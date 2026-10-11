@@ -94,7 +94,7 @@ const std::vector<CoveCliffProp>& EstateCoveCliff()
     static const std::vector<CoveCliffProp> props = []
     {
         std::vector<CoveCliffProp> out;
-#define COVE_CLIFF_PROP(MESH, X, Y, Z, YAW, UX, UY, UZ, SCALE) out.push_back({MESH, {X, Y}, Z, YAW, UX, UY, UZ, SCALE});
+#define COVE_CLIFF_PROP(MESH, X, Y, Z, YAW, UX, UY, UZ, SCALE, SCALEZ) out.push_back({MESH, {X, Y}, Z, YAW, UX, UY, UZ, SCALE, SCALEZ});
 #include "HomesteadCoveCliff.inc"
 #undef COVE_CLIFF_PROP
         return out;

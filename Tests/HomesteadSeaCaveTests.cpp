@@ -95,7 +95,7 @@ int main()
     for (const CoveCliffProp& prop : EstateCoveCliff())
     {
         Check(std::strlen(prop.mesh) > 0, "a cliff piece names its mesh");
-        Check(std::fabs(std::hypot(std::hypot(prop.upX, prop.upY), prop.upZ) - 1.0) < 0.01 && prop.upZ > 0.4,
+        Check(std::fabs(std::hypot(std::hypot(prop.upX, prop.upY), prop.upZ) - 1.0) < 0.01 && prop.upZ > 0.2,
             "a cliff piece stands up its slope", prop.upZ);
         if (!CoveCliffPropBlocks(prop))
         {
@@ -103,7 +103,9 @@ int main()
             continue;
         }
         ++rocks;
-        Check(!PointInPolygon(cave.footprint, prop.position), "no cliff rock over the cave");
+        // Over the cave only where the hillside is its roof: the rock's base well above the cave's highest roof.
+        if (PointInPolygon(cave.footprint, prop.position))
+            Check(prop.z > cave.roofMaxZ, "a cliff rock over the cave sits above its roof", prop.z - cave.roofMaxZ);
         const Point inCave = cave.ToLocal(prop.position);
         Check(!(inCave.x > -600.0 && inCave.x < 1300.0 && std::fabs(inCave.y) < 1300.0), "no cliff rock in the cave's mouth",
             inCave.x);

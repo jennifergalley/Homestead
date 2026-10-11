@@ -37,18 +37,22 @@ STEEP = 0.75                  # rise per metre: steeper than this is cliff
 MIN_Z, MAX_Z = 3.0, 62.0      # rock centres between these heights (m above the sea)
 BERM_Z = 2.4                  # every rock's footprint stays above this (the dry sand is at ~1.7 m)
 MOUTH_BOX = dict(x=(-549.0, -511.0), y=(-697.0, -658.0))   # the cave's own crag and its approach
+MOUTH_TOP_Z = 15.0            # ... up to its top (world m); above, the face over the crag is rocked too
 CAVE_MARGIN_M = 5.0           # no rock within this of the cave's footprint (the hillside is its roof)
 PATH_CLEAR_M = 10.0           # nor this near the cove path
-TILT = 0.8                    # how far a rock leans from upright toward the slope's normal
-# (mesh, footprint radius m at scale 1, height m, scales, share): house-sized outcrops and smaller blocks.
+TILT = 1.0                    # how far a rock leans from upright toward the slope's normal
+# (mesh, footprint radius m at scale 1, height m, plan scales, height scale (of the plan scale), share). The house-
+# sized outcrops are laid along the slope as broad, low slabs: granite sheet joints parallel to the face, a rock
+# skin over the hill; the jointed boulders stand out of it as blocks.
 ROCKS = [
-    ("GraniteDome/SM_GraniteDome", 4.6, 4.8, (0.75, 1.35), 0.24),
-    ("GraniteSplitBoulder/SM_GraniteSplitBoulder", 3.6, 4.2, (0.8, 1.4), 0.24),
-    ("GraniteErratic/SM_GraniteErratic", 1.4, 2.0, (0.9, 1.6), 0.26),
-    ("GraniteBoulderJointed/SM_GraniteBoulderJointed", 1.5, 1.9, (0.9, 1.7), 0.26),
+    ("GraniteDome/SM_GraniteDome", 4.6, 4.8, (2.6, 4.2), (0.35, 0.5), 0.36),
+    ("GraniteSplitBoulder/SM_GraniteSplitBoulder", 3.6, 4.2, (2.6, 4.0), (0.4, 0.55), 0.32),
+    ("GraniteErratic/SM_GraniteErratic", 1.4, 2.0, (1.6, 2.8), (0.8, 1.0), 0.16),
+    ("GraniteBoulderJointed/SM_GraniteBoulderJointed", 1.5, 1.9, (1.6, 2.8), (0.8, 1.0), 0.16),
 ]
-SPACING = 0.75                # of the sum of two footprint radii: rocks overlap a little, as a crag's blocks do
-TARGET_ROCKS = 70
+ROOF_CLEAR_M = 2.5            # over the cave, rock only where the ground stands this far above its highest roof
+SPACING = 0.5                 # of the sum of two footprint radii: rocks overlap a little, as a crag's blocks do
+TARGET_ROCKS = 220
 THRIFT = "Thrift/SM_ThriftClump"
 THRIFT_DRIFTS = 26            # drifts of 3-7 cushions on ledges and the cliff foot
 
@@ -74,8 +78,12 @@ def normal(z, x, y, e=1.5):
 
 
 def cave_footprint():
-    """The cave's outline in world m, from HomesteadSeaCave.inc (cave-local cm, +Y the cave's right)."""
+    """The cave's outline in world m, from HomesteadSeaCave.inc (cave-local cm, +Y the cave's right); sets
+    CAVE_ROOF_Z, its highest roof (world m)."""
+    global CAVE_ROOF_Z
     text = open(CAVE_INC).read()
+    floor = float(re.search(r"SEA_CAVE_ANCHOR\(([^)]*)\)", text).group(1).split(",")[2])
+    CAVE_ROOF_Z = (floor + float(re.search(r"SEA_CAVE_ROOF_MAX\(([^)]*)\)", text).group(1))) / 100.0
     ax, ay, _, yaw = map(float, re.search(r"SEA_CAVE_ANCHOR\(([^)]*)\)", text).group(1).split(","))
     c, s = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
     ring = []
@@ -126,32 +134,35 @@ def main():
     pz = height(z, px, py)
     n = normal(z, px, py)
     slope = np.hypot(n[:, 0], n[:, 1]) / n[:, 2]
-    ok = (slope > STEEP) & (pz > MIN_Z) & (pz < MAX_Z) & ~in_box(MOUTH_BOX, px, py)
+    ok = (slope > STEEP) & (pz > MIN_Z) & (pz < MAX_Z) & ~(in_box(MOUTH_BOX, px, py) & (pz < MOUTH_TOP_Z))
     pts = np.c_[px, py]
-    ok &= ring_distance(cave, pts) > CAVE_MARGIN_M
+    roof = CAVE_ROOF_Z + ROOF_CLEAR_M
+    ok &= (ring_distance(cave, pts) > CAVE_MARGIN_M) | (pz > roof)
     for line in paths:
         ok &= polyline_distance(line, pts) > PATH_CLEAR_M
     cand = np.flatnonzero(ok)
     rng.shuffle(cand)
     print(f"cove cliff: {len(cand)} m2 of steep face to dress")
 
-    kinds = rng.choice(len(ROCKS), size=len(cand), p=[r[4] for r in ROCKS])
+    kinds = rng.choice(len(ROCKS), size=len(cand), p=[r[5] for r in ROCKS])
     placed = []           # (x, y, radius)
     rocks = []
     for i, k in zip(cand, kinds):
         if len(rocks) >= TARGET_ROCKS:
             break
-        mesh, r1, h1, scales, _ = ROCKS[k]
+        mesh, r1, h1, scales, flat, _ = ROCKS[k]
         s = rng.uniform(*scales)
+        sz = s * rng.uniform(*flat)
         r = r1 * s
         x, y = px[i], py[i]
         if any(math.hypot(x - qx, y - qy) < SPACING * (r + qr) for qx, qy, qr in placed):
             continue
         fp = footprint_points(x, y, r)
         fz = height(z, fp[:, 0], fp[:, 1])
-        if fz.min() < BERM_Z or in_box(MOUTH_BOX, fp[:, 0], fp[:, 1], pad=1.0).any():
+        if fz.min() < BERM_Z or (in_box(MOUTH_BOX, fp[:, 0], fp[:, 1], pad=1.0) & (fz < MOUTH_TOP_Z)).any():
             continue
-        if (ring_distance(cave, fp) < CAVE_MARGIN_M).any():
+        over = ring_distance(cave, fp) < CAVE_MARGIN_M
+        if over.any() and (fz[over] - 0.3 * h1 * sz).min() < roof:
             continue
         if any((polyline_distance(line, fp) < PATH_CLEAR_M).any() for line in paths):
             continue
@@ -163,12 +174,16 @@ def main():
         offs = np.c_[fp - [x, y], np.zeros(len(fp))]
         offs[:, 2] = -(offs[:, 0] * up[0] + offs[:, 1] * up[1]) / up[2]      # stay in the plane normal to up
         rim = base + offs
-        drop = max(0.0, float((rim[:, 2] - height(z, rim[:, 0], rim[:, 1])).max())) + 0.25 + 0.12 * h1 * s
+        drop = max(0.0, float((rim[:, 2] - height(z, rim[:, 0], rim[:, 1])).max())) + 0.15 + 0.2 * h1 * sz
         pivot = base - up * drop / up[2]
         yaw = rng.uniform(0, 360)
-        rocks.append((mesh, pivot, yaw, up, s))
+        rocks.append((mesh, pivot, yaw, up, s, sz))
         placed.append((x, y, r))
     print(f"cove cliff: {len(rocks)} rocks")
+    cover = np.zeros(len(cand), bool)
+    for qx, qy, qr in placed:
+        cover |= np.hypot(px[cand] - qx, py[cand] - qy) < qr * 0.8
+    print(f"cove cliff: {cover.mean():.0%} of the steep face under rock")
 
     # Thrift: drifts on the face's gentler ledges and along the cliff foot, never on the walking line.
     flowers = []
@@ -182,23 +197,23 @@ def main():
                 continue
             nn = normal(z, np.array([x]), np.array([y]))[0]
             up = np.array([0.0, 0.0, 1.0]) * 0.7 + nn * 0.3
-            flowers.append((THRIFT, np.array([x, y, fz - 0.03]), rng.uniform(0, 360), up / np.linalg.norm(up),
-                            rng.uniform(0.8, 1.3)))
+            s = rng.uniform(0.8, 1.3)
+            flowers.append((THRIFT, np.array([x, y, fz - 0.03]), rng.uniform(0, 360), up / np.linalg.norm(up), s, s))
     # And on the shelves round the cave's own crag outside the mouth (Balance: sea pinks on the ledges).
     for x, y in ((-543.5, -673.5), (-542.0, -671.0), (-517.5, -673.0), (-519.0, -670.5), (-545.0, -677.0),
                  (-515.0, -676.5)):
         fz = float(height(z, x, y))
-        flowers.append((THRIFT, np.array([x, y, fz - 0.03]), rng.uniform(0, 360), np.array([0.0, 0.0, 1.0]),
-                        rng.uniform(0.9, 1.2)))
+        s = rng.uniform(0.9, 1.2)
+        flowers.append((THRIFT, np.array([x, y, fz - 0.03]), rng.uniform(0, 360), np.array([0.0, 0.0, 1.0]), s, s))
     print(f"cove cliff: {len(flowers)} thrift cushions")
 
     lines = ["// Generated by Scripts/Terrain/cove_cliff_rocks.py from the estate heightfield and HomesteadSeaCave.inc;",
-             "// do not edit by hand. COVE_CLIFF_PROP(mesh, x, y, z, yaw, up x, up y, up z, scale): world cm, the",
+             "// do not edit by hand. COVE_CLIFF_PROP(mesh, x, y, z, yaw, up x, up y, up z, scale, height scale): world cm, the",
              "// mesh's pivot (ground line) and its up axis; rocks block, thrift is walk-through."]
-    for mesh, p, yaw, up, s in rocks + flowers:
+    for mesh, p, yaw, up, s, sz in rocks + flowers:
         name = mesh.rsplit("/", 1)[1]
         lines.append(f'COVE_CLIFF_PROP("{PROPS}/{mesh}.{name}", {p[0] * 100:.1f}, {p[1] * 100:.1f}, {p[2] * 100:.1f}, '
-                     f"{yaw:.1f}, {up[0]:.4f}, {up[1]:.4f}, {up[2]:.4f}, {s:.3f})")
+                     f"{yaw:.1f}, {up[0]:.4f}, {up[1]:.4f}, {up[2]:.4f}, {s:.3f}, {sz:.3f})")
     with open(OUT, "w", newline="\r\n") as fh:
         fh.write("\n".join(lines) + "\n")
     print("cove cliff: wrote", os.path.relpath(OUT, REPO))
@@ -211,10 +226,10 @@ def main():
         sub = z[int(REGION["y"][0]) + H:int(REGION["y"][1]) + H, int(REGION["x"][0]) + H:int(REGION["x"][1]) + H]
         ax.contourf(ys[:sub.shape[0]], xs[:sub.shape[1]], sub.T, levels=[-5, 0, 2.2, 5, 10, 20, 30, 45, 70],
                     cmap="terrain")
-        for mesh, p, _, _, s in rocks:
+        for mesh, p, _, _, s, _ in rocks:
             r = next(r for m, r, *_ in ROCKS if m == mesh) * s
             ax.add_patch(plt.Circle((p[1], p[0]), r, color="0.3", alpha=0.6))
-        f = np.array([p for *_, p, _, _, _ in [(0, *fl) for fl in flowers]]) if flowers else np.zeros((0, 3))
+        f = np.array([fl[1] for fl in flowers]) if flowers else np.zeros((0, 3))
         ax.plot(f[:, 1], f[:, 0], ".", color="m", ms=3)
         ax.plot(np.r_[cave[:, 1], cave[0, 1]], np.r_[cave[:, 0], cave[0, 0]], "k-")
         for line in paths:

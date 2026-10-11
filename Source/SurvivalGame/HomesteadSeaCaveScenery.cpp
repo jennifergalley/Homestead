@@ -88,7 +88,10 @@ bool AHomesteadSeaCave::Build()
     if (bBuilt) return true;
     const Homestead::SeaCave& Cave = Homestead::EstateSeaCave();
     if (!Cave.valid()) return false;
-    // The cliff dressing stands on its own: it goes down even before the cave mesh is imported.
+    SetActorLocationAndRotation(FVector(Cave.anchor.x, Cave.anchor.y, Cave.floorZ),
+        FRotator(0.0f, static_cast<float>(Cave.yaw), 0.0f));
+    // The cliff dressing stands on its own: it goes down even before the cave mesh is imported. Its instances are
+    // added in world space, so the actor must already stand at the cave's anchor.
     BuildCliff();
     UStaticMesh* RockAsset = LoadObject<UStaticMesh>(nullptr, RockMesh, nullptr, LOAD_NoWarn | LOAD_Quiet);
     if (!RockAsset)
@@ -97,8 +100,6 @@ bool AHomesteadSeaCave::Build()
         return !Cliff.IsEmpty();
     }
     bBuilt = true;
-    SetActorLocationAndRotation(FVector(Cave.anchor.x, Cave.anchor.y, Cave.floorZ),
-        FRotator(0.0f, static_cast<float>(Cave.yaw), 0.0f));
 
     // The rock: walked on (complex collision on its coarse LOD), and the camera stays inside it.
     Rock = NewObject<UStaticMeshComponent>(this, TEXT("Rock"));
@@ -287,7 +288,8 @@ void AHomesteadSeaCave::BuildCliff()
         const FQuat Rotation = FQuat::FindBetweenNormals(FVector::UpVector, Up)
             * FQuat(FVector::UpVector, FMath::DegreesToRadians(static_cast<float>(Prop.yaw)));
         (*Found)->AddInstance(FTransform(Rotation, FVector(Prop.position.x, Prop.position.y, Prop.z),
-            FVector(static_cast<float>(Prop.scale))), /*bWorldSpace=*/true);
+            FVector(static_cast<float>(Prop.scale), static_cast<float>(Prop.scale), static_cast<float>(Prop.scaleZ))),
+            /*bWorldSpace=*/true);
     }
     UE_LOG(LogHomesteadSeaCave, Log, TEXT("Cove cliff: %d pieces in %d batches%s."), static_cast<int32>(Props.size()),
         Cliff.Num(), Missing.IsEmpty() ? TEXT("") : *FString::Printf(TEXT(" (%d meshes not imported)"), Missing.Num()));

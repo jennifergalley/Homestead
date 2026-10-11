@@ -52,6 +52,7 @@ struct CoveCliffProp
     double yaw = 0.0;             // about its own up axis, degrees
     double upX = 0.0, upY = 0.0, upZ = 1.0;   // its up axis (unit)
     double scale = 1.0;
+    double scaleZ = 1.0;           // along its up axis: the big outcrops lie along the slope as low slabs
 };
 const std::vector<CoveCliffProp>& EstateCoveCliff();
 // Thrift and other walk-through plants have no collision; rocks block.
