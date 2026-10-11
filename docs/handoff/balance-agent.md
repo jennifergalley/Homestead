@@ -44,6 +44,11 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-10: Cave Agent (d6ef3d58) sea-cave plan OK: night glow, a safe pool, flowers and ferns, 2
   beach nodes at the mouth from the Beach Agent's 40, map label "Sea cave". Awaiting day and night
   screenshots.
+- 2026-10-10: Gameplay Agent (5b555e6e) batch OK: meadow herbs 38 → 19 patches (keep 10 coins;
+  57 herbs a day), fingerposts replace the travel signs, ridges cleared only under tilled plots,
+  the standing-room berry bush removed, "Start a new game". Awaiting screenshots.
+- 2026-10-10: Lighting Agent (0816ef4d) persistent-moonlight night OK at 0.2 lux ground (Set A
+  unchanged); suggested village lit windows as later polish.
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
