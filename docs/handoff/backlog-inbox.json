@@ -620,6 +620,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T07:51:20.316Z"
+    },
+    {
+      "id": "jenny-mv3lucwr-gobgld",
+      "title": "[Balance] Glowing moss in the sea cave",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (sea-cave review, 2026-10-11). A faint gold-green glowing moss (goblin's gold) near the cave mouth; needs a new asset.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T09:12:29.403Z"
     }
   ]
 }
