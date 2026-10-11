@@ -6,7 +6,7 @@
   "triangle_budget": 12000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/fingerpost.py",
-  "source_sha256": "22b1d3f781be7445ff2893828bc3d9169df1ae9b7383ae4efff6919d465be1cc",
+  "source_sha256": "25248824400c7afd31fb33a427244c3599f4c7782a5104149ff90171a7c578d0",
   "provenance": "Original project-authored procedural geometry and materials. Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence, permits embedding and modification).",
   "meshes": {
     "SM_Fingerpost_ToTheCove": {
@@ -53,30 +53,7 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheCove.fbx",
-      "sha256": "ed700d92622fbffb45363a871bf66a2824a0da35c29b89c50c17f75e926665c1",
-      "preview": "preview_SM_Fingerpost_ToTheCove.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_Fingerpost_ToTheCove_hero.png",
-          "detail": "beauty_SM_Fingerpost_ToTheCove_detail.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 256,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          -20
-        ],
-        "ground": "lowest"
-      }
+      "sha256": "1cf6464299bd65059922c31786f9027463077fd0abc2902edf1aef9eda5d131e"
     }
   },
   "warnings": [],
@@ -88,8 +65,8 @@
     "head of the cliff steps": 153
   },
   "textures": {
-    "T_Fingerpost_ToTheCove_basecolor.png": "26c81eb310481a99fc88c820f6a65c4921590cc0190e393187eb24425873235a",
-    "T_Fingerpost_ToTheCove_roughness.png": "de8703e3a1d0f79fe897b9cffe38175ce11dcdb15d37ce5fd767002faf4d1586",
-    "T_Fingerpost_ToTheCove_normal.png": "0ecd5f6c96a87f32a39a09820ef135b0a54871ed01e656fc813f69a8e4cd035c"
+    "T_Fingerpost_ToTheCove_basecolor.png": "1a937ecb80a0d723256cada94ebba92863d34d2bc7bcf5f2e77b98753d3cc27e",
+    "T_Fingerpost_ToTheCove_roughness.png": "5ccca9ac64d4b2ec1af43789d9c94063d8d89852d6ec5d8e3e243745fcb19c7d",
+    "T_Fingerpost_ToTheCove_normal.png": "b66d488819d8eb35b90c243482710201094eb2b16f79db56d46b8388e98c77f1"
   }
 }

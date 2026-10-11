@@ -6,14 +6,14 @@
   "triangle_budget": 16000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/fingerpost_road.py",
-  "source_sha256": "7f49533d0daa6fe0a1c6f98dfd4818251641c735769765a95d2c1084ba745a8f",
+  "source_sha256": "2d129c51e22d49b5b3ad0a23be4a0db60b035e870b7931fcfa558f74308a2c40",
   "provenance": "Original project-authored procedural geometry and materials. Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence, permits embedding and modification).",
   "meshes": {
     "SM_Fingerpost_ToTheVillage": {
-      "vertices": 3734,
-      "triangles": 7400,
+      "vertices": 3791,
+      "triangles": 7884,
       "size_cm": [
-        90.25,
+        135.25,
         13.08,
         252.0
       ],
@@ -53,13 +53,13 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheVillage.fbx",
-      "sha256": "a9df6452078ca7a90d223dcd09564c3e6b489007d2f454973784dbde8e2d5716"
+      "sha256": "973126d6ece13de4432af3fd675249cf2c23a01964e095937ca5d96e11e1b137"
     },
     "SM_Fingerpost_ToTheManor": {
-      "vertices": 3306,
-      "triangles": 6552,
+      "vertices": 3354,
+      "triangles": 6884,
       "size_cm": [
-        90.25,
+        135.25,
         13.08,
         252.0
       ],
@@ -99,13 +99,13 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheManor.fbx",
-      "sha256": "4a6b431b9d5a671cef6ddb9a88aaf99c475f3a056b705dacd993fd8b175a214b"
+      "sha256": "a866055b67fd7cfdf66ffb0c314b16e512b39f669b95add5ec80510bc445f45a"
     },
     "SM_Fingerpost_VillageManor": {
-      "vertices": 4064,
-      "triangles": 8056,
+      "vertices": 4114,
+      "triangles": 8601,
       "size_cm": [
-        160.0,
+        250.0,
         13.08,
         252.0
       ],
@@ -145,7 +145,7 @@
         ]
       },
       "fbx": "SM_Fingerpost_VillageManor.fbx",
-      "sha256": "61d3dfe5a968e43f4bbf1459cbe3766f62dfd725e5532b30e9fdaa435f77dcf0"
+      "sha256": "573c0db1d7ebabda50fcac4c964195d3f43ead86220df7099978169b120d7261"
     }
   },
   "warnings": [],
@@ -158,14 +158,14 @@
     "Manor"
   ],
   "textures": {
-    "T_Fingerpost_ToTheVillage_basecolor.png": "8d709a9c1d143c1443b2d503c5d50d47b91579d51a2602756e39369060e2fbf4",
-    "T_Fingerpost_ToTheVillage_roughness.png": "1727bb74eb1bb6ac8538d6972080bdd4ab724f2c5525adba3015ed439ce762d9",
-    "T_Fingerpost_ToTheVillage_normal.png": "4b060986204374e0b1cea1deffca0c722b41ce4a19088008256197108b54ae49",
-    "T_Fingerpost_ToTheManor_basecolor.png": "2edb81f64f13062152eff0e7cb7658f530c04296949270e2b923c724bcea8644",
-    "T_Fingerpost_ToTheManor_roughness.png": "b0e837734b76ea9362420e7ed27e4560926c9b0fab681d1c5538ceff2081c273",
-    "T_Fingerpost_ToTheManor_normal.png": "53a36a03f11a7d355ddc63ae405ffd451b21fa9bfbca330dd391155f7d3dc27f",
-    "T_Fingerpost_VillageManor_basecolor.png": "3ffc96516178bd0741a7f5e3ea322678af7638ac7bbf3d231829752499a84544",
-    "T_Fingerpost_VillageManor_roughness.png": "1c507781de0e38b18a4a7cb36241bd0a2c580df88e927669a760b9c3e5508fbe",
-    "T_Fingerpost_VillageManor_normal.png": "77b2adfbd6207fd2ade3530d8fda916b080dcae3c2338d78e354d98d47f5eee2"
+    "T_Fingerpost_ToTheVillage_basecolor.png": "56e131bf148cb685ce2222f1b8d79156a9548179082ae56c341e08e069d5e22e",
+    "T_Fingerpost_ToTheVillage_roughness.png": "60b48b547d51808143fc17f5b69597ae3dcdc9a346ecda2076666dcd705357f9",
+    "T_Fingerpost_ToTheVillage_normal.png": "6f3559df33d1a7e73378af23042f16291a6057de721ccf3043ca4d0cf6b4cc3b",
+    "T_Fingerpost_ToTheManor_basecolor.png": "2e0e8c75922e942fcffd9ebd8ec88ee3433e5a0bc59800b072eeadc68a398cd1",
+    "T_Fingerpost_ToTheManor_roughness.png": "22ac732f45cf2b5f2f550efb0515e1e6004beb4a927ad547ed6a231fb975f6cb",
+    "T_Fingerpost_ToTheManor_normal.png": "ab3d02276266b20384e64302e17f5c3ac8ae589d3aa21e4d9417d31ac2fd090b",
+    "T_Fingerpost_VillageManor_basecolor.png": "764b25ac450b3db4e3786d95bf889470fe4bf2937d5480a6dc614f761f4b5b9b",
+    "T_Fingerpost_VillageManor_roughness.png": "106cef4bf41a512086398d5718b068af39a05a9fc58ad3d86b4502fd992438a6",
+    "T_Fingerpost_VillageManor_normal.png": "bc0b02454a98f5831cc61e60b2fd976271d4833ceb6a2f19bc0c7c3d7c4c8f57"
   }
 }
