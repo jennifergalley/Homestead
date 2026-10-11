@@ -125,4 +125,7 @@ def build_embers():
 
 build_flame()
 build_embers()
+for asset in ('M_BeachCampfireFlame', 'M_BeachCampfireEmbers'):
+    if not unreal.EditorAssetLibrary.save_asset(f'{PATH}/{asset}', only_if_is_dirty=False):
+        raise RuntimeError(f'could not save {asset}')
 print('CAMPFIRE_MATERIALS_BUILT')

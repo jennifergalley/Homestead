@@ -202,9 +202,11 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             else
             {
                 auto* Box = NewObject<UBoxComponent>(this);
-                // The beach campfire's ring is only ankle-high and can sit a few cm under the drawn sand: a
-                // 40 cm box from below the ring up stops her at its edge rather than stepping into the fire.
-                const float BoxHalfZ = Kind == ResourceKind::BeachCampfire ? FMath::Max(Extent.Z, 20.0f) : Extent.Z;
+                // The beach's shore rocks and campfire ring are below her 45 cm step height (and can sit a few cm
+                // under the drawn sand): a box a metre tall stops her at their edge instead of letting her climb on.
+                const bool bBeach = Kind == ResourceKind::BeachCampfire || Kind == ResourceKind::MusselBed
+                    || Kind == ResourceKind::LaverRocks;
+                const float BoxHalfZ = bBeach ? FMath::Max(Extent.Z, 50.0f) : Extent.Z;
                 Box->SetBoxExtent(FVector(Extent.X * 0.85f, Extent.Y * 0.85f, BoxHalfZ), false);
                 Blocker = Box;
             }

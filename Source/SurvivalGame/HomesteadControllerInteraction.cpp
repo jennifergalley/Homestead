@@ -160,6 +160,13 @@ void AHomesteadController::Interact()
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
                         if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * FMath::Clamp(Toward.Size() - 30.0f, 0.0f, Edge);
                     }
+                    // A shore rock (mussels, laver) is about 90 cm across: she kneels beside it and reaches onto its top.
+                    else if (Kind == Homestead::ResourceKind::MusselBed || Kind == Homestead::ResourceKind::LaverRocks)
+                    {
+                        constexpr float ShoreRockReachCm = 52.0f;
+                        const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * ShoreRockReachCm;
+                    }
                     if (Avatar->PlayKneelGather(Gather, Target, Berries, HomesteadBeachLook::HeldMesh(Kind)) && Landscape)
                     {
                         Landscape->HoldProduce(FocusId);
