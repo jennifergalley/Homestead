@@ -86,6 +86,13 @@ and never use `-Force`. Keep builds and compiles bounded (`-WaitMutex`; one UAT 
 Integration only). An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
+**Spawn lanes sequentially** (Jenny, 2026-10-10): the orchestrator starts at most two heavy lanes at a
+time (lanes that need Blender, Unreal or C++ builds), matching the two heavy-job slots, in dependency
+order (for example terrain before anything placed on it). It spawns the next queued lane when one
+sends `[ready]`, rather than spawning every lane up front and having them queue for slots. Light
+sessions (Balance, docs, text-only or planning work) may run alongside. Lanes don't fan out
+sub-agents that run heavy jobs in parallel; sub-agents count against the same two slots.
+
 ## Loops
 
 Jenny works in two modes. When she hasn't said which, treat short requests as the Interactive Loop.

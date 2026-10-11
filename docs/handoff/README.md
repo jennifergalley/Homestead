@@ -89,6 +89,11 @@ Integration gets a slot first when it merges, builds or packages. No heavy edito
 Jenny plays; never use `-Force`; and Integration alone runs one UAT package at a time. An idle or
 waiting session schedules a wake-up and ends its turn rather than sleeping or polling.
 
+**Spawn lanes sequentially** (Jenny, 2026-10-10): start at most two heavy lanes (Blender, Unreal or
+C++ builds) at a time, in dependency order, and spawn the next queued lane when one sends `[ready]`.
+Light sessions (Balance, docs, text-only or planning) may run alongside. Lanes don't fan out
+sub-agents that run heavy jobs in parallel; sub-agents count against the same two slots.
+
 ## Roles
 
 | Role | What it does | How to find it |
