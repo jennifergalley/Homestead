@@ -15,6 +15,9 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 ICON_SIZE = 256
+# Meals whose hero is a transparent render: cropped to their content (with this margin per side) before thumbnailing.
+TRANSPARENT_HEROES = ("SteamedMussels", "MusselPotatoBroth", "FriedLaver")
+CROP_MARGIN = 0.06
 # (item, committed 256px icon) for raw beach gatherables; copied verbatim.
 COPIED_ICONS = (
     ("Seashell", Path("Assets") / "Props" / "BeachShells" / "icon_seashell_256.png"),
@@ -49,6 +52,15 @@ def main() -> None:
         key = icon_key(item)
         with Image.open(source) as original:
             thumbnail = original.convert("RGBA")
+            # The beach meals' heroes are transparent renders (render_beauty transparent): crop to the dish, with a
+            # margin, so it fills the icon as the older meals' framed heroes do.
+            if item in TRANSPARENT_HEROES:
+                left, top, right, bottom = thumbnail.getchannel("A").getbbox()
+                side = int(max(right - left, bottom - top) * (1.0 + 2.0 * CROP_MARGIN))
+                cx, cy = (left + right) // 2, (top + bottom) // 2
+                square = Image.new("RGBA", (side, side))
+                square.alpha_composite(thumbnail.crop((cx - side // 2, cy - side // 2, cx - side // 2 + side, cy - side // 2 + side)))
+                thumbnail = square
             thumbnail.thumbnail((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
             canvas = Image.new("RGBA", (ICON_SIZE, ICON_SIZE))
             canvas.alpha_composite(thumbnail, ((ICON_SIZE - thumbnail.width) // 2, (ICON_SIZE - thumbnail.height) // 2))
