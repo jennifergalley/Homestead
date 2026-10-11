@@ -243,6 +243,24 @@ makes up the rest.
 That lands about 40% of attempts, roughly one fish a minute (about 45 coins a minute). That is still
 above crops, so the daily-cap idea above is parked until a playtest.
 
+## 8a. Beach gathering (card `jenny-mv36t3cy-p7dm5i`, approved plan 2026-10-10)
+
+| Node | Count | Yield (sell each) | ≈ coins |
+| --- | --- | --- | --- |
+| Shell scatter | 10 | 2 seashells (5) | 100 |
+| Driftwood | 8 | 3 driftwood (3) | 72 |
+| Beach pebbles | 6 | 2 stone (5) | 60 |
+| Mussel bed | 8 | 3 mussels (6) | 144 |
+| Laver rocks | 8 | 2 laver (4) | 64 |
+
+0.5 energy per node, all refreshing at 06:00: about 440 coins and 20 energy a day, mostly on her own
+cove. ✅ That's a pleasant daily stroll, roughly fishing's per-minute rate but capped, so it doesn't
+crowd out crops. The Beach Agent proposed 56 nodes (about 830 coins); trimmed here.
+
+Meals (Cookfire, Well fed): steamed mussels (3 mussels) 25; mussel and potato broth (3 mussels,
+potato, laver) 35; fried laver (2 laver) 19. The beach campfire takes 3 driftwood and 0.2 energy,
+burns 4 game hours, works as a cookfire while lit, and can be relit.
+
 ## 9. Target pacing
 
 These are targets for lanes to tune toward; there's no telemetry yet. They assume a 60-minute day.
