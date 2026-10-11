@@ -65,3 +65,9 @@ Gameplay and Wardrobe both add General Store stock; they coordinate the append-o
 - Slot 1: Map Agent (C++ build, then rebake import + PIE).
 - Slot 2: Gameplay Agent (fingerpost Blender, then editor pass).
 - Queue: Cave (one pass on the final heightfield) → Beach (runs its Blender jobs one at a time). Integration preempts when it merges or packages.
+
+### Overnight delegation (Jenny, 2026-10-10 21:56)
+
+- Work continues overnight until this build is on the shortcut; lanes run in autopilot.
+- The Orchestrator approves review media on Jenny's behalf; lanes record that in their ready evidence.
+- After the build is promoted and closure is done, the Orchestrator shuts the PC down.
