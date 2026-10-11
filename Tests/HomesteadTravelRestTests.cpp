@@ -102,8 +102,8 @@ void DiscoveryAndSaves()
         const auto* place = layout.FindLandmark(anchors[index]);
         CHECK(place != nullptr && Homestead::TravelVisitNear(place->position, destination, layout));
         const auto discovered = sim.DiscoverTravel(destination, place->position);
-        CHECK(discovered && discovered.message == std::string("Fast Travel Destination Unlocked: ")
-            + Homestead::TravelDestinationLabel(destination));
+        CHECK(discovered && discovered.message == std::string("Fast travel unlocked: ")
+            + Homestead::TravelDestinationName(destination));
         CHECK(Homestead::IsTravelUnlocked(sim.GetState(), destination));
         const auto plan = Homestead::PlanTravel(sim.GetState(), from, destination, layout);
         CHECK(plan.ok && plan.gameHours > 0.0);

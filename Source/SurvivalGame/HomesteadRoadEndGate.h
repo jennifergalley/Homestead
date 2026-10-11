@@ -12,7 +12,7 @@ class UStaticMeshComponent;
 class UTextRenderComponent;
 struct FHitResult;
 
-// The shut field gate across the public road's far end and the granite milestone beside it ("Penvose 9 miles";
+// The shut field gate across the public road's far end and the granite milestone beside it ("Marlbury 9 miles";
 // shrink-estate-map decision 7). Built from existing kit meshes: the derelict farm's cleft-oak fence posts and
 // rails (a five-bar braced leaf between two fence bays) and a cove-route granite kerb stood on end. A pawn-only
 // box stops her at the gate; touching it shows Homestead::RoadEndRefusalMessage, at most once per cooldown.

@@ -1,4 +1,4 @@
-"""Scripted MetaHuman Creator look for the general-store clerk, Mr. Josiah Trethewey.
+"""Scripted MetaHuman Creator look for the general-store clerk, Mr. Callum Aldridge.
 
 Run inside the editor (MCP ``run_python``), one step per call, for example::
 

@@ -1,7 +1,7 @@
 # metahuman-store-clerk Specification
 
 ## Purpose
-The General Store clerk, Mr. Josiah Trethewey: a MetaHuman shopkeeper who stands at the counter with a period outfit and a counter idle.
+The General Store clerk, Mr. Callum Aldridge: a MetaHuman shopkeeper who stands at the counter with a period outfit and a counter idle.
 
 ## Requirements
 

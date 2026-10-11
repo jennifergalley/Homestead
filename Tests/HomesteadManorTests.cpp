@@ -72,8 +72,8 @@ void SeededStandingRoom()
     Simulation sim = NewEstate();
     const State& state = sim.GetState();
     CHECK(sim.DayNumber() == 1 && std::string(sim.SeasonName()) == "Spring" && state.hour == 6.0);
-    CHECK(state.heroineName == "Eleanor" && state.familyName == "Cavendish" && state.estateName == "Trevennor");
-    CHECK(sim.EstateName() == "Trevennor");
+    CHECK(state.heroineName == "Eleanor" && state.familyName == "Cavendish" &&     state.estateName == "Larkhollow");
+        CHECK(sim.EstateName() == "Larkhollow");
     CHECK(state.buildings.size() == 1);
     const int room = Manor::HeritageBuildingId(state);
     CHECK(room == state.buildings[0].id);
@@ -83,7 +83,7 @@ void SeededStandingRoom()
         && std::abs(state.buildings[0].origin.y + centre.y - origin->position.y) < 1e-6);
     CHECK(state.journal.size() == 1 && state.journal[0] == Manor::ArrivalEntry);
     CHECK(Manor::JournalTitle(Manor::ArrivalEntry) == "Home at last");
-    CHECK(Manor::JournalText(Manor::ArrivalEntry, state).find("Trevennor") != std::string::npos);
+    CHECK(Manor::JournalText(Manor::ArrivalEntry, state).find("Larkhollow") != std::string::npos);
     CHECK(CountOf(state, Piece::Foundation) == 4 && CountOf(state, Piece::Roof) == 4);
     CHECK(CountOf(state, Piece::Wall) == 7 && CountOf(state, Piece::Doorway) == 1);
     CHECK(CountOf(state, Piece::Hearth) == 1 && CountOf(state, Piece::Bed) == 1 && CountOf(state, Piece::Chest) == 1);
@@ -348,27 +348,27 @@ void BuildingInsideTheRooflessHall()
 void NamesValidationAndPersistence()
 {
     CHECK(Manor::TrimName("  Clara \t") == "Clara");
-    CHECK(Manor::TrimName("\xC2\xA0Tr\xC3\xA9vose\xC2\xA0") == "Tr\xC3\xA9vose");
-    CHECK(Manor::NameLength("Tr\xC3\xA9vose") == 7);
+    CHECK(Manor::TrimName("\xC2\xA0Mor\xC3\xA9ton\xC2\xA0") == "Mor\xC3\xA9ton");
+    CHECK(Manor::NameLength("Mor\xC3\xA9ton") == 7);
     CHECK(Manor::NameLength("bad\xC3") == -1 && Manor::NameLength("tab\tname") == -1);
     CHECK(Manor::NameProblem("", "estate name") == "Enter an estate name.");
     CHECK(Manor::NameProblem("", "surname") == "Enter a surname.");
     Simulation sim = NewEstate();
-    CHECK(!sim.SetNames("   ", "Pendarves", "Trevennor"));
-    CHECK(!sim.SetNames("Clara", "", "Trevennor"));
-    CHECK(!sim.SetNames("Clara", "Pendarves", std::string(25, 'a')));
-    OK(sim.SetNames("Clara", "Pendarves", std::string(24, 'a')));
-    OK(sim.SetNames("  Clara ", "Pendarves", " Trevennor"));
-    CHECK(sim.GetState().heroineName == "Clara" && sim.GetState().estateName == "Trevennor");
+    CHECK(!sim.SetNames("   ", "Ashworth", "Larkhollow"));
+    CHECK(!sim.SetNames("Clara", "", "Larkhollow"));
+    CHECK(!sim.SetNames("Clara", "Ashworth", std::string(25, 'a')));
+    OK(sim.SetNames("Clara", "Ashworth", std::string(24, 'a')));
+    OK(sim.SetNames("  Clara ", "Ashworth", " Larkhollow"));
+    CHECK(sim.GetState().heroineName == "Clara" && sim.GetState().estateName == "Larkhollow");
     CHECK(Manor::SaveLabel(sim.GetState())
-        == "Clara Pendarves \xE2\x80\x94 Trevennor, Spring 1, 1851");
-    OK(sim.SetNames("\xC3\x89lise", "Tr\xC3\xA9vose", "Chy an Mor"));
+        == "Clara Ashworth \xE2\x80\x93 Larkhollow, Spring 1, 1851");
+    OK(sim.SetNames("\xC3\x89lise", "Mor\xC3\xA9ton", "Seaview Rise"));
     const std::string saved = sim.Serialize();
     Simulation loaded;
     loaded.SetPlacements(ProvisionalEstatePlacements());
     OK(loaded.Deserialize(saved));
-    CHECK(loaded.GetState().heroineName == "\xC3\x89lise" && loaded.GetState().familyName == "Tr\xC3\xA9vose");
-    CHECK(loaded.EstateName() == "Chy an Mor");
+    CHECK(loaded.GetState().heroineName == "\xC3\x89lise" && loaded.GetState().    familyName == "Mor\xC3\xA9ton");
+        CHECK(loaded.EstateName() == "Seaview Rise");
     CHECK(Manor::HeritageBuildingId(loaded.GetState()) != 0);
     for (const auto& piece : loaded.GetState().structures) CHECK(piece.heritage);
     CHECK(Find(loaded.GetState(), Piece::Wall)->skin == StructureSkin::Stone);
@@ -396,7 +396,7 @@ void NamesValidationAndPersistence()
         raised = aid.SeedStandingRoomAt({-800.0 - 450.0 * (attempt % 8), 200.0 - 450.0 * (attempt / 8)}, 30.0 * attempt);
     OK(raised);
     CHECK(Manor::HeritageBuildingId(aid.GetState()) != 0 && CountOf(aid.GetState(), Piece::Hearth) == 1);
-    CHECK(aid.GetState().estateName == "Trevennor" && aid.GetState().journal.size() == 1);
+    CHECK(aid.GetState().estateName == "Larkhollow" && aid.GetState().journal.size() == 1);
     CHECK(!aid.SeedStandingRoomAt({5000.0, 5000.0}, 0.0));
     Simulation aidLoaded;
     OK(aidLoaded.Deserialize(aid.Serialize()));

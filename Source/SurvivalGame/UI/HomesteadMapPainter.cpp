@@ -137,7 +137,7 @@ void FPainter::Glyph(EHomesteadMapGlyph Kind, FVector2D Center, float Size, cons
         Fill({P(0.25f, -0.62f), P(0.42f, -0.62f), P(0.42f, -0.25f), P(0.25f, -0.4f)}, Color);
         break;
     case EHomesteadMapGlyph::Mine:
-        // A Cornish engine house: a gabled block and its tall chimney stack.
+        // A rural engine house: a gabled block and its tall chimney stack.
         Fill({P(-0.7f, -0.1f), P(-0.2f, -0.45f), P(0.3f, -0.1f), P(0.3f, 0.6f), P(-0.7f, 0.6f)}, Color);
         Fill({P(0.4f, -0.8f), P(0.62f, -0.8f), P(0.68f, 0.6f), P(0.36f, 0.6f)}, Color);
         break;

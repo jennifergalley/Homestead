@@ -5717,7 +5717,7 @@ void MvpWoodlandPlacements()
         brambles += placement.kind == ResourceKind::BrambleThin || placement.kind == ResourceKind::BrambleThicket;
         nearest = std::min(nearest, std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y));
     }
-    // Most of the MVP wood is in Carn Wood, for sale beside the compact map's skinnier estate (shrink-estate-map); its
+    // Most of the MVP wood is in Hollin Wood, for sale beside the compact map's skinnier estate (shrink-estate-map); its
     // eastern edge stays hers.
     CHECK(trees >= 30 && branches >= 5 && berries >= 5 && roots >= 5);
     // The MVP's blocking brambles are clearable overgrowth here.

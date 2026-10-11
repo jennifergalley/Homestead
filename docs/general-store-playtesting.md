@@ -17,17 +17,17 @@ display-only conversion; the historic dollar-era receipts remain intact as evide
 1. Start a new estate game. The purse, a coin icon in the vitals stack under the calendar at the top right, reads **$10.00**.
 2. Walk to the town square, about 1.7 km east of the house along the road. The general store is on
    the north side, with a green **GENERAL STORE** board over the door.
-3. Climb the steps and go inside. At the counter the prompt reads **Talk to Mr. Trethewey**. Press
+3. Climb the steps and go inside. At the counter the prompt reads **Talk to Mr. Aldridge**. Press
    E, A or click to see her greeting, then **Continue** to open the shop. The game pauses while it's
    open.
 4. **Sell** tab: pick an item, set the quantity (the Quantity dialog is the field book's), check
    the total and the purse-after figure, then confirm. The balance in the shop's header goes up at
    once. The coin row's green `+` delta lasts about 3 seconds after the trade; the HUD is hidden
    while the shop is open, so you see it only if you leave straight away.
-5. **Buy** tab: what you sold is now listed under **From Trevennor**, below the shop's own goods
-   (scroll down if it's cut off). Buy a Cornish
+5. **Buy** tab: what you sold is now listed under **From Larkhollow**, below the shop's own goods
+   (scroll down if it's cut off). Buy a meat
    pasty ($1.00), close the shop, and eat it from the hotbar or field book. Hunger and energy rise.
-6. Sleep through the night. After 6 AM the store has sold part of the From Trevennor stock (about
+6. Sleep through the night. After 6 AM the store has sold part of the From Larkhollow stock (about
    a third a day).
 7. Visit after 6 PM. The door is shut, the closed sign hangs on it, and interacting shows
    "Closed - opens at 8 AM".
@@ -37,7 +37,7 @@ B or Escape backs out. The mouse works throughout.
 
 ## Placeholders
 
-- Mr. Josiah Trethewey, the $10.00 start and the estate name "Trevennor" are placeholders until
+- Mr. Callum Aldridge, the $10.00 start and the estate name "Larkhollow" are placeholders until
   Jenny renames them.
 - The shopkeeper is a **stand-in body**, the heroine mesh with an apron, labelled over her head.
   Her MetaHuman (task 3.2) waits for Jenny's Epic sign-in.

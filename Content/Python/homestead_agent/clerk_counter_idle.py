@@ -1,4 +1,4 @@
-"""Mr. Trethewey's idle behind the General Store counter: leaning on it with both palms flat on the top.
+"""Mr. Aldridge's idle behind the General Store counter: leaning on it with both palms flat on the top.
 
     from homestead_agent import clerk_counter_idle as cci
     anim = cci.build()       # bakes /Game/Characters/Clerk_MH/Animations/AN_ClerkMH_CounterIdle

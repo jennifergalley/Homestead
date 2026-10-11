@@ -24,14 +24,14 @@ FString AHomesteadController::GreetingFor(const Homestead::Shop& Shop) const
 {
     const FString Estate = EstateName();
     if (Shop.greetings == 0)
-        return FString::Printf(TEXT("Well now, you'll be the new lady up at %s! Josiah Trethewey. Word travels quick in a village "
-            "this size. If it's sold on this coast I've likely a shelf of it, and anything you bring down from the estate, "
+        return FString::Printf(TEXT("Well now, you'll be the new lady up at %s!         Callum Aldridge. Word travels quick in a village "
+                    "this size. If it's sold in these parts I've likely a shelf of it, and anything you bring down from the estate, "
             "set it on the counter and I'll give you a fair price."), *Estate);
     const double Hour = FMath::Fmod(State().hour, 24.0);
     const int32 Pick = Shop.greetings % 2;
     if (Hour < 12.0)
         return Pick ? TEXT("You're up with the lark. What can I do for you this morning?")
-            : TEXT("Morning, my 'andsome. Kettle's only just boiled. What'll it be?");
+            : TEXT("Morning, my dear. Kettle's only just boiled. What'll it be?");
     if (Hour < 16.0)
         return Pick ? FString::Printf(TEXT("Back again? Let's see what you've brought me from %s."), *Estate)
             : TEXT("Afternoon! Mind the step, it's been loose since Lady Day.");

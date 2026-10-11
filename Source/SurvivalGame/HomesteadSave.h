@@ -19,7 +19,7 @@ public:
     UPROPERTY() int64 SavedAtUtc = 0;
     // Same-second tie-breaker; old saves without this field read as zero.
     UPROPERTY() int64 SavedRevision = 0;
-    // For the save list: "Eleanor Cavendish — Trevennor, Spring 1" (empty for unnamed woodland games).
+    // For the save list: "Eleanor Cavendish – Larkhollow, Spring 1" (empty for unnamed woodland games).
     UPROPERTY() FString SaveLabel;
     UPROPERTY() float CameraSensitivity = 1.0f;
     UPROPERTY() bool InvertCameraY = false;

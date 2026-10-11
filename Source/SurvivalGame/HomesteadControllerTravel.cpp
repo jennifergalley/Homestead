@@ -34,8 +34,8 @@ void AHomesteadController::TickTravelDiscovery()
         const auto Destination = PendingTravelNotices[0];
         PendingTravelNotices.RemoveAt(0);
         if (Homestead::IsTravelUnlocked(State(), Destination))
-            Notify(FString::Printf(TEXT("Fast Travel Destination Unlocked: %s"),
-                UTF8_TO_TCHAR(Homestead::TravelDestinationLabel(Destination))), false);
+            Notify(FString::Printf(TEXT("Fast travel unlocked: %s"),
+                UTF8_TO_TCHAR(Homestead::TravelDestinationName(Destination))), false);
     }
 }
 

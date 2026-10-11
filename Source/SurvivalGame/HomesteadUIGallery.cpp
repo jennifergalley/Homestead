@@ -567,7 +567,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("shop-quantity"), TEXT("Buy tab, choosing bread: the how-many dialog."), ECover::Shop, 3, Counter, Shop(1, -1, TEXT("Bread")));
 
     // Road signs.
-    Add(TEXT("sign-confirm"), TEXT("The Gateway road sign: the centred 'Town / Manor' confirm over the Map page."), ECover::Dialog, 7,
+    Add(TEXT("sign-confirm"), TEXT("The Gateway road sign: the centred 'Village / Manor' confirm over the Map page."), ECover::Dialog, 7,
         Sign(TEXT("GatewayRoadSign"), 180.0), [SignIndex](AHomesteadController& PC)
         {
             PC.Focus = AHomesteadController::EFocus::RoadSign;
@@ -668,7 +668,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     List.Last().bKeepWorld = true;
     Add(TEXT("focus-shopkeeper"), TEXT("At the counter facing the shopkeeper: his name and the keyed talk/trade hint."),
         ECover::Focus, 4, Counter, nullptr);
-    Add(TEXT("focus-sign"), TEXT("Facing the Gateway road sign: 'Road sign | Town / Manor' and the keyed 'Choose a way'."),
+    Add(TEXT("focus-sign"), TEXT("Facing the Gateway road sign: 'Road sign | Village / Manor' and the keyed 'Choose a way'."),
         ECover::Focus, 5, Sign(TEXT("GatewayRoadSign"), 180.0), nullptr);
     Add(TEXT("focus-chest"), TEXT("A long chest name leads the parchment card; Open stays readable below, with refusal and gains stacked clear."),
         ECover::Focus, 6, Chest, [ChestId](AHomesteadController& PC)

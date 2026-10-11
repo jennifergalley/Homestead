@@ -32,7 +32,7 @@ Soil watered within the last day and plots less than half weedy SHALL grow at fu
 - **THEN** the focus line adds "weedy, growing slowly"
 
 ### Requirement: Period crops are sold as seed at the general store
-Trethewey's general store SHALL sell seed for turnips, carrots, potatoes, broad beans, strawberries and cabbage. Each crop SHALL yield its own produce, which she can eat or sell at the store. The legacy root and berry crops SHALL keep working.
+Aldridge's general store SHALL sell seed for turnips, carrots, potatoes, broad beans, strawberries and cabbage. Each crop SHALL yield its own produce, which she can eat or sell at the store. The legacy root and berry crops SHALL keep working.
 
 #### Scenario: Buying and sowing seed
 - **WHEN** she buys carrot seed at the store and sows it

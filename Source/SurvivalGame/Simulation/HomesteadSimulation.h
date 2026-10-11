@@ -375,7 +375,7 @@ struct State
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
     std::vector<UnderbrushEdit> clearedUnderbrush; // Sorted, unique.
-    // Round 1 fixed Cornish estate: resources come from the baked EstatePlacements (resource id =
+    // Round 1 fixed estate: resources come from the baked EstatePlacements (resource id =
     // placement id) instead of the seeded woodland generator, and there are no chunks.
     bool fixedEstate = false;
     int placementBakeVersion = 0;
@@ -556,7 +556,7 @@ public:
     // The heroine's, her family's and the estate's names (see HomesteadManor.h for the rules).
     Result SetNames(const std::string& heroine, const std::string& family, const std::string& estate);
     Result DiscoverTravel(TravelDestination destination, Point player);
-    // The estate's name for HUD and toasts ("Trevennor"); "the estate" before one is chosen.
+    // The estate's name for HUD and toasts ("Larkhollow"); "the estate" before one is chosen.
     std::string EstateName() const;
     // The baked placements a fixed-estate save is loaded against; set before Deserialize.
     void SetPlacements(const EstatePlacements& placements);

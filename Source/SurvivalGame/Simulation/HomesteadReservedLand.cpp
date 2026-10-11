@@ -14,12 +14,12 @@ struct ReservedName
 
 // Jenny-approved period names (shrink-estate-map design, decision 5). VillageGrowth is outline only.
 constexpr ReservedName ReservedNames[] = {
-    {"Neighbour.Penhallow", "Penhallow", false},
-    {"Neighbour.Tregarthen", "Tregarthen", false},
-    {"Neighbour.Polwhele", "Polwhele", false},
+    {"Neighbour.Penhallow", "Ashgrove", false},
+    {"Neighbour.Tregarthen", "Brackenburn", false},
+    {"Neighbour.Polwhele", "Thornley", false},
     {"Common.VillageGreen", "the village green", false},
     {"Common.Allotments", "allotments", false},
-    {"Common.ChapelSands", "Chapel sands", false},
+    {"Common.ChapelSands", "Gull Sands", false},
     {"Common.VillageGrowth", "", true},
 };
 

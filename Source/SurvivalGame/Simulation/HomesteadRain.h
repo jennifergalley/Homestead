@@ -2,7 +2,7 @@
 
 // The estate's rain (add-rain-weather; Jenny, 2026-09-30: "let it randomize throughout the day/night
 // cycle"). Each calendar day (06:00 to 06:00) may hold one spell of rain. A stable hash of the day picks
-// whether it rains (more often in autumn and winter, the Cornish coast's wet seasons), when it starts
+// whether it rains (more often in autumn and winter, the coast's wet seasons), when it starts
 // (any hour), how long it lasts (1-8 h, most often 5-7) and how long the cloud takes to build before it
 // and clear after it (half an hour to an hour and a half). A spell may run past midnight and past the next
 // 06:00. It all depends on the hour alone: no seed and nothing saved, so a reload brings the same weather.

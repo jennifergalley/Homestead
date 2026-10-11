@@ -27,7 +27,7 @@ constexpr double TravelTownReachCm = 4500.0;
 enum class TravelDestination : int { Manor, Town, Mine, Cove, Mill, Gateway, Store, Count };
 constexpr int TravelDestinationCount = static_cast<int>(TravelDestination::Count);
 
-// "the manor" / "town", for sentences ("Walk to town").
+// "the manor" / "the village", for sentences ("Walk to the village").
 const char* TravelDestinationName(TravelDestination destination);
 const char* TravelDestinationLabel(TravelDestination destination);
 bool IsTravelUnlocked(const State& state, TravelDestination destination);
@@ -82,6 +82,6 @@ constexpr double RoadSignReachCm = 280.0;
 std::vector<TravelDestination> RoadSignDestinations(const std::string& signName);
 // The sign within reach of t, nearest first, or null.
 const struct PublicRoadSign* RoadSignNear(Point at, double reachCm = RoadSignReachCm);
-// The words painted on it ("To town", "To the manor", "Town / Manor").
+// The words painted on it ("To the village", "To the manor", "Village / Manor").
 std::string RoadSignLabel(const std::string& signName);
 }

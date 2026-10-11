@@ -247,7 +247,7 @@ std::string SaveLabel(const State& state)
     if (state.heroineName.empty() && state.familyName.empty() && state.estateName.empty()) return {};
     std::string label = state.heroineName;
     if (!state.familyName.empty()) label += (label.empty() ? "" : " ") + state.familyName;
-    if (!state.estateName.empty()) label += " \xE2\x80\x94 " + state.estateName;
+    if (!state.estateName.empty()) label += " \xE2\x80\x93 " + state.estateName;
     return label + ", " + Calendar::LongDate(Calendar::DateAt(state.hour));
 }
 
@@ -321,7 +321,7 @@ std::string JournalText(const std::string& key, const State& state)
     return "Spring 1, " + std::to_string(ArrivalYear) + ". Home at last, to " + estate + ". The house is a ruin, "
         "the fields are bramble to the hedgerow, and the roof of the old hall lies where it fell. One room still keeps "
         "the weather out: the corner by the kitchen hearth, with a bed and a chest. The pail is in the chest, with a few "
-        "dry branches, and pasties and bread from the town. Father's garden tools always hung in the "
+        "dry branches, and pasties and bread from the village. Father's garden tools always hung in the "
         "west rooms, by the chimney; something of them may be left under the rubble. It will do for a beginning.";
 }
 }

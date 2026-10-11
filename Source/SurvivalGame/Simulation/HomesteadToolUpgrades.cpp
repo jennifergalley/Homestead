@@ -31,7 +31,7 @@ std::string Name(ToolKind tool)
 
 std::string Description(ToolKind tool)
 {
-    return std::string("Mr. Trethewey fits a new iron head to your ") + ToolName(tool) + ".";
+    return std::string("Mr. Aldridge fits a new iron head to your ") + ToolName(tool) + ".";
 }
 
 std::string CraftFirst(ToolKind tool)
