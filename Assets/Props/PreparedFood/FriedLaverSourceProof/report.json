@@ -73,7 +73,8 @@
           0,
           14
         ],
-        "ground": "lowest"
+        "ground": "lowest",
+        "transparent": true
       }
     },
     "SM_FriedLaverPortion": {

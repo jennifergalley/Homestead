@@ -576,7 +576,7 @@ def _fit_distance(corners, target, direction, lens, aspect, margin=1.12, sensor=
 
 def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160), samples=256,
                   views=("hero", "detail"), pose=(0, 0, 0), focus=None, ground="lowest",
-                  eye_distance=None, detail_distance=None, detail_fstop=22.0):
+                  eye_distance=None, detail_distance=None, detail_fstop=22.0, transparent=False):
     """Photoreal Cycles review renders of ``obj`` on a soil ground under an HDRI sky.
     ``pose`` (XYZ degrees) temporarily re-orients the asset for review (e.g. lay a
     tool on the ground); ``focus`` is an object-space point for the close detail
@@ -586,7 +586,10 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     looks at the asset from a standing player's eye height (1.6 m) at
     ``eye_distance`` meters. ``detail_distance`` / ``detail_fstop`` override the
     detail camera's distance (default >= 0.35 m) and aperture for tiny props such as
-    seeds. Returns render metadata."""
+    seeds. ``transparent=True`` keeps the HDRI sky for lighting but drops the soil
+    ground plane and renders an RGBA PNG with a transparent background (for item
+    icons cut from the hero render instead of a studio backdrop). Returns render
+    metadata."""
     scene = bpy.context.scene
     rest = obj.matrix_world.copy()
     obj.matrix_world = Euler([math.radians(a) for a in pose]).to_matrix().to_4x4() @ rest
@@ -607,32 +610,35 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     scene.cycles.use_adaptive_sampling = True
     scene.render.resolution_x, scene.render.resolution_y = resolution
     scene.render.resolution_percentage = 100
-    scene.render.film_transparent = False
+    scene.render.film_transparent = transparent
     scene.render.image_settings.file_format = "PNG"
-    scene.render.image_settings.color_mode = "RGB"
+    scene.render.image_settings.color_mode = "RGBA" if transparent else "RGB"
     scene.view_settings.view_transform = "AgX"
     scene.view_settings.look = "AgX - Medium High Contrast"
     scene.view_settings.exposure = -0.35
     _sky(hdri, rotation=40)
 
-    soil = bpy.data.materials.new("M_BeautySoil")
-    if soil.node_tree is None:
-        soil.use_nodes = True
-    soil_bsdf = soil.node_tree.nodes["Principled BSDF"]
-    noise_tex = soil.node_tree.nodes.new("ShaderNodeTexNoise")
-    noise_tex.inputs["Scale"].default_value = 18.0
-    ramp = soil.node_tree.nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (0.035, 0.026, 0.017, 1)
-    ramp.color_ramp.elements[1].color = (0.085, 0.066, 0.042, 1)
-    soil.node_tree.links.new(noise_tex.outputs["Fac"], ramp.inputs["Fac"])
-    soil.node_tree.links.new(ramp.outputs["Color"], soil_bsdf.inputs["Base Color"])
-    soil_bsdf.inputs["Roughness"].default_value = 0.95
+    ground = None
+    if not transparent:
+        soil = bpy.data.materials.new("M_BeautySoil")
+        if soil.node_tree is None:
+            soil.use_nodes = True
+        soil_bsdf = soil.node_tree.nodes["Principled BSDF"]
+        noise_tex = soil.node_tree.nodes.new("ShaderNodeTexNoise")
+        noise_tex.inputs["Scale"].default_value = 18.0
+        ramp = soil.node_tree.nodes.new("ShaderNodeValToRGB")
+        ramp.color_ramp.elements[0].color = (0.035, 0.026, 0.017, 1)
+        ramp.color_ramp.elements[1].color = (0.085, 0.066, 0.042, 1)
+        soil.node_tree.links.new(noise_tex.outputs["Fac"], ramp.inputs["Fac"])
+        soil.node_tree.links.new(ramp.outputs["Color"], soil_bsdf.inputs["Base Color"])
+        soil_bsdf.inputs["Roughness"].default_value = 0.95
     lo, hi = bounds(obj)
     if ground_mode == "origin":
         lo = Vector((lo.x, lo.y, max(lo.z, ground_z)))
     size = hi - lo
     center = (lo + hi) / 2
-    ground = box("BeautyGround", (60, 60, 0.02), (center.x, center.y, lo.z - 0.012), material=soil)
+    if not transparent:
+        ground = box("BeautyGround", (60, 60, 0.02), (center.x, center.y, lo.z - 0.012), material=soil)
 
     corners = [Vector((x, y, z)) for x in (lo.x, hi.x) for y in (lo.y, hi.y) for z in (lo.z, hi.z)]
     aspect = resolution[0] / resolution[1]
@@ -675,11 +681,12 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
         out[view] = str(path)
         bpy.data.objects.remove(cam)
         bpy.data.cameras.remove(data)
-    bpy.data.objects.remove(ground)
+    if ground is not None:
+        bpy.data.objects.remove(ground)
     obj.matrix_world = rest
     return {"views": out, "device": backend[0], "gpus": backend[1], "samples": samples,
             "resolution": list(resolution), "hdri": Path(hdri).name, "pose": list(pose),
-            "ground": ground_mode}
+            "ground": ground_mode, "transparent": transparent}
 
 
 # ------------------------------------------------------------ modeling tools

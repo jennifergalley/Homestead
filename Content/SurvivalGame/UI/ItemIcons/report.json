@@ -73,20 +73,20 @@
     "steamed-mussels": {
       "item": "SteamedMussels",
       "source": "Assets/Props/PreparedFood/SteamedMusselsSourceProof/beauty_SM_SteamedMussels_hero.png",
-      "source_sha256": "f39fdfbc19e5efd9d27c49e6f95746f4c23ca50b8e46b6475cb5d456ff4671b5",
-      "sha256": "89ddeef8e87830f8c164ef17651b904623b523e7e440f751e6594e4337f3d5fa"
+      "source_sha256": "1ae818331a427cc5da46b5dd47b767f40703558ad1be4adf65a3484d88f9bf59",
+      "sha256": "cf14270a8a929eab9aac2d803237b85692934b19921b990ad7d9f1b4a1d271c3"
     },
     "mussel-potato-broth": {
       "item": "MusselPotatoBroth",
       "source": "Assets/Props/PreparedFood/MusselPotatoBrothSourceProof/beauty_SM_MusselPotatoBroth_hero.png",
-      "source_sha256": "eab4166744ed4818c8ebbe6b1d0c94813355ec87af005fc5627840c9061292f4",
-      "sha256": "82037eb9f14342236314c279e0f533cc53f1f90f7faea78faa2e7ed58b2e8335"
+      "source_sha256": "f131dee0dd117cf055fcee5958952de515384e301f01652bdb04176ba1602441",
+      "sha256": "22ada3af3fe929f7889c6ec3c93c34b03cacaed04cd02f2ebade4ec291497901"
     },
     "fried-laver": {
       "item": "FriedLaver",
       "source": "Assets/Props/PreparedFood/FriedLaverSourceProof/beauty_SM_FriedLaver_hero.png",
-      "source_sha256": "f319fff40433190651212257af81037142fa62b2df4bef8af691d6e3423bd630",
-      "sha256": "10879ae48db9b3abd3a8fb753642a82f9a61b3cf4d1cf200a4b0b9c3f639213f"
+      "source_sha256": "851a9c73c14ae6abdf984b5f71b515c49becc816b3316e63b3ef7221d2298181",
+      "sha256": "4cd9bd300e2ecb26b6447966bc953623cf6fa40e2bed4675f96f0e12d9013ee9"
     },
     "river-trout": {
       "item": "RiverTrout",
