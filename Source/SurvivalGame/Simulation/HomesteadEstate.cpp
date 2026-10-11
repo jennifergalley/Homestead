@@ -364,6 +364,10 @@ const EstatePlacements& EstatePlacementsBeforeCompactMap()
         // the new cove path or the moved village street displaced, with the same 3 m rule.
         auto coastMix = topUp;
 #include "HomesteadEstateCoastMixPlacements.inc"
+        // Beach finds and the beach campfire (586000-586099, Scripts/Terrain/beach_detritus.py; add-beach-gathering),
+        // last of all with the same 3 m rule (the generator keeps them 3.2 m from every row above).
+        auto beachFind = topUp;
+#include "HomesteadEstateBeachPlacements.inc"
         // Town lane (530000+).
         return table;
     }();
@@ -392,17 +396,6 @@ const EstatePlacements& ProvisionalEstatePlacements()
         // dropped with no refund, and buildings outside the new bounds become unreachable). Bump the
         // bake version so old saves are rejected cleanly instead of silently losing player state.
         table.bakeVersion = 3;
-        // Beach finds and the beach campfire (586000-586099, Scripts/Terrain/beach_detritus.py; add-beach-gathering),
-        // after the compact map's retire pass so EstatePlacementsBeforeCompactMap keeps its hash, with the same 3 m rule.
-        auto beachFind = [&](int id, ResourceKind kind, double x, double y)
-        {
-            for (const EstatePlacement& other : table.placements)
-                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
-                    return;
-            const EstatePlacement placement{id, kind, {x, y}, 0.0, 0.0, 1.0, 0};
-            if (EstatePlacementAllowed(layout, placement)) table.placements.push_back(placement);
-        };
-#include "HomesteadEstateBeachPlacements.inc"
         return table;
     }();
     return Placements;

@@ -376,6 +376,9 @@ void RequirementsMatchTransactions()
             {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2},
             {Item::RiverTrout, 1}, {Item::RiverSalmon, 1}, {Item::LakePerch, 1}, {Item::LakeCarp, 1},
             {Item::SeaMackerel, 1}, {Item::SeaBass, 1}});
+        // The beach meals take only their own finds (the pack is nearly full with everything above).
+        if (FindBeachMeal(recipe))
+            Stock(sim, {{Item::Mussels, 3}, {Item::Laver, 2}, {Item::Potato, 1}, {Item::Kindling, 1}});
         const auto before = sim.GetState().inventory;
         const double hour = sim.GetState().hour;
         const char* description = RecipeRequirements(recipe);
@@ -5171,10 +5174,12 @@ void RuinTimbersAreChoppedWithTheAxe()
         if (table[i].id == 520006) rackAt = i;
     CHECK(firstTimber > lastForage && firstTimber < rackAt && rackAt < table.size());
     // Only the lake trail's forage (582300-582399), the woodland forage and the windfall spots (583000-584199) and the
-    // compact map's top-up (585000-585299) and the coast mix's brambles (587000-587099) come after the rack.
+    // compact map's top-up (585000-585299), the beach finds (586000-586099) and the coast mix's brambles (587000-587099)
+    // come after the rack.
     for (std::size_t i = rackAt + 1; i < table.size(); ++i)
         CHECK((table[i].id >= 582300 && table[i].id < 582400) || (table[i].id >= 583000 && table[i].id < 584200)
-            || (table[i].id >= 585000 && table[i].id < 585300) || (table[i].id >= 587000 && table[i].id < 587100));
+            || (table[i].id >= 585000 && table[i].id < 585300) || (table[i].id >= 586000 && table[i].id < 586100)
+            || (table[i].id >= 587000 && table[i].id < 587100));
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     for (int id : {582012, 582013})
@@ -5283,16 +5288,18 @@ void EveryHandGatherHasItsOwnPose()
         const auto kind = static_cast<ResourceKind>(i);
         const GatherPose pose = HandGatherPose(kind);
         if (const auto* info = FindOvergrowth(kind)) CHECK(info->byHand == (pose != GatherPose::None));
-        else CHECK((kind == ResourceKind::ForestTree) == (pose == GatherPose::None));
+        // The beach campfire is lit, not gathered (add-beach-gathering).
+        else CHECK((kind == ResourceKind::ForestTree || kind == ResourceKind::BeachCampfire) == (pose == GatherPose::None));
     }
-    for (auto kind : {ResourceKind::Stones, ResourceKind::SalvagePile, ResourceKind::RubbishHeap, ResourceKind::SlateHeap})
+    for (auto kind : {ResourceKind::Stones, ResourceKind::SalvagePile, ResourceKind::RubbishHeap, ResourceKind::SlateHeap,
+             ResourceKind::BeachPebbles})
         CHECK(HandGatherPose(kind) == GatherPose::Stones);
     for (auto kind : {ResourceKind::Branches, ResourceKind::FallenBranch, ResourceKind::BrokenCrate,
-             ResourceKind::BrokenBarrel, ResourceKind::RottenPlanks})
+             ResourceKind::BrokenBarrel, ResourceKind::RottenPlanks, ResourceKind::Driftwood})
         CHECK(HandGatherPose(kind) == GatherPose::Sticks);
     for (auto kind : {ResourceKind::BerryBush, ResourceKind::Roots, ResourceKind::Flowers, ResourceKind::Primroses,
              ResourceKind::Bluebells, ResourceKind::WildDaffodils, ResourceKind::WildGarlic, ResourceKind::Weeds,
-             ResourceKind::Nettles})
+             ResourceKind::Nettles, ResourceKind::Seashells, ResourceKind::MusselBed, ResourceKind::LaverRocks})
         CHECK(HandGatherPose(kind) == GatherPose::Pouch);
     CHECK(HandGatherPose(ResourceKind::Reeds) == GatherPose::Reeds);
     CHECK(HandGatherPose(ResourceKind::TallGrass) == GatherPose::None && HandGatherPose(ResourceKind::Sapling) == GatherPose::None);
