@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Thrift",
+  "description": "A cushion of thrift (sea pink) in flower, 22 cm tall: a dense tuft of narrow dark leaves under round pink flower heads on leafless stalks. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 14000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/thrift.py",
+  "source_sha256": "3bdb43f0db6b693cd4e441250aa40259fb9c7a15eb052797f2c64ced27e422ca",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_ThriftClump": {
+      "vertices": 2236,
+      "triangles": 2160,
+      "size_cm": [
+        25.71,
+        24.08,
+        27.06
+      ],
+      "materials": [
+        {
+          "name": "M_Thrift",
+          "textures": {
+            "basecolor": "T_Thrift_basecolor.png",
+            "normal": "T_Thrift_normal.png",
+            "roughness": "T_Thrift_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.003034651279449463,
+          0.00497455894947052,
+          0.14
+        ]
+      },
+      "fbx": "SM_ThriftClump.fbx",
+      "sha256": "9b7ca5a506601bfc44b5a905eb7a6aa3e8dede343eba682e8d6fe32fa30133e9",
+      "preview": "preview_SM_ThriftClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_ThriftClump_hero.png",
+          "detail": "beauty_SM_ThriftClump_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_ThriftClump_LOD1": {
+      "vertices": 970,
+      "triangles": 852,
+      "size_cm": [
+        25.29,
+        23.16,
+        27.54
+      ],
+      "materials": [
+        {
+          "name": "M_Thrift",
+          "textures": {
+            "basecolor": "T_Thrift_basecolor.png",
+            "normal": "T_Thrift_normal.png",
+            "roughness": "T_Thrift_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.003034651279449463,
+          0.00497455894947052,
+          0.14
+        ]
+      },
+      "fbx": "SM_ThriftClump_LOD1.fbx",
+      "sha256": "1f2969cddaefa7dfc40a916ddf1064795f81763c06127fc4d981b5dd72b5112d",
+      "preview": "preview_SM_ThriftClump_LOD1.png"
+    },
+    "SM_ThriftClump_LOD2": {
+      "vertices": 304,
+      "triangles": 236,
+      "size_cm": [
+        24.81,
+        22.44,
+        28.78
+      ],
+      "materials": [
+        {
+          "name": "M_Thrift",
+          "textures": {
+            "basecolor": "T_Thrift_basecolor.png",
+            "normal": "T_Thrift_normal.png",
+            "roughness": "T_Thrift_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.003034651279449463,
+          0.00497455894947052,
+          0.14
+        ]
+      },
+      "fbx": "SM_ThriftClump_LOD2.fbx",
+      "sha256": "1b6a443a439d8d9a28916cc2cf1c3e9860d11fb6370a1016419395e467a3cd60",
+      "preview": "preview_SM_ThriftClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_Thrift: T_Thrift_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_Thrift_basecolor.png": "78ecbdfea4a57d4d5b5013a2272660f9efa4313e8ab56d466a071c0da421a9f7",
+    "T_Thrift_normal.png": "bb962c9018741020e60ee84f0d636f59d6122658ed36374cdc31324f57252d32",
+    "T_Thrift_roughness.png": "e1e38a4d838479f80ceaeb9dfc939da3b216815670123d73827f3375d55fd335"
+  }
+}

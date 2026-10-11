@@ -46,6 +46,10 @@ private:
     TObjectPtr<AHomesteadWaterPool> Pool;
     UPROPERTY()
     TArray<TObjectPtr<UStaticMeshComponent>> Dressing;
+    /** The cove's west cliff: one instanced batch per rock or plant mesh (HomesteadCoveCliff.inc). */
+    UPROPERTY()
+    TArray<TObjectPtr<class UInstancedStaticMeshComponent>> Cliff;
+    void BuildCliff();
     UPROPERTY()
     TArray<TObjectPtr<UAudioComponent>> Sounds;
     TArray<float> SoundGains;

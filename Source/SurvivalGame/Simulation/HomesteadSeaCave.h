@@ -42,6 +42,21 @@ struct SeaCave
 
 const SeaCave& EstateSeaCave();
 
+// The cove's west cliff dressing round the cave (card "[Balance] Rock face for the cove cliff"): granite outcrops
+// sunk into the steep face and thrift on its ledges, from HomesteadCoveCliff.inc (Scripts/Terrain/cove_cliff_rocks.py).
+struct CoveCliffProp
+{
+    const char* mesh = "";
+    Point position;               // the mesh's pivot (its ground line), world cm
+    double z = 0.0;
+    double yaw = 0.0;             // about its own up axis, degrees
+    double upX = 0.0, upY = 0.0, upZ = 1.0;   // its up axis (unit)
+    double scale = 1.0;
+};
+const std::vector<CoveCliffProp>& EstateCoveCliff();
+// Thrift and other walk-through plants have no collision; rocks block.
+bool CoveCliffPropBlocks(const CoveCliffProp& prop);
+
 // She counts as in the cave this far (cm, her capsule's centre) below the landscape's surface over it: the
 // landscape above the cave is its roof, so the cave's floor, not the landscape, is the ground under her.
 // Below the controller's fall-through check (200 cm under the surface for her centre, about 290 cm for her

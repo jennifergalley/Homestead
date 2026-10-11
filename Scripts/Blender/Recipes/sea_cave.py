@@ -85,9 +85,9 @@ DRESSING = [
     ("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_a", 4.4, -1.8, 140.0, 0.7),
     ("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_a", 0.9, -2.4, 260.0, 0.75),
     ("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_a", 6.2, 4.3, 80.0, 0.65),
-    (f"{PROPS}/RedCampion/SM_RedCampion", -4.6, 4.6, 0.0, 1.0),
-    (f"{PROPS}/RedCampion/SM_RedCampion", -4.1, -5.6, 120.0, 0.9),
-    (f"{PROPS}/RedCampion/SM_RedCampion", -5.3, 2.7, 230.0, 1.1),
+    (f"{PROPS}/RedCampion/SM_RedCampionClump", -4.6, 4.6, 0.0, 1.0),
+    (f"{PROPS}/RedCampion/SM_RedCampionClump", -4.1, -5.6, 120.0, 0.9),
+    (f"{PROPS}/RedCampion/SM_RedCampionClump", -5.3, 2.7, 230.0, 1.1),
 ]
 
 

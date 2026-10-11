@@ -7,12 +7,14 @@
 #include "Simulation/HomesteadSeaCave.h"
 
 #include "Components/AudioComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Misc/Paths.h"
 #include "Sound/SoundWave.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadSeaCave, Log, All);
@@ -26,6 +28,7 @@ const TCHAR* const PoolFallback = TEXT("/Game/SurvivalGame/Materials/MI_EstatePo
 const TCHAR* const PlaneMesh = TEXT("/Engine/BasicShapes/Plane.Plane");
 const TCHAR* const DripsSound = TEXT("/Game/SurvivalGame/Audio/Ambience/SeaCaveDrips.SeaCaveDrips");
 const TCHAR* const SurfSound = TEXT("/Game/SurvivalGame/Audio/Ambience/SeaCaveSurf.SeaCaveSurf");
+const TCHAR* const CliffMaterialFolder = TEXT("/Game/SurvivalGame/Environment/SeaCave");
 
 // The fissure (Recipes/sea_cave.py's fissure box): 6 m along its crossing joint, 0.6 m wide, its joint turned
 // 28 degrees left of the cave's axis (mirrored into Unreal's frame). The card closes its top, just inside it.
@@ -85,11 +88,13 @@ bool AHomesteadSeaCave::Build()
     if (bBuilt) return true;
     const Homestead::SeaCave& Cave = Homestead::EstateSeaCave();
     if (!Cave.valid()) return false;
+    // The cliff dressing stands on its own: it goes down even before the cave mesh is imported.
+    BuildCliff();
     UStaticMesh* RockAsset = LoadObject<UStaticMesh>(nullptr, RockMesh, nullptr, LOAD_NoWarn | LOAD_Quiet);
     if (!RockAsset)
     {
         UE_LOG(LogHomesteadSeaCave, Log, TEXT("Sea cave: SM_SeaCave isn't imported; not placing the cave."));
-        return false;
+        return !Cliff.IsEmpty();
     }
     bBuilt = true;
     SetActorLocationAndRotation(FVector(Cave.anchor.x, Cave.anchor.y, Cave.floorZ),
@@ -230,6 +235,62 @@ bool AHomesteadSeaCave::Build()
         Cave.anchor.x, Cave.anchor.y, Cave.floorZ, Cave.yaw, Pool ? TEXT("filled") : TEXT("missing"),
         Dressing.Num(), Missing, Sounds.Num());
     return true;
+}
+
+void AHomesteadSeaCave::BuildCliff()
+{
+    using namespace HomesteadSeaCaveLook;
+    if (!Cliff.IsEmpty()) return;
+    const std::vector<Homestead::CoveCliffProp>& Props = Homestead::EstateCoveCliff();
+    TMap<FString, UInstancedStaticMeshComponent*> Batches;
+    TSet<FString> Missing;
+    for (const Homestead::CoveCliffProp& Prop : Props)
+    {
+        const FString Path = UTF8_TO_TCHAR(Prop.mesh);
+        UInstancedStaticMeshComponent** Found = Batches.Find(Path);
+        if (!Found)
+        {
+            if (Missing.Contains(Path)) continue;
+            UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+            if (!Mesh)
+            {
+                Missing.Add(Path);
+                continue;
+            }
+            UInstancedStaticMeshComponent* Batch = NewObject<UInstancedStaticMeshComponent>(this);
+            Batch->SetupAttachment(GetRootComponent());
+            Batch->SetMobility(EComponentMobility::Movable);
+            Batch->SetStaticMesh(Mesh);
+            if (Homestead::CoveCliffPropBlocks(Prop))
+            {
+                // The cliff's weathered stone reads darker than the estate's sunlit boulders (build_sea_cave.py).
+                const FString Name = FPaths::GetBaseFilename(Path);
+                const FString Dark = FString::Printf(TEXT("%s/MI_%s_Cliff.MI_%s_Cliff"), CliffMaterialFolder,
+                    *Name.RightChop(3), *Name.RightChop(3));
+                if (UMaterialInterface* Override = LoadObject<UMaterialInterface>(nullptr, *Dark, nullptr, LOAD_NoWarn | LOAD_Quiet))
+                    Batch->SetMaterial(0, Override);
+                Batch->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+                Batch->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+            }
+            else
+            {
+                Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+                Batch->SetCastShadow(false);
+            }
+            Batch->SetCanEverAffectNavigation(false);
+            Batch->SetGenerateOverlapEvents(false);
+            Batch->RegisterComponent();
+            Cliff.Add(Batch);
+            Found = &Batches.Add(Path, Batch);
+        }
+        const FVector Up = FVector(Prop.upX, Prop.upY, Prop.upZ).GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
+        const FQuat Rotation = FQuat::FindBetweenNormals(FVector::UpVector, Up)
+            * FQuat(FVector::UpVector, FMath::DegreesToRadians(static_cast<float>(Prop.yaw)));
+        (*Found)->AddInstance(FTransform(Rotation, FVector(Prop.position.x, Prop.position.y, Prop.z),
+            FVector(static_cast<float>(Prop.scale))), /*bWorldSpace=*/true);
+    }
+    UE_LOG(LogHomesteadSeaCave, Log, TEXT("Cove cliff: %d pieces in %d batches%s."), static_cast<int32>(Props.size()),
+        Cliff.Num(), Missing.IsEmpty() ? TEXT("") : *FString::Printf(TEXT(" (%d meshes not imported)"), Missing.Num()));
 }
 
 void AHomesteadSeaCave::SetSky(float Daylight, float Overcast)

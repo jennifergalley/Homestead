@@ -90,6 +90,28 @@ int main()
     // The cave takes over before the controller's fall-through check (her centre 200 cm under the surface) would.
     Check(SeaCaveBelowSurfaceCm < 200.0, "the cave takes over before the fall-through check", SeaCaveBelowSurfaceCm);
 
+    // The cove cliff's dressing: rocks clear of the cave (its hillside is the cave's roof) and its mouth.
+    int rocks = 0, plants = 0;
+    for (const CoveCliffProp& prop : EstateCoveCliff())
+    {
+        Check(std::strlen(prop.mesh) > 0, "a cliff piece names its mesh");
+        Check(std::fabs(std::hypot(std::hypot(prop.upX, prop.upY), prop.upZ) - 1.0) < 0.01 && prop.upZ > 0.4,
+            "a cliff piece stands up its slope", prop.upZ);
+        if (!CoveCliffPropBlocks(prop))
+        {
+            ++plants;
+            continue;
+        }
+        ++rocks;
+        Check(!PointInPolygon(cave.footprint, prop.position), "no cliff rock over the cave");
+        const Point inCave = cave.ToLocal(prop.position);
+        Check(!(inCave.x > -600.0 && inCave.x < 1300.0 && std::fabs(inCave.y) < 1300.0), "no cliff rock in the cave's mouth",
+            inCave.x);
+        Check(prop.z > 0.0, "cliff rocks stand above the beach", prop.z);
+    }
+    Check(rocks >= 30, "the cliff is rocky", rocks);
+    Check(plants >= 20, "thrift on the cliff", plants);
+
     if (Failures) std::printf("%d failure(s)\n", Failures);
     else std::printf("HomesteadSeaCaveTests: all passed\n");
     return Failures ? 1 : 0;

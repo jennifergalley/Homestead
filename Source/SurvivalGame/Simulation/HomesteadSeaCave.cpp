@@ -3,6 +3,7 @@
 #include "HomesteadEstate.h"
 
 #include <cmath>
+#include <cstring>
 
 namespace Homestead
 {
@@ -86,6 +87,24 @@ const SeaCave& EstateSeaCave()
 {
     static const SeaCave cave = BuildSeaCave();
     return cave;
+}
+
+const std::vector<CoveCliffProp>& EstateCoveCliff()
+{
+    static const std::vector<CoveCliffProp> props = []
+    {
+        std::vector<CoveCliffProp> out;
+#define COVE_CLIFF_PROP(MESH, X, Y, Z, YAW, UX, UY, UZ, SCALE) out.push_back({MESH, {X, Y}, Z, YAW, UX, UY, UZ, SCALE});
+#include "HomesteadCoveCliff.inc"
+#undef COVE_CLIFF_PROP
+        return out;
+    }();
+    return props;
+}
+
+bool CoveCliffPropBlocks(const CoveCliffProp& prop)
+{
+    return std::strstr(prop.mesh, "/Granite") != nullptr;
 }
 
 bool InSeaCave(const SeaCave& cave, Point point, double z, double surfaceZ)

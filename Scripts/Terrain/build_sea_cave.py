@@ -9,6 +9,7 @@
 3. MI_SeaCavePool: the cave pool's still water, an instance of the estate pond's water, clearer and greener
    (seep water over pale sand), with no wind ripple.
 4. SeaCaveDrips and SeaCaveSurf from Assets/Audio/Ambience (Scripts/generate_sea_cave_audio.py), looping.
+5. The cove cliff's dressing: SM_ThriftClump (Recipes/thrift.py) and darker MI_<Granite>_Cliff instances.
 Then saves. The landscape hole is build_landscape_holes.py.
 """
 import importlib.util
@@ -36,8 +37,29 @@ def import_mesh():
     spec = importlib.util.spec_from_file_location("import_props", os.path.join(REPO, "Scripts", "Blender", "import_props.py"))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module.main(["SeaCave"])
-    LIB.save_directory("/Game/SurvivalGame/Environment/Props/SeaCave", False, True)
+    module.main(["SeaCave", "Thrift"])
+    for name in ("SeaCave", "Thrift"):
+        LIB.save_directory(f"/Game/SurvivalGame/Environment/Props/{name}", False, True)
+
+
+# The cove's west cliff (cove_cliff_rocks.py) reuses the estate's granite with darker, weathered stone: sea cliffs
+# are wet, salt-stained and lichen-dark, not the pale sunlit tors inland (M_PropGranite's MacroBrightness is 0.74).
+CLIFF_ROCKS = ("GraniteDome", "GraniteSplitBoulder", "GraniteErratic", "GraniteBoulderJointed")
+CLIFF_BRIGHTNESS = 0.5
+
+
+def cliff_materials():
+    for name in CLIFF_ROCKS:
+        parent = unreal.load_asset(f"/Game/SurvivalGame/Environment/Props/{name}/MI_{name}")
+        if not parent:
+            print("sea cave: no MI_" + name)
+            continue
+        path = f"{FOLDER}/MI_{name}_Cliff"
+        mi = LIB.load_asset(path) if LIB.does_asset_exist(path) else TOOLS.create_asset(
+            f"MI_{name}_Cliff", FOLDER, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+        MEL.set_material_instance_parent(mi, parent)
+        MEL.set_material_instance_scalar_parameter_value(mi, "MacroBrightness", CLIFF_BRIGHTNESS)
+        LIB.save_loaded_asset(mi, False)
 
 
 def sky_material():
@@ -92,5 +114,6 @@ def sounds():
 import_mesh()
 sky_material()
 pool_material()
+cliff_materials()
 sounds()
 print("sea cave assets: built")
