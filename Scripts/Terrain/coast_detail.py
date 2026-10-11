@@ -41,6 +41,8 @@ CRAG_M = 2.2                      # crag relief on a full cliff face
 CRAG_MIN_Z = 3.0                  # above the berm
 WATERLINE_BAND = (-1.6, 1.2)      # ground heights (m) whose level wanders
 WATERLINE_M = 0.7                 # by up to this
+FILLET_BAND = (1.6, 9.0)          # m: the talus apron at a cliff's foot (foot_fillet)
+FILLET_SIGMA_M = 2.5
 SEED = 1854
 
 CAVE_BOX = (-545.0, -515.0, -692.0, -666.0)     # x0, x1, y0, y1: Cave Agent's crag and mouth (no scenery)
@@ -100,6 +102,18 @@ def waterline(z, sl, layout):
     band = smoothstep(lo - 0.5, lo, zz) * (1.0 - smoothstep(hi, hi + 0.4, zz))
     wob = noise(zz.shape, 11, SEED + 3) * 0.75 + noise(zz.shape, 4, SEED + 4) * 0.25
     z[sl] = zz + band * WATERLINE_M * wob
+
+
+def foot_fillet(z, sl):
+    """A talus apron where the sand meets a steep face (FILLET_BAND m above the berm), so the slope break spreads
+    over a few landscape quads; a one-quad crease drew the rock blend as a row of triangle teeth."""
+    zz = z[sl]
+    gy, gx = np.gradient(ndimage.gaussian_filter(zz, 1.0))
+    steep = ndimage.binary_dilation(np.hypot(gx, gy) > 0.6, iterations=4)
+    band = smoothstep(FILLET_BAND[0] - 0.2, FILLET_BAND[0] + 0.3, zz) * (1 - smoothstep(FILLET_BAND[1] - 2.0, FILLET_BAND[1], zz))
+    w = ndimage.gaussian_filter(band * steep, 1.5)
+    soft = ndimage.gaussian_filter(zz, FILLET_SIGMA_M)
+    z[sl] = np.maximum(zz + (soft - zz) * w, np.minimum(zz, 1.7))
 
 
 def keep_cave(z, before):
@@ -179,6 +193,28 @@ def main():
     z = (raw.astype(np.float64) - 32768.0) / 128.0
     before_mix = git_r16(BEFORE_MIX)
     rng = np.random.default_rng(SEED)
+    if layout.get("coastDetail") and not layout.get("coastFillet"):
+        before = z.copy()
+        (x0, y0), (x1, y1) = np.min(layout["polygons"]["PlayableBounds"], 0), np.max(layout["polygons"]["PlayableBounds"], 0)
+        foot_fillet(z, (slice(int(y0) + H, int(y1) + H + 1), slice(int(x0) + H, int(x1) + H + 1)))
+        keep_cave(z, before)
+        u16 = np.clip(np.round(32768 + z * 128.0), 0, 65535).astype(np.uint16)
+        moved = np.argwhere(u16 != raw)
+        u16.astype("<u2").tofile(R16)
+        Image.fromarray(u16).save(PNG)
+        z = (u16.astype(np.float64) - 32768.0) / 128.0
+        npy = os.path.join(WORK, "game_reshaped_4033.npy")
+        if os.path.exists(npy) and len(moved):
+            zn = np.load(npy)
+            r, c = moved[:, 0], moved[:, 1]
+            zn[2 * H - c, r] = z[r, c].astype(zn.dtype)
+            np.save(npy, zn)
+        layout["coastFillet"] = True
+        with open(LAYOUT, "w") as fh:
+            json.dump(layout, fh, indent=1)
+        (a, b), (c, e) = moved.min(0), moved.max(0)
+        print(f"coast detail: foot fillet {len(moved)} vertices; ApplyEstateHeightfield rows {a}-{c}, cols {b}-{e}")
+        return
     if not layout.get("coastDetail"):
         before = z.copy()
         (x0, y0), (x1, y1) = np.min(layout["polygons"]["PlayableBounds"], 0), np.max(layout["polygons"]["PlayableBounds"], 0)

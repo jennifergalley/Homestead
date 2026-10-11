@@ -9808,5 +9808,6 @@
   "maxGrade": 0.184
  },
  "coastSoften": true,
- "coastDetail": true
+ "coastDetail": true,
+ "coastFillet": true
 }

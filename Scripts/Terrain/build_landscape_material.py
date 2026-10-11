@@ -146,10 +146,9 @@ if (drops > 0.01)
 
 // Steep ground of any paint layer (Jenny's striated cliffs, 2026-10-10): the top-down layers stretch into streaks
 // on a steep face, so above about 35 degrees the triplanar granite takes over, greyed toward Cornish granite.
-float steepness = 1.0 - saturate(normalize(Nw).z);
-float rockAmt = smoothstep(0.17, 0.30, steepness);
+float rockAmt = saturate(SteepRock);
 float rl = dot(CliffC, float3(0.333, 0.333, 0.333));
-float3 granite = lerp(float3(rl, rl, rl) * float3(0.96, 0.98, 1.03), CliffC, 0.45);
+float3 granite = lerp(float3(rl, rl, rl) * float3(0.92, 0.95, 1.0), CliffC, 0.2) * (0.85 + 0.3 * Macro1);
 col = lerp(col, granite, rockAmt);
 n = normalize(lerp(n, normalize(CliffN), rockAmt));
 rough = lerp(rough, CliffR, rockAmt);
@@ -261,7 +260,7 @@ def ground_finish(bc, nm, rg, y0, cliff=None):
     c.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
     c.set_editor_property('description', 'GroundFinish')
     inputs = [('BC', bc, ''), ('NIn', nm, ''), ('R', rg, ''), ('WP', wp, ''), ('D', depth, ''),
-              ('GroundTex', ground, 'RGBA'), ('Canopy', canopy, 'R'), ('Stony', canopy, 'G'), ('Zone', canopy, 'B'),
+              ('GroundTex', ground, 'RGBA'), ('Canopy', canopy, 'R'), ('Stony', canopy, 'G'), ('Zone', canopy, 'B'), ('SteepRock', canopy, 'A'),
               ('MvpD', mvp_d, 'RGB'), ('MvpN', mvp_n, 'RGB'), ('MvpR', mvp_r, 'R'), ('MvpFarD', mvp_far, 'RGB'),
               ('MudD', mud_d, 'RGB'), ('MudN', mud_n, 'RGB'), ('MudR', mud_r, 'R'), ('MudFarD', mud_far, 'RGB'), ('Macro1', macro1, 'R'), ('Macro2', macro2, 'R'),
               ('WearD', wear_d, 'RGB'), ('WearN', wear_n, 'RGB'), ('WearR', wear_r, 'R'),
