@@ -49,9 +49,9 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   the standing-room berry bush removed, "Start a new game". Awaiting screenshots.
 - 2026-10-10: Lighting Agent (0816ef4d) persistent-moonlight night OK at 0.2 lux ground (Set A
   unchanged); suggested village lit windows as later polish.
-- 2026-10-10: Map Agent (94e0bd8e) mixed-coast plan: cove cap relaxed to 90 s for a step-free path
-  at up to 1 in 4 (~430 m); stairs/rails kit dropped but a bench viewpoint and edge posts kept.
-  Awaiting its timed sprint and viewpoint screenshot.
+- 2026-10-10: Map Agent (94e0bd8e) mixed-coast plan: I proposed a 90 s cove cap for a step-free
+  1-in-4 path; the Orchestrator reverted it to Jenny's call (options: 1-in-4 ~90 s, a lower cove
+  site, or a slope plus one short flight). Cap stays 60 s until she picks; then update §9.
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
