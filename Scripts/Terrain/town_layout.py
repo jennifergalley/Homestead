@@ -45,8 +45,10 @@ TERRACE_JOINT_M = 0.1            # between the houses of one terrace (they share
 STORE_DOOR_TO_COUNTER_M = 6.0
 STORE_FOOTPRINT_M = (9.6, 9.4)   # depth, width
 STORE_DOOR_OUT_M = 0.5           # the door anchor stands just outside the front
-JUNCTION_CHAINAGE_M = 260.0      # where the street leaves the main road: metres along it from the manor forecourt
-SPUR_TURN_DEG = 55.0             # the street leaves the road turned this far to its right (toward the square)
+JUNCTION_CHAINAGE_M = 350.0      # where the street leaves the main road: metres along it from the manor forecourt
+                                 # (moved up from 260 m, where the street fell 21% at its kink: Balance, 2026-10-10)
+SPUR_TURN_DEG = 120.0            # the street leaves the road turned this far to its right (toward the square)
+STREET_HANDLES = (0.3, 0.7)      # the street's curve: its leaving and arriving handles, as shares of the straight distance
 TOWN_ROTATION_DEG = 180.0        # the whole town turned about its centre: its street mouth and store face west, toward the drive
 TOWN_ARRIVAL_FROM_DOOR_M = 4.0   # a walk to town lands her this far in front of the store door
 
@@ -120,9 +122,9 @@ def street_points(start, heading, end, arrive):
     """A cubic Bezier from the junction (leaving along heading) into the square (arriving along `arrive`, a unit
     vector pointing into the square), 1 m steps."""
     p0, p3 = np.asarray(start, float), np.asarray(end, float)
-    reach = np.linalg.norm(p3 - p0) * 0.45
-    p1 = p0 + heading * reach
-    p2 = p3 - arrive * reach
+    reach = np.linalg.norm(p3 - p0)
+    p1 = p0 + heading * reach * STREET_HANDLES[0]
+    p2 = p3 - arrive * reach * STREET_HANDLES[1]
     t = np.linspace(0, 1, 400)[:, None]
     curve = (1 - t) ** 3 * p0 + 3 * (1 - t) ** 2 * t * p1 + 3 * (1 - t) * t ** 2 * p2 + t ** 3 * p3
     seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(curve, axis=0), axis=1))]

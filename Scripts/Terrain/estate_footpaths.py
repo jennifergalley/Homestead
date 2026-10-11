@@ -39,7 +39,7 @@ COVE_KEEP_M = (1.8, 3.8)      # the cove route's bed stays as cove_route.py grad
 # takes 1 in 4 (at 1 in 5 it would need a 4 m cutting through the forecourt and the manor clear-out).
 PATHS = [
     ("Mine", [(-266, -653), (-272, -664), (-282, -680), (-300, -698), (-340, -712), (-375, -718), (-401, -721)], 1.0 / 4.0),
-    ("MineLink", [(-404, -716), (-412, -700), (-418, -684), (-410, -670), (-402, -658), (-401, -645), (-397, -638)],
+    ("MineLink", [(-404, -716), (-412, -700), (-418, -684), (-410, -668), (-394, -654), (-372, -645), (-352, -642)],
      1.0 / 5.0),
     # Down the valley side in two short zigzags (the straight line needed a 4 m cutting).
     ("VillageRiver", [(-118, -322), (-146, -308), (-178, -298), (-192, -302), (-234, -330), (-246, -318),

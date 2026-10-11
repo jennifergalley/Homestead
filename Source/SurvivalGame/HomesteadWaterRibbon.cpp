@@ -46,6 +46,8 @@ constexpr float CapRowDivisor = 4.0f;
 // M_CreekWater tiles its ripples 0.8 and 2.1 times and its foam 1.3 times per metre, so all three
 // repeat whole every 10 m: V can restart there without a seam.
 constexpr float UVRepeatCm = 1000.0f;
+// White water at the river's mouth, where it meets the surf (MouthFroth); short of the full riffle froth.
+constexpr float MouthWhiteWater = 0.7f;
 
 // Circular rounding: 0 at the very end, 1 once a full cap length in.
 float CapWidth(float Along, float Cap)
@@ -138,7 +140,8 @@ void AHomesteadWaterRibbon::RebuildSurface()
         const float Outer = Wet + BankOverlap * Rounding;
         const float Riffle = FMath::Clamp((Grade - RiffleGrade) / RiffleGradeRange, 0.0f, 1.0f);
         const float Spring = SpringFroth > 1.0f ? 1.0f - FMath::SmoothStep(0.0f, SpringFroth, Distance) : 0.0f;
-        const float Churn = FMath::Max(Riffle, 0.8f * Spring);
+        const float Surf = MouthFroth > 1.0f ? 1.0f - FMath::SmoothStep(0.0f, MouthFroth, Length - Distance) : 0.0f;
+        const float Churn = FMath::Max3(Riffle, 0.8f * Spring, MouthWhiteWater * Surf);
         for (int32 Column = 0; Column <= Columns; ++Column)
         {
             const float Across = (static_cast<float>(Column) / Columns - 0.5f) * 2.0f;

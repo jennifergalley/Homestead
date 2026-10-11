@@ -45,7 +45,7 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::StandingRoomOrigin, {-25600.0, -63800.0}, 8652.6, 0.0},
             {Anchor::StandingRoomSpawn, {-25750.0, -63800.0}, 8652.6, -90.0},
             {Anchor::EstateGateway, {-5500.0, 9000.0}, 5632.0, 60.0},
-            {Anchor::CoveBeach, {-47600.0, -61600.0}, 180.0, 200.0},
+            {Anchor::CoveBeach, {-49000.0, -58000.0}, 180.0, 200.0},
             {Anchor::MineEntrance, {-41000.0, -72200.0}, 5223.0, 0.0},
             {Anchor::MillSite, {-11800.0, -9200.0}, 3113.1, 0.0},
             {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 5632.0, 60.0},
@@ -377,6 +377,7 @@ const EstatePlacements& ProvisionalEstatePlacements()
         std::vector<int> retiredIds;
         auto retired = [&](int id) { retiredIds.push_back(id); };
 #include "HomesteadEstateRetiredPlacements.inc"
+#include "HomesteadEstateCoastMixRetired.inc"
         std::sort(retiredIds.begin(), retiredIds.end());
         const EstateLayout& layout = ProvisionalEstateLayout();
         table.placements.erase(std::remove_if(table.placements.begin(), table.placements.end(), [&](const EstatePlacement& placement)
