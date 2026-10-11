@@ -59,3 +59,9 @@ Gameplay and Wardrobe both add General Store stock; they coordinate the append-o
 | Cave Agent | `d6ef3d58-ed8a-4297-9f27-e3a51528c59d` | Claude Opus 5.5 / high | 8781 | beach sea cave with a pool |
 | Balance Agent | `ceb1109b-f156-451c-b890-ca91fa92f1c1` | Claude Opus 5.5 / high | — | review only |
 | Integration Agent | `09ae4063-4f60-475e-bb88-7c6d6a7bbc7c` | Claude Sonnet 5 / medium | reserved slot | merge, package, promote |
+
+### Heavy-job slots (2 total; orchestrator grants)
+
+- Slot 1: Map Agent (C++ build, then rebake import + PIE).
+- Slot 2: Gameplay Agent (fingerpost Blender, then editor pass).
+- Queue: Cave (one pass on the final heightfield) → Beach (runs its Blender jobs one at a time). Integration preempts when it merges or packages.

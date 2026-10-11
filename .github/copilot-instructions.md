@@ -74,13 +74,17 @@ replacement or eligible archival. Model changes within a session are separate ac
 See `docs\handoff\agent-lifecycle.md`; preserve the existing old-agent and live-release archival protections.
 
 **No cap on concurrent implementers** (Jenny, 2026-10-04: the old three-implementer cap is dropped).
-Run as many lanes as the assigned work needs. The **machine limits still apply**: at most 2 Unreal
-processes (editors, packaged games, commandlets), one of them reserved for Integration, so lanes share
-one editor turn through the orchestrator. Watch RAM and pagefile: an editor plus Jenny's running game
+Run as many lanes as the assigned work needs. The **machine limits still apply** (Jenny,
+2026-10-10): **at most 2 heavy jobs at once across all agent sessions**. A heavy job is any Blender
+process, Unreal editor or commandlet, C++/UBT/native-test build, or UAT package (one lane running
+several Blender processes in parallel uses several). The orchestrator grants the two slots; a lane
+holding a slot runs one heavy process at a time, tells the orchestrator when it releases it, and
+does non-heavy work (code, scripts, docs) without a slot. Integration gets a slot first when it
+merges, builds or packages. Watch RAM and pagefile: an editor plus Jenny's running game
 has exhausted memory and crashed both. When Jenny is playing, lanes avoid heavy editor or cook work
 and never use `-Force`. Keep builds and compiles bounded (`-WaitMutex`; one UAT package at a time,
 Integration only). An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
-the editor by sleeping or polling.
+a slot by sleeping or polling.
 
 ## Loops
 
