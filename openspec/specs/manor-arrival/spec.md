@@ -10,8 +10,8 @@ family and estate.
 The New game flow SHALL include appearance selection and a Names step for first name, family surname and estate name. Each name SHALL be non-empty and at most 24 characters. The names SHALL be saved and shown in the save list.
 
 #### Scenario: Name a new game
-- **WHEN** the player enters "Clara", "Pendarves" and "Trevennor" and begins
-- **THEN** the save list later shows "Clara Pendarves — Trevennor", and the boundary toast names Trevennor
+- **WHEN** the player enters "Clara", "Ashworth" and "Larkhollow" and begins
+- **THEN** the save list later shows "Clara Ashworth – Larkhollow", and the boundary toast names Larkhollow
 
 #### Scenario: Controller-only setup
 - **WHEN** the player completes the New game flow using only a controller
@@ -72,7 +72,7 @@ Player-facing people, business and estate names SHALL NOT reference Poldark.
 
 #### Scenario: Store and clerk
 - **WHEN** she visits the general store
-- **THEN** it is Trethewey's and the clerk is Mr. Josiah Trethewey
+- **THEN** it is Aldridge's and the clerk is Mr. Callum Aldridge
 
 ### Requirement: Every cooked meal grants Well fed
 Eating any Meal on the estate SHALL start Well fed for the standard duration.

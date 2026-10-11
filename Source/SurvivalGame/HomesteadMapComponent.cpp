@@ -47,7 +47,7 @@ FString UHomesteadMapComponent::EstateName(const AHomesteadController& Controlle
 {
     // The name she chose in the Names step; the placeholder until she has.
     const std::string& Name = Controller.State().estateName;
-    return Name.empty() ? FString(TEXT("Trevennor")) : FString(UTF8_TO_TCHAR(Name.c_str()));
+    return Name.empty() ? FString(TEXT("Larkhollow")) : FString(UTF8_TO_TCHAR(Name.c_str()));
 }
 
 FBox2D UHomesteadMapComponent::MinimapBox(float ViewWidth, float ViewHeight)
@@ -174,6 +174,8 @@ void UHomesteadMapComponent::RefreshModel()
             if (Index > 0 && FChar::IsUpper(Name[Index]) && FChar::IsLower(Name[Index - 1])) Spaced += TEXT(' ');
             Spaced += Name[Index] == TEXT('_') ? TEXT(' ') : Name[Index];
         }
+        // The id stays "ForSale.CarnWood" (saves, layout); the name she reads is neutral.
+        if (Spaced == TEXT("Carn Wood")) Spaced = TEXT("Hollin Wood");
         Shape.Label = Parcel.id == Homestead::Anchor::EstateBoundary ? Next->EstateName : Spaced;
         Next->Parcels.Add(MoveTemp(Shape));
     }
@@ -182,7 +184,7 @@ void UHomesteadMapComponent::RefreshModel()
         {Homestead::Anchor::CoveBeach, TEXT("The cove"), TEXT("Your own little beach where the river meets the sea."), EHomesteadMapGlyph::Cove},
         {Homestead::Anchor::MillSite, TEXT("Mill site"), TEXT("The old water mill's footings, by the ford."), EHomesteadMapGlyph::Mill},
         {Homestead::Anchor::EstateGateway, TEXT("Estate gateway"), TEXT("Where the estate drive meets the old road."), EHomesteadMapGlyph::Gateway},
-        {Homestead::Anchor::TownSquare, TEXT("Town"), TEXT("The village in the woods above the estuary."), EHomesteadMapGlyph::Town},
+        {Homestead::Anchor::TownSquare, TEXT("The village"), TEXT("The village in the woods above the estuary."), EHomesteadMapGlyph::Town},
         {Homestead::Anchor::GeneralStoreDoor, TEXT("General store"), TEXT("Tools, seed and supplies; it buys your goods too."), EHomesteadMapGlyph::Store},
     };
     // The manor first: its footprint's middle, else where she wakes.

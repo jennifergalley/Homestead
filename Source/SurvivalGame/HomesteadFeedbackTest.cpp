@@ -118,7 +118,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     // or prevent hint learning just because the retained notice is a refusal.
     for (const bool bError : {false, true})
     {
-        const FString Message = bError ? TEXT("Too tired") : TEXT("Fast Travel Destination Unlocked: Lake");
+        const FString Message = bError ? TEXT("Too tired") : TEXT("Fast travel unlocked: the lake");
         const auto NoticeSerial = MakeShared<uint32>(0);
         const auto HintCount = MakeShared<int32>(0);
         const FString Hint = bError ? TEXT("HudQuietErrorFixture") : TEXT("HudQuietSuccessFixture");

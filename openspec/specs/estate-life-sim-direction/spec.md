@@ -23,7 +23,7 @@ money or item penalty, lost time, lower output, or a reputation dip.
 The game SHALL track energy as the heroine's only personal meter and SHALL NOT track hunger, warmth or cold. Eating SHALL restore energy. Meals SHALL restore more than snacks and SHALL grant a temporary Well fed benefit that reduces work costs. No meter SHALL cause fainting, damage or failure.
 
 #### Scenario: Meal versus snack
-- **WHEN** the heroine eats a Cornish pasty, and at another time eats a loaf of bread
+- **WHEN** the heroine eats a pasty, and at another time eats a loaf of bread
 - **THEN** the pasty restores more energy and grants Well fed, and the bread restores a little energy without Well fed
 
 #### Scenario: A day without eating
@@ -118,4 +118,4 @@ The map SHALL show faint dashed outlines with period names for neighbouring esta
 
 #### Scenario: Reading the map
 - **WHEN** Jenny opens the map
-- **THEN** she sees Penhallow, Tregarthen and Polwhele, the village green, allotments and Chapel sands outlined and named, with no neighbour gameplay
+- **THEN** she sees Ashgrove, Brackenburn and Thornley, the village green, allotments and Gull Sands outlined and named, with no neighbour gameplay

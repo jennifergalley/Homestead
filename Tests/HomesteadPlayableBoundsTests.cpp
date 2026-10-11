@@ -59,19 +59,19 @@ void ReservedLandIsNotAParcel()
     const auto parcels = ParcelsFromLayout(ReservedLayout());
     Check(parcels.size() == 2, "only the home estate and the for-sale wood are parcels");
     Check(parcels.size() == 2 && parcels[0].owned && parcels[1].forSale && parcels[1].id == "ForSale.CarnWood",
-        "home owned, Carn Wood for sale");
+        "home owned, Hollin Wood for sale");
 }
 
 void ReservedLandNames()
 {
     struct Expected { const char* id; const char* label; bool faintest; };
     const Expected expected[] = {
-        {"Neighbour.Penhallow", "Penhallow", false},
-        {"Neighbour.Tregarthen", "Tregarthen", false},
-        {"Neighbour.Polwhele", "Polwhele", false},
+        {"Neighbour.Penhallow", "Ashgrove", false},
+        {"Neighbour.Tregarthen", "Brackenburn", false},
+        {"Neighbour.Polwhele", "Thornley", false},
         {"Common.VillageGreen", "the village green", false},
         {"Common.Allotments", "allotments", false},
-        {"Common.ChapelSands", "Chapel sands", false},
+        {"Common.ChapelSands", "Gull Sands", false},
         {"Common.VillageGrowth", "", true},
         {"Common.Unnamed", "", false},
     };
@@ -139,7 +139,7 @@ void RoadEndRefusalIsRateLimited()
     Check(RoadEndRefusalDue(5.0 + RoadEndRefusalCooldownSeconds, 5.0), "again after the cooldown");
     Check(RoadEndRefusalDue(1.0, 5.0), "a clock that went back (a new world) resets it");
     const std::string message = RoadEndRefusalMessage;
-    Check(message == "The road to Penvose \xE2\x80\x93 another day.", "the agreed words, with an en dash");
+    Check(message == "The road to Marlbury \xE2\x80\x93 another day.", "the agreed words, with an en dash");
     Check(message.find("Truro") == std::string::npos, "no real town");
 }
 }

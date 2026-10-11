@@ -21,7 +21,7 @@ struct TravelPlace
 };
 constexpr std::array<TravelPlace, TravelDestinationCount> TravelPlaces{{
     {Anchor::StandingRoomSpawn, "The manor", "the manor", TravelArrivedCm},
-    {Anchor::TownSquare, "Town", "town", TravelTownReachCm},
+    {Anchor::TownSquare, "The village", "the village", TravelTownReachCm},
     {Anchor::MineEntrance, "Mine ruin", "the mine ruin", 1500.0},
     {Anchor::CoveBeach, "The cove", "the cove", 2000.0},
     {Anchor::MillSite, "Mill site", "the mill site", 1500.0},
@@ -83,7 +83,7 @@ Result Simulation::DiscoverTravel(TravelDestination destination, Point player)
     if (!TravelVisitNear(player, destination, Layout())) return TravelBad("Visit this location first.", revision_);
     const int id = static_cast<int>(destination);
     state_.discoveredTravel.insert(std::lower_bound(state_.discoveredTravel.begin(), state_.discoveredTravel.end(), id), id);
-    return TravelGood(std::string("Fast Travel Destination Unlocked: ") + TravelDestinationLabel(destination), ++revision_);
+    return TravelGood(std::string("Fast travel unlocked: ") + TravelDestinationName(destination), ++revision_);
 }
 
 void TravelDiscovery::WriteSaveSection(std::ostream& output, const State& state)
@@ -156,14 +156,14 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
         if (const auto* square = layout.FindLandmark(Anchor::TownSquare);
             square && std::hypot(from.x - square->position.x, from.y - square->position.y) <= TravelTownReachCm)
         {
-            plan.error = "You're already in town.";
+            plan.error = "You're already in the village.";
             return plan;
         }
     }
     if (roadDestination && (std::hypot(from.x - stop->position.x, from.y - stop->position.y) < TravelArrivedCm
         || (stop->hasArrival && std::hypot(from.x - stop->arrival.x, from.y - stop->arrival.y) < TravelArrivedCm)))
     {
-        plan.error = destination == TravelDestination::Manor ? "You're already at the manor." : "You're already in town.";
+        plan.error = destination == TravelDestination::Manor ? "You're already at the manor." : "You're already in the village.";
         return plan;
     }
     if (roadDestination)
@@ -285,8 +285,8 @@ const PublicRoadSign* RoadSignNear(Point at, double reachCm)
 std::string RoadSignLabel(const std::string& signName)
 {
     const auto destinations = RoadSignDestinations(signName);
-    if (destinations.size() == 2) return "Town / Manor";
-    if (destinations.size() == 1) return destinations[0] == TravelDestination::Town ? "To town" : "To the manor";
+    if (destinations.size() == 2) return "Village / Manor";
+    if (destinations.size() == 1) return destinations[0] == TravelDestination::Town ? "To the village" : "To the manor";
     return {};
 }
 }

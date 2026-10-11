@@ -328,7 +328,7 @@ public:
     // The estate title card over the first view; it never blocks input.
     void ShowArrival();
     bool IsArrivalShowing() const { return ArrivalCard.IsValid(); }
-    // "Eleanor Cavendish — Trevennor, Spring 1" for the current game (empty for unnamed woodland).
+    // "Eleanor Cavendish – Larkhollow, Spring 1" for the current game (empty for unnamed woodland).
     FString CurrentSaveLabel() const;
     // Console playtest aid: make one garment from freshly granted materials and put it on
     // (key or name, e.g. HomesteadWear fur-coat).

@@ -1,4 +1,4 @@
-// AHomesteadShopkeeper's MetaHuman: Mr. Trethewey's body, face, grooms, Blender-fitted period
+// AHomesteadShopkeeper's MetaHuman: Mr. Aldridge's body, face, grooms, Blender-fitted period
 // garments, the pencil behind his ear, and the LOD sync that keeps them together. Mirrors the
 // heroine's stack (HomesteadCharacterAppearance.cpp) at NPC cost: nothing animates off screen.
 #include "HomesteadShopkeeper.h"

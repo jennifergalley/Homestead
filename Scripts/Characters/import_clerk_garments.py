@@ -1,4 +1,4 @@
-"""Import Mr. Trethewey's Blender-fitted garments and pencil onto the clerk MetaHuman.
+"""Import Mr. Aldridge's Blender-fitted garments and pencil onto the clerk MetaHuman.
 
 Run in the editor (MCP run_python):
 

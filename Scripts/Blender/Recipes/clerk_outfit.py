@@ -1,4 +1,4 @@
-"""Shopkeeper's outfit for Mr. Josiah Trethewey (the Homestead clerk MetaHuman): linen shirt with
+"""Shopkeeper's outfit for Mr. Callum Aldridge (the Homestead clerk MetaHuman): linen shirt with
 rolled sleeves, wool waistcoat, wool trousers, canvas bib apron, madder neckerchief, leather ankle
 boots, plus a carpenter's pencil prop and its behind-the-ear fit.
 

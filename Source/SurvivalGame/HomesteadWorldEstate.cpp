@@ -51,7 +51,7 @@ constexpr FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a"), false, 4500, false, 0, 0},
     {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b"), false, 4500, false, 0, 0},
     {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_a.SM_Shrub04_a"), false, 12000, false, 0, 0},
-    // Mature Cornish woodland (Blender recipes oak.py, beech.py, sycamore.py): the pivot is the bottom of a
+    // Mature English woodland (Blender recipes oak.py, beech.py, sycamore.py): the pivot is the bottom of a
     // 30 cm skirt under the flare, so RimLift 30 puts the ground line 4 cm under the lowest root sample.
     {TEXT("/Game/SurvivalGame/Environment/Trees/Oak/SM_Oak.SM_Oak"), true, 0, true, 30, 60},
     {TEXT("/Game/SurvivalGame/Environment/Trees/Beech/SM_Beech.SM_Beech"), true, 0, true, 30, 50},

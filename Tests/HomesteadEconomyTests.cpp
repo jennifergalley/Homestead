@@ -782,8 +782,8 @@ void NoWalkToTownFromTown()
         CHECK(Refused(store.customer, "You're already at the general store."));
         CHECK(Refused(door, "You're already at the general store."));
     }
-    // About the square: already in town.
-    CHECK(Refused(square, "You're already in town."));
+    // About the square: already in the village.
+    CHECK(Refused(square, "You're already in the village."));
     // A little way off down the street she can still walk to the road's end in town, briefly.
     const TravelPlan street = PlanTravel(sim.GetState(), {square.x, square.y - 6000.0}, TravelDestination::Town, layout);
     CHECK(street.ok && street.gameHours < 1.0);
@@ -804,8 +804,8 @@ void RoadSignsOfferTheWalk()
     CHECK(RoadSignDestinations("ManorRoadSign") == std::vector<TravelDestination>{TravelDestination::Town});
     CHECK(RoadSignDestinations("TownRoadSign") == std::vector<TravelDestination>{TravelDestination::Manor});
     CHECK(RoadSignDestinations("GatewayRoadSign").size() == 2 && RoadSignDestinations("Milestone").empty());
-    CHECK(RoadSignLabel("ManorRoadSign") == "To town" && RoadSignLabel("TownRoadSign") == "To the manor"
-        && RoadSignLabel("GatewayRoadSign") == "Town / Manor");
+    CHECK(RoadSignLabel("ManorRoadSign") == "To the village" && RoadSignLabel("TownRoadSign") == "To the manor"
+        && RoadSignLabel("GatewayRoadSign") == "Village / Manor");
     Store store = OpenStore();
     Simulation& sim = store.sim;
     sim.SkipToHourOfDay(9.0);

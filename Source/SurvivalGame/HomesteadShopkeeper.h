@@ -28,8 +28,8 @@ public:
     // Hidden outside opening hours.
     void SetOnDuty(bool bOnDuty);
     bool IsOnDuty() const { return bDuty; }
-    static const TCHAR* DisplayName() { return TEXT("Mr. Trethewey"); }
-    static const TCHAR* FullName() { return TEXT("Mr. Josiah Trethewey"); }
+    static const TCHAR* DisplayName() { return TEXT("Mr. Aldridge"); }
+    static const TCHAR* FullName() { return TEXT("Mr. Callum Aldridge"); }
     bool IsStandIn() const { return !bMetaHuman; }
 
 private:
