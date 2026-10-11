@@ -1,6 +1,6 @@
 {
   "buildId": "20261010-next-02",
-  "authorizedAt": "2026-10-10T19:20:00.000Z",
+  "authorizedAt": "2026-10-11T02:20:00Z",
   "allocationPolicy": "Covers the Map feedback build (round 4's third lane set: Map, Beach, Gameplay, Names, Lighting, Cave, their Balance review, and Integration's merge/review/package/test/promote/closure) for build 20261010-next-02, allocated from the 2026-10-10 19:20 kickoff. Excludes 20261010-next-01 (map-shrink stage 2 and its own Balance/Integration segments), already allocated and reported separately.",
   "limits": [
     "FINAL: batch cleared (Names, Lighting, Map, Gameplay, Cave, Beach all [ready] and merged); segments below carry final commit SHAs. session_store_sql returned no per-call usage rows for these local worktree sessions (cloud query: 0 rows on exact session IDs; local source: session_usage table absent), so the paired usage snapshot has events: [] and the generated report (reports\\20261010-next-02.json) is genuinely status \"incomplete\" with zero recordedNanoAiu and no estimated figures of any kind; totals and per-segment costs for this build are unavailable, not approximated.",
@@ -14,9 +14,11 @@
       "sessionId": "94e0bd8e-ab39-402c-8aa3-0b9365489bc9",
       "projectSessionId": "94e0bd8e-ab39-402c-8aa3-0b9365489bc9",
       "task": "map-feedback-build",
-      "tasks": ["map-feedback-build"],
+      "tasks": [
+        "map-feedback-build"
+      ],
       "category": "implementation",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-opus-5.5",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -27,9 +29,11 @@
       "sessionId": "8c44fafc-9777-4063-86f9-071f7722293f",
       "projectSessionId": "8c44fafc-9777-4063-86f9-071f7722293f",
       "task": "map-feedback-build",
-      "tasks": ["map-feedback-build"],
+      "tasks": [
+        "map-feedback-build"
+      ],
       "category": "implementation",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-opus-5.5",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -40,9 +44,11 @@
       "sessionId": "5b555e6e-49a2-4592-9abb-1a857ebd5a67",
       "projectSessionId": "5b555e6e-49a2-4592-9abb-1a857ebd5a67",
       "task": "map-feedback-build",
-      "tasks": ["map-feedback-build"],
+      "tasks": [
+        "map-feedback-build"
+      ],
       "category": "implementation",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-sonnet-5.5",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -53,9 +59,11 @@
       "sessionId": "72b7d774-d285-4f3d-93a5-d62f61927853",
       "projectSessionId": "72b7d774-d285-4f3d-93a5-d62f61927853",
       "task": "map-feedback-build",
-      "tasks": ["map-feedback-build"],
+      "tasks": [
+        "map-feedback-build"
+      ],
       "category": "implementation",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-sonnet-5.5",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -66,9 +74,11 @@
       "sessionId": "0816ef4d-8f71-4df4-bb26-62e659d21fdb",
       "projectSessionId": "0816ef4d-8f71-4df4-bb26-62e659d21fdb",
       "task": "map-feedback-build",
-      "tasks": ["map-feedback-build"],
+      "tasks": [
+        "map-feedback-build"
+      ],
       "category": "implementation",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-sonnet-5.5",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -79,9 +89,11 @@
       "sessionId": "d6ef3d58-ed8a-4297-9f27-e3a51528c59d",
       "projectSessionId": "d6ef3d58-ed8a-4297-9f27-e3a51528c59d",
       "task": "map-feedback-build",
-      "tasks": ["map-feedback-build"],
+      "tasks": [
+        "map-feedback-build"
+      ],
       "category": "implementation",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-opus-5.5",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -92,9 +104,11 @@
       "sessionId": "ceb1109b-f156-451c-b890-ca91fa92f1c1",
       "projectSessionId": "ceb1109b-f156-451c-b890-ca91fa92f1c1",
       "task": "balance-docs-map-feedback",
-      "tasks": ["balance-docs-map-feedback"],
+      "tasks": [
+        "balance-docs-map-feedback"
+      ],
       "category": "docs",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-opus-5.5",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -105,14 +119,31 @@
       "sessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
       "projectSessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
       "task": "integration-round4-map-feedback",
-      "tasks": ["integration-round4-map-feedback"],
+      "tasks": [
+        "integration-round4-map-feedback"
+      ],
       "category": "integration",
-      "since": "2026-10-10T19:20:00.000Z",
+      "since": "2026-10-11T02:20:00Z",
       "model": "claude-sonnet-5",
       "reasoningEffort": "medium",
       "launchContextTier": "default",
       "contextTier": null,
       "boundaryEvidence": "Integration Agent session (reserved editor slot). Merged the batch onto integration-batch in order Names 8bfc59aa4 -> Lighting e9815ce4a -> Cave a47b099c6 -> Gameplay 5152f9f58 -> Beach aff198307 (Map e0405d8f4 already on main); resolved binary/LFS conflicts by taking Map's side for EstateScenery.bin (rerunning beach_detritus.py for Beach's ~3,550 decor records, kinds 49-55) and for the 135 __ExternalActors__ landscape files (rerunning build_landscape_holes.py / PaintEstateLandscapeHoles for Cave's mouth hole); Opus 5 risky save-compat review passed; editor module rebuild plus native suite 28/28; Development package built and verified (~5.44 GB); EstateSmoke and ToolRepeat packaged suites passed; FullLoop root-caused to a Woodland route selector issue (HomesteadFullLoopTest.cpp 490-499, not player-facing), substituted with an F5/F9 NativeSaveRetry proof that passed against both the worktree package and the installed copy; installed to E:\\Repos\\SurvivalGame\\Build\\Windows with Jenny's saves/config preserved, shortcut retargeted; pushed integration-batch to origin/main (6f69ebb7c..ecb3ba939); full delivery closure (builds.md card, this accounting report, FullLoop OpenSpec change, OpenSpec archives, planner slots, docs liaison write-ups). Mixed models across calls; segment label reflects the dominant model (claude-sonnet-5 medium), actual per-call model/effort preserved in exported records."
+    },
+    {
+      "sessionId": "cfe8292c-5320-4ab3-a942-1b64c2cc956b",
+      "projectSessionId": "cfe8292c-5320-4ab3-a942-1b64c2cc956b",
+      "task": "integration-round4-map-feedback",
+      "tasks": [
+        "integration-round4-map-feedback"
+      ],
+      "category": "orchestration",
+      "since": "2026-10-11T02:20:00Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Orchestrator Agent: planned and split Jenny's map feedback into six lanes, granted the two heavy-job slots overnight, reviewed and approved review media on Jenny's behalf, routed fixes, and corrected delivery closure (build card, planner)."
     }
   ]
 }

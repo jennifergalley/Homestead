@@ -55,7 +55,7 @@
     "backlog:jenny-mv3q32oa-bchhld"
   ],
   "slots": {
-    "backlog:jenny-mv1jsi38-balcu1": "after-next"
+    "backlog:jenny-mv1jsi38-balcu1": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -157,5 +157,5 @@
     "backlog:jenny-mv37dekn-bchfir",
     "backlog:jenny-mv37umtc-mnrbry"
   ],
-  "updated": "2026-10-11T16:39:12.000Z"
+  "updated": "2026-10-11T17:36:31.201Z"
 }

@@ -228,7 +228,7 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 ## Next build
 
-- A coast of mixed cliffs and gentle slopes, with a gentler path to the cove.
+- Currants easier to spot from a distance (Balance card, promoted from Build after next).
 - Map-edge cliffs, no inescapable drops, a smooth river mouth, and fixed cliff, grass, path, stair-edge, beach-corner and boulder artifacts.
 - A sea cave in the beach cliffs with a pool inside.
 - Beach shells, stones, driftwood and mussels to gather daily, cook and sell.
