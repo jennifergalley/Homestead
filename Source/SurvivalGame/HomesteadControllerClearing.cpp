@@ -423,6 +423,11 @@ void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)
         return;
     }
     if (SwingNode == INDEX_NONE) return;
+    if (MineSwingsNeeded() > 0)
+    {
+        LandMineSwing(bMoreComing);
+        return;
+    }
     ++SwingsLanded;
     // Blows count from where she actually stood when they landed (a billhook swing may walk her up first).
     SwingFrom = FVector2D(Position.x, Position.y);

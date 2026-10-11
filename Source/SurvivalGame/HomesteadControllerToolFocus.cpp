@@ -16,6 +16,21 @@ constexpr double FocusReachCm = 280.0;
 void AHomesteadController::FocusHeldToolTarget(Homestead::Point Position)
 {
     if (Focus != EFocus::None && Focus != EFocus::Resource) return;
+    // Down in the tunnels the pickaxe names the node she's aimed at, and nothing on the surface.
+    if (IsUnderground())
+    {
+        if (SelectedCarriedTool() == Homestead::Item::Pickaxe)
+        {
+            const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
+            const int Aimed = Sim.FindAimedMine(Position, GetPawn() ? GetPawn()->GetActorLocation().Z : 0.0, {Forward.X, Forward.Y});
+            if (Aimed != -1)
+            {
+                Focus = EFocus::Resource;
+                FocusId = Aimed;
+            }
+        }
+        return;
+    }
     // With a clearing tool in hand, what she's aimed at is what the prompt names and the swing strikes
     // (Simulation::HeldToolFocus): nearer overgrowth behind her or to the side doesn't keep the focus,
     // even when this tool clears it too. A forageable she's standing at keeps it.

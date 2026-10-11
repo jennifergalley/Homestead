@@ -43,6 +43,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     UpdateClearPops(DeltaSeconds);
     UpdateSoilGrounding(DeltaSeconds);
     if (Weather) Weather->TickWeather(DeltaSeconds);
+    TickMine(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {
         FHomesteadChunkBaselineBuild Completed = ChunkBaselineBuild->Get();

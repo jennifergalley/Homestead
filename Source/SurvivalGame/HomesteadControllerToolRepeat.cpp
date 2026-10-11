@@ -1,6 +1,7 @@
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadToolRepeat.h"
 
 #include "Components/SkeletalMeshComponent.h"
@@ -20,6 +21,21 @@ bool AHomesteadController::ContinueHeldStrike(int32 Node, Homestead::Item Tool)
     const auto Position = PlayerPoint();
     const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
     const Homestead::Point Facing{Forward.X, Forward.Y};
+    if (Homestead::Mine::FindNode(Node))
+    {
+        // Holding the button keeps swinging at the same node until it gives, she lowers the pick or it's refused.
+        const bool bHeld = IsToolButtonHeld() && SelectedHotbarSlot >= 0 && SelectedHotbarSlot < Homestead::PackRowSize
+            && HotbarItem(SelectedHotbarSlot) == Tool && Sim.Count(Tool) > 0 && ShouldShowHotbar();
+        if (!bHeld || !IsUnderground() || Sim.MineDepleted(Node)
+            || Sim.FindAimedMine(Position, GetPawn()->GetActorLocation().Z, Facing) != Node)
+            return false;
+        if (const auto Check = Sim.CheckMine(Node, Tool, Position, GetPawn()->GetActorLocation().Z); !Check.ok)
+        {
+            Notify(Check);
+            return false;
+        }
+        return true;
+    }
     Homestead::ToolRepeat::Held Now;
     Now.held = IsToolButtonHeld();
     const bool bSelected = SelectedHotbarSlot >= 0 && SelectedHotbarSlot < Homestead::PackRowSize
@@ -60,5 +76,6 @@ void AHomesteadController::UpdateHeldRepeat()
     HeldRepeatNode = INDEX_NONE;
     // Checked again now: letting go during the last blow's recovery ends it there.
     if (!ContinueHeldStrike(Node, Tool)) return;
-    SwingAtOvergrowth(Tool);
+    if (Homestead::Mine::FindNode(Node)) SwingAtMine(Tool);
+    else SwingAtOvergrowth(Tool);
 }

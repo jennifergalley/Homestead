@@ -5,6 +5,7 @@
 #include "HomesteadEstateTerrain.h"
 #include "Simulation/HomesteadEstate.h"
 #include "Simulation/HomesteadEstatePublicRoad.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadSeaCave.h"
 
 #include "Engine/World.h"
@@ -121,7 +122,9 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
         && (bPendingGroundSnap || Waited < HomesteadSettleTuning::BridgeSettleHoldSeconds)) bFound = false;
     const bool bInSeaCave = bEstateMap && Homestead::InSeaCave(Homestead::EstateSeaCave(), {Target.X, Target.Y}, Target.Z, Ground);
     // In the sea cave the landscape is overhead: its floor is the cave's own (always loaded) rock.
-    const bool bLandscapeReady = !bEstateMap || bInSeaCave
+    // Underground the landscape is far overhead: the tunnels' own collision is the floor, and the settle waits for it.
+    const bool bUnderground = bEstateMap && Homestead::Mine::IsUnderground({Target.X, Target.Y}, Target.Z);
+    const bool bLandscapeReady = !bEstateMap || bInSeaCave || bUnderground
         || HomesteadGroundSnap::HasLandscapeCollision(GetWorld(), Target, End, Avatar);
     if ((!bFound || !bLandscapeReady) && Waited < HoldLimitSeconds)
     {
@@ -148,7 +151,9 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
             false, nullptr, ETeleportType::TeleportPhysics);
         return false;
     }
-    const float Floor = bFound ? Hit.ImpactPoint.Z : bOnBridge ? static_cast<float>(Deck.deckZ) : Ground;
+    // Never the surface terrain underground: if the tunnel floor never loads, she stays where she was put.
+    const float Floor = bFound ? Hit.ImpactPoint.Z : bOnBridge ? static_cast<float>(Deck.deckZ)
+        : bUnderground ? Target.Z - HalfHeight - 2.0f : Ground;
     if (!bFound || !bLandscapeReady)
     {
         if (bPendingGroundSnap && bEstateMap) return false;

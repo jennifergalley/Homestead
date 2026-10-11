@@ -28,6 +28,10 @@ constexpr double UndergroundCeilingAboveFloorCm = 1500.0; // Above this over the
 constexpr double FootprintMarginCm = 600.0;       // Margin around the walkable floors that still counts as the mine.
 constexpr double StuckSlackCm = 220.0;            // How far past a floor's edge before the stuck rule moves her.
 constexpr double StuckBelowFloorCm = 300.0;       // Below the lowest floor by this much she has fallen out of the level.
+// Too tired to swing even the cheapest node (a worn-pickaxe coal seam costs 2.0 on top of the Reserve): she is
+// "out of energy" for the mine, and wakes at the house (WakeAtMine).
+constexpr double ExhaustedBelow = Exertion::Reserve + 2.0;
+inline bool IsExhausted(double energy) { return energy < ExhaustedBelow; }
 
 enum class NodeKind { Rock, Coal, Copper, Gem };
 

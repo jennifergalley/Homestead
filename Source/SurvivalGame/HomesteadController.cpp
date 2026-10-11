@@ -334,7 +334,11 @@ void AHomesteadController::Tick(float DeltaSeconds)
         {
             // Wait (in place, movement off) for World Partition to stream in the ground under the spawn,
             // then stand her on it. Standalone and packaged games take about a minute to stream it.
-            PendingLocation.Z = bFreshTerrainSpawn ? Ground + 150.0f : FMath::Max(PendingLocation.Z, LoadGround + 100.0f);
+            // A save made underground keeps its own depth: lifting it to "above the terrain" would put her on the surface.
+            const bool bLoadedUnderground = !bFreshTerrainSpawn
+                && Homestead::Mine::IsUnderground({PendingLocation.X, PendingLocation.Y}, PendingLocation.Z);
+            PendingLocation.Z = bFreshTerrainSpawn ? Ground + 150.0f
+                : bLoadedUnderground ? PendingLocation.Z : FMath::Max(PendingLocation.Z, LoadGround + 100.0f);
             if (!SettleOnGround(PendingLocation, EstateSpawnWait, DeltaSeconds, 180.0f,
                 bFreshTerrainSpawn ? TEXT("new game") : TEXT("load"))) return;
         }
@@ -404,7 +408,9 @@ void AHomesteadController::Tick(float DeltaSeconds)
             return;
         }
         const float Surface = GroundHeight(Position.X, Position.Y);
-        if (bEstateMap && Surface < -70.0f)
+        // The tunnels run under the terrain: its water, floor and recovery rules don't apply down there.
+        const bool bInMine = bEstateMap && Homestead::Mine::IsUnderground({Position.X, Position.Y}, Position.Z);
+        if (bEstateMap && !bInMine && Surface < -70.0f)
         {
             // No swimming in round 1: she wades to about knee depth and no further.
             if (auto* Avatar = Cast<AHomesteadCharacter>(ControlledPawn))
@@ -413,7 +419,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
             if (ToastRemaining <= 0) Notify(TEXT("The water's too deep to wade any further."));
             return;
         }
-        if (Position.Z < Surface - 200
+        if (Position.Z < Surface - 200 && !bInMine
             && !(bEstateMap && Homestead::InSeaCave(Homestead::EstateSeaCave(), {Position.X, Position.Y}, Position.Z, Surface)))
         {
             ++WorldRecoveries;
@@ -446,6 +452,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
             RefreshRemaining = 0;
         }
     }
+    TickMine(DeltaSeconds);
     TickStores(DeltaSeconds);
     TickFishing(DeltaSeconds);
     TickRoadSigns();

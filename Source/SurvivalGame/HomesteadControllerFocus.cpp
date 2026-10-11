@@ -9,6 +9,7 @@
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadItems.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadTreeFelling.h"
 
@@ -43,10 +44,21 @@ void AHomesteadController::UpdateFocus()
             FocusTarget = Target; bHasFocusTarget = true;
         }
     };
+    // The tunnels lie straight under the surface: a mine node answers only to someone down there, and
+    // the surface nodes (and the stone pile upstairs) only to someone up here.
+    const bool bUnderground = IsUnderground();
     for (const auto& Node : State().resources)
-        if (!Node.cleared) Consider(EFocus::Resource, Node.id, Node.position);
+        if (!Node.cleared && (Homestead::Mine::IsMineNodeKind(Node.kind) == bUnderground))
+            Consider(EFocus::Resource, Node.id, Node.position);
+    ConsiderTrapdoorFocus(Consider);
     for (const auto& Drop : State().worldDrops)
         Consider(EFocus::Drop, Drop.id, Drop.position);
+    if (bUnderground)
+    {
+        // Nothing grows, is built or is sold down here: only the nodes, the ladder and what she's dropped.
+        FocusHeldToolTarget(Position);
+        return;
+    }
     for (const auto& Plot : State().plots)
         Consider(EFocus::Plot, Plot.id, Homestead::PlotCenter(Plot));
     // In a garden of adjoining squares the nearest centre is ambiguous (and a weed at her feet can
@@ -197,6 +209,8 @@ FString AHomesteadController::FocusTitle() const
                         Status = TEXT("  (") + Text(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str()).ToLower() + TEXT(")");
                 }
                 if (Node.kind == Homestead::ResourceKind::DeerRemains) return TEXT("Deer bones");
+                if (Homestead::Mine::IsMineNodeKind(Node.kind))
+                    return Text(Homestead::ResourceName(Node.kind)) + (Sim.MineDepleted(Node.id) ? TEXT("  (bare for now)") : TEXT(""));
                 if (Node.kind == Homestead::ResourceKind::BeachCampfire && Homestead::Beach::CampfireLit(Node, State().hour))
                     return TEXT("Beach campfire (burning)");
                 return Text(Homestead::ResourceName(Node.kind)) + Status;
@@ -227,6 +241,7 @@ FString AHomesteadController::FocusTitle() const
             }
         break;
     case EFocus::Fire: return TEXT("Cookfire");
+    case EFocus::Trapdoor: return IsUnderground() ? TEXT("Ladder") : TEXT("Trapdoor");
     case EFocus::Hearth: return TEXT("Hearth");
     case EFocus::Bed: return TEXT("Bed");
     case EFocus::Chest: return ChestDisplayName(FocusId);
@@ -269,6 +284,13 @@ FString AHomesteadController::FocusActions() const
                 // A burning beach campfire cooks like a cookfire; an unlit one is lit with driftwood.
                 if (Node.kind == Homestead::ResourceKind::BeachCampfire)
                     return Homestead::Beach::CampfireLit(Node, State().hour) ? A + TEXT(" Cook") : A + TEXT(" Light the fire");
+                if (Node.kind == Homestead::ResourceKind::MinePile) return A + TEXT(" Pick up stone");
+                if (Homestead::Mine::IsMineNodeKind(Node.kind))
+                {
+                    if (Node.readyAtHour > State().hour) return FString();
+                    if (!ToolAvailable || SelectedTool != Homestead::Item::Pickaxe) return FString();
+                    return Sim.IsLampLit() ? Use + TEXT(" Mine") : FString(TEXT("Too dark to work. Light your lamp."));
+                }
                 if (Node.readyAtHour > State().hour) return FString();
                 // Trees are felled with the axe on the tool button; nothing else is offered on them.
                 if (Node.kind == Homestead::ResourceKind::ForestTree)
@@ -336,6 +358,7 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add fuel");
     case EFocus::Hearth: return A + TEXT(" Cook");
     case EFocus::Drop: return A + TEXT(" Pick up");
+    case EFocus::Trapdoor: return A + (IsUnderground() ? TEXT(" Climb up the ladder") : TEXT(" Climb down to the mine"));
     case EFocus::Bed:
         if (!bBedFocusActionable) return FString();
         if (const auto Offer = BedSleepOffer())
