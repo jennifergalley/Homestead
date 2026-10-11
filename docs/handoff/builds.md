@@ -7,6 +7,49 @@ Delivery is work-driven: the planner's Next build ships as soon as its admitted 
 reviewed, then Build after next moves up. Lanes implement only what Jenny has prioritized for a planner
 slot, then go idle; they do not pick up unflagged queue items.
 
+## 2026-10-10 — 5:18 PM
+
+- Build ID: `20261010-next-01`
+- Package source SHA: `5fb269035ccbbc772d47a84e2760d0bf8ef4ccc5`
+- Status: delivered
+- Configuration: Development
+- Ships:
+- Map shrink stage 2: new coast and cove with cliff steps down to the water; the mine moved up to
+  the clifftop; the map cropped to a 1520 m square around PlayableBounds with walls at the edges;
+  the Penvose gate; roadside cottages; neighbour and commons area outlines. 50 retired placement
+  ids, 145 new ones (585000-585299).
+- Carries forward the already-admitted batch from the prior build: village street and dressing,
+  iron tool upgrades, 15 total garments (7 classic + 8 modern), the harder fishing rework, Well fed
+  text, and the Trethewey renaming.
+- Well fed's HUD chip text no longer clips past the panel's right edge (chip height 38→60,
+  word-wrapped) — fixes the cosmetic issue flagged in the prior build.
+- Admitted: Map shrink stage 2 (`1f8fdf647`, rebased), plus Balance docs
+  (`b3beabaff`, `5a9e312c2`, `9397e1fb0`, `7460bc1c2` — stage-2 travel targets, layout review, and
+  final OK, including confirming the cove heath fix `babfe357e` is included).
+- Verification: Native 26/26 (bakeVersion bump included); editor/game Development compile and
+  package succeeded via `pwsh` (Windows PowerShell 5.1 lacks the 2-arg `[IO.Path]::GetFullPath`
+  overload `Build-Game.ps1` uses — must invoke with `pwsh`, not `powershell.exe`). An Opus 5 risky
+  save-compatibility review found pre-shrink saves would otherwise pass the version gate and
+  silently drop retired-parcel purchases and out-of-bounds placements with no refund; fixed by
+  bumping `bakeVersion` 2→3 in `ProvisionalEstatePlacements()` only (the frozen placement-pin table
+  used by `HomesteadManorTests` is untouched, still `bakeVersion = 2`). Fixed 3 stale FullLoop
+  assertions uncovered while re-validating the suite against the new content: watering-toast
+  quiet-success notices (`d46b291ff`), probabilistic seed-bonus roots-harvest count
+  (`95285907f`), and crafting-row count after deferred fish recipes (`1e2f3d49b`). Packaged
+  `EstateSmoke` (59.78fps, zero errors), `ToolRepeat` (59.97fps), and `FullLoop`/F5-F9 proof
+  (54.70fps, full save/load round-trip, failure-recovery modal) all passed clean against the
+  installed Development package. `Content/` was clean post-cook (no incidental resave noise this
+  time). The installed executable SHA-256 is
+  `5C5BF4B40B86857A283922A0542A3CD4104A182A2CB5EED3E5CF825E4E212EC6`.
+- Promotion: `Homestead Estate.lnk` targets the Development `SurvivalGame.exe` at the unchanged
+  `Build\Windows` path with the existing Homestead icon; no retargeting needed. The retained
+  rollback is `E:\Repos\SurvivalGame\Build\Windows-20261010-morning` (current + one rollback; the
+  prior `Windows-20261004-evening-03` rollback was pruned per the round's disk-space finding).
+- Review: Balance OK on every `[ready]` (stage-2 travel targets, layout review, final OK, cove heath
+  fix). Jenny approved stage-2 media and native 26/26 + beach 6/6 before this delivery.
+- Known issues: none carried forward; the Well Fed HUD chip clipping from the prior build is fixed.
+- Accounting: per-build report not generated this round (see Later section).
+
 ## 2026-10-04 — 7:27 PM
 
 - Build ID: `20261004-next-01`
@@ -111,11 +154,11 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 ## Next build
 
-- Map shrink stage 2 only (isolated; Jenny 2026-10-09): keep the manor core and the town walk as they are; bring the cove and mine much closer; crop the unexplored world; outline reserved plots for neighbouring estates and communal areas (beach, park, community garden).
+- Move away from Cornish names: neutral invented names for the estate, neighbours, map places and the clerk.
 
 ## Build after next
 
-- Move away from Cornish names: neutral invented names for the estate, neighbours, map places and the clerk.
+- Unassigned; awaiting Jenny's next backlog priorities.
 
 ## 2026-10-04 — 3:13 PM
 
