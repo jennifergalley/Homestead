@@ -4655,7 +4655,8 @@ void OvergrowthTableAndPrompts()
     const auto& all = ProvisionalEstatePlacements().placements;
     for (const auto& placement : all)
     {
-        if (placement.id < 540000 || placement.id >= 550000) continue;
+        // The coast mix replaced each first bramble its paths displaced (587000+, coast_mix_placements.py).
+        if ((placement.id < 540000 || placement.id >= 550000) && (placement.id < 587000 || placement.id >= 587100)) continue;
         CHECK(placement.kind == ResourceKind::BerryBush);
         CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
         ++berries;
@@ -5170,10 +5171,10 @@ void RuinTimbersAreChoppedWithTheAxe()
         if (table[i].id == 520006) rackAt = i;
     CHECK(firstTimber > lastForage && firstTimber < rackAt && rackAt < table.size());
     // Only the lake trail's forage (582300-582399), the woodland forage and the windfall spots (583000-584199) and the
-    // compact map's top-up (585000-585299) come after the rack.
+    // compact map's top-up (585000-585299) and the coast mix's brambles (587000-587099) come after the rack.
     for (std::size_t i = rackAt + 1; i < table.size(); ++i)
         CHECK((table[i].id >= 582300 && table[i].id < 582400) || (table[i].id >= 583000 && table[i].id < 584200)
-            || (table[i].id >= 585000 && table[i].id < 585300));
+            || (table[i].id >= 585000 && table[i].id < 585300) || (table[i].id >= 587000 && table[i].id < 587100));
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     for (int id : {582012, 582013})
