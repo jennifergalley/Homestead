@@ -57,7 +57,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   to trim if that's quick), cave 13 s from the path foot, mine link on the terrace, village street
   8% average. Carded: viewpoint bench. The west cliff, bare cove-head slope, cliff striations and
   straight waterline became the Orchestrator's blocking fixes instead; re-check shots 03 and 04 in
-  the Map Agent's next [review].
+  the Map Agent's next [review]. Later: Map round 2 approved by the Orchestrator; the west-cliff
+  rock face moved into this build under the Cave Agent (re-check it in the cave's review).
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
