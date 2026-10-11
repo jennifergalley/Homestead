@@ -59,9 +59,9 @@ ID_SLOTS = {  # kind: (first id, count) - Balance 2026-10-10
 }
 # The sea cave's tideline (Cave Agent): kind -> (x m, y m), or None until it sends the settled mouth. Each takes the
 # last id of its kind's slot.
-CAVE_ROWS = {"Seashells": None, "MusselBed": None}
-CAVE_MOUTH = (-530.0, -688.0)     # Map Agent 2026-10-10 (settled mouth); decor and other finds keep CAVE_CLEAR_M from it
-CAVE_CLEAR_M = 10.0
+CAVE_ROWS = {"Seashells": (-522.0, -665.0), "MusselBed": (-539.0, -653.0)}   # Cave Agent, 2026-10-10 23:34
+CAVE_MOUTH = (-530.0, -669.0)     # Cave Agent: the mouth's floor; the rest of the scatter keeps CAVE_CLEAR_M from it
+CAVE_CLEAR_M = 7.0
 
 # Scenery kinds (EstateSceneryKinds 49-55; 56 spare).
 SHELL_DRIFT, PEBBLE_DRIFT, WRACK, DRIFT_STICKS, DRIFT_LOG, THRIFT, SEA_CAMPION = range(49, 56)
