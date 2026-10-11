@@ -62,9 +62,9 @@ Gameplay and Wardrobe both add General Store stock; they coordinate the append-o
 
 ### Heavy-job slots (2 total; orchestrator grants)
 
-- Slot 1: Map Agent (C++ build, then rebake import + PIE).
-- Slot 2: Gameplay Agent (fingerpost Blender, then editor pass).
-- Queue: Cave (one pass on the final heightfield) → Beach (runs its Blender jobs one at a time). Integration preempts when it merges or packages.
+- Slot 1 (the one Unreal editor): Map Agent (rebake + review captures), then Gameplay (~20 min), then Cave (final fit).
+- Slot 2 (Blender only while an editor runs): Beach Agent, one Blender process at a time (decor props, meals art).
+- Then Beach's placement pass in the editor. Integration takes a slot first when it builds or packages.
 
 ### Overnight delegation (Jenny, 2026-10-10 21:56)
 
