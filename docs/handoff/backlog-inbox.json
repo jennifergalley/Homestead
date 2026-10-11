@@ -636,6 +636,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T10:23:16.033Z"
+    },
+    {
+      "id": "jenny-mv3q32oa-bchhld",
+      "title": "[Balance] Beach held items read better",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (beach review, 2026-10-11). The laver handful looks like dark cloth and the held seashell is too small at camera distance: give laver a glossy purple-green frond look and enlarge the shell.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T11:11:14.506Z"
     }
   ]
 }
