@@ -6,16 +6,16 @@
   "triangle_budget": 60000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/mine_house_blockout.py",
-  "source_sha256": "0d808f45c638a68de922245cbd73f62d7e6536137907cbf3b4982c1d55ff4dda",
+  "source_sha256": "0acf0efd547f8e020cf584f820a5ef86257bba9b075f07f6027cd04f1a6c4ce6",
   "provenance": "Original project-authored blockout geometry.",
   "meshes": {
     "SM_MineHouseBlockout": {
-      "vertices": 2134,
-      "triangles": 4190,
+      "vertices": 2348,
+      "triangles": 4670,
       "size_cm": [
-        1065.0,
-        770.28,
-        2120.0
+        960.0,
+        660.28,
+        2320.0
       ],
       "materials": [
         {
@@ -116,7 +116,7 @@
         ]
       },
       "fbx": "SM_MineHouseBlockout.fbx",
-      "sha256": "1b47f79474ff8179a2e003983c1a950284a3326013619a2ad570fc709f891e17",
+      "sha256": "260c6d42e8506ad2686348a7fbd9d641791ee5b7d7889163693acc6af2b1e075",
       "preview": "preview_SM_MineHouseBlockout.png"
     }
   },

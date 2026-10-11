@@ -61,13 +61,13 @@ def build(kit):
     tx, ty = L.TRAPDOOR["centre"]
     hx, hy = L.TRAPDOOR["size"][0] / 2, L.TRAPDOOR["size"][1] / 2
     fz0, fz1 = L.FLOOR_Z - 0.10, L.FLOOR_Z
-    box("FloorW", (-L.IN_X, -L.IN_Y, fz0), (tx - hx, L.IN_Y, fz1), boards)
-    box("FloorE", (tx + hx, -L.IN_Y, fz0), (L.IN_X, L.IN_Y, fz1), boards)
+    box("FloorW", (L.IN_W, -L.IN_Y, fz0), (tx - hx, L.IN_Y, fz1), boards)
+    box("FloorE", (tx + hx, -L.IN_Y, fz0), (L.IN_E, L.IN_Y, fz1), boards)
     box("FloorS", (tx - hx, -L.IN_Y, fz0), (tx + hx, ty - hy, fz1), boards)
     box("FloorN", (tx - hx, ty + hy, fz0), (tx + hx, L.IN_Y, fz1), boards)
-    box("UpperFloor", (-L.IN_X, -L.IN_Y, L.CEILING_Z), (L.IN_X, L.IN_Y, L.UPPER_FLOOR_Z), boards)
+    box("UpperFloor", (L.IN_W, -L.IN_Y, L.CEILING_Z), (L.IN_E, L.IN_Y, L.UPPER_FLOOR_Z), boards)
     for i in range(7):
-        x = -L.IN_X + 0.6 + i * (2 * L.IN_X - 1.2) / 6
+        x = L.IN_W + 0.6 + i * (L.IN_E - L.IN_W - 1.2) / 6
         box(f"Joist{i}", (x - 0.11, -L.IN_Y, L.CEILING_Z - 0.24), (x + 0.11, L.IN_Y, L.CEILING_Z), timber)
 
     # --- the shaft under the trapdoor: a granite-lined well with a ladder, fading to black
@@ -82,26 +82,26 @@ def build(kit):
     for k in range(int((depth + L.FLOOR_Z) / 0.3)):
         z = -depth + 0.25 + k * 0.3
         box(f"Rung{k}", (tx - hx + 0.08, ty - 0.24, z - 0.02), (tx - hx + 0.12, ty + 0.24, z + 0.02), timber)
-    # Collar round the opening and the lid thrown open against its hinge (west side).
+    # Collar round the opening and the lid thrown open on its hinge (the +Y edge), leaning back.
     for name, lo, hi in (("CollarS", (tx - hx - 0.12, ty - hy - 0.12), (tx + hx + 0.12, ty - hy)),
-                         ("CollarN", (tx - hx - 0.12, ty + hy), (tx + hx + 0.12, ty + hy + 0.12)),
+                         ("CollarW", (tx - hx - 0.12, ty - hy), (tx - hx, ty + hy)),
                          ("CollarE", (tx + hx, ty - hy), (tx + hx + 0.12, ty + hy))):
         box(name, (*lo, L.FLOOR_Z), (*hi, L.FLOOR_Z + 0.05), timber)
-    lid = kit.box("TrapdoorLid", (0.08, 2 * hy + 0.1, 2 * hx + 0.1), U(tx - hx - 0.16, ty, L.FLOOR_Z + hx + 0.05),
-                  rotation=(0, -12.0, 0), material=timber)
+    lid = kit.box("TrapdoorLid", (2 * hx + 0.1, 0.08, 2 * hy + 0.1), U(tx, ty + hy + 0.16, L.FLOOR_Z + hy + 0.05),
+                  rotation=(-12.0, 0, 0), material=timber)
     parts.append(lid)
 
     # --- walls with round-arched openings cut out
     walls = {
-        "+X": ((L.OUT_X / 2 - L.WALL, -L.OUT_Y / 2, 0.0), (L.OUT_X / 2, L.OUT_Y / 2, L.EAVES_Z)),
-        "-X": ((-L.OUT_X / 2, -L.OUT_Y / 2, 0.0), (-L.OUT_X / 2 + L.WALL, L.OUT_Y / 2, L.EAVES_Z)),
-        "+Y": ((-L.OUT_X / 2 + L.WALL, L.OUT_Y / 2 - L.WALL, 0.0), (L.OUT_X / 2 - L.WALL, L.OUT_Y / 2, L.EAVES_Z)),
-        "-Y": ((-L.OUT_X / 2 + L.WALL, -L.OUT_Y / 2, 0.0), (L.OUT_X / 2 - L.WALL, -L.OUT_Y / 2 + L.WALL, L.EAVES_Z)),
+        "+X": ((L.IN_E, -L.OUT_Y / 2, 0.0), (L.OUT_X / 2, L.OUT_Y / 2, L.EAVES_Z)),
+        "-X": ((-L.OUT_X / 2, -L.OUT_Y / 2, 0.0), (L.IN_W, L.OUT_Y / 2, L.EAVES_Z)),
+        "+Y": ((L.IN_W, L.IN_Y, 0.0), (L.IN_E, L.OUT_Y / 2, L.EAVES_Z)),
+        "-Y": ((L.IN_W, -L.OUT_Y / 2, 0.0), (L.IN_E, -L.IN_Y, L.EAVES_Z)),
     }
     wall_objs = {k: box("Wall" + k, lo, hi, stone) for k, (lo, hi) in walls.items()}
     # Gable triangles on the X ends.
     run, rise = L.OUT_Y / 2, L.RIDGE_Z - L.EAVES_Z
-    for key, x0, x1 in (("+X", L.OUT_X / 2 - L.WALL, L.OUT_X / 2), ("-X", -L.OUT_X / 2, -L.OUT_X / 2 + L.WALL)):
+    for key, x0, x1 in (("+X", L.IN_E, L.OUT_X / 2), ("-X", -L.OUT_X / 2, L.IN_W)):
         v = [U(x0, -run, L.EAVES_Z), U(x0, run, L.EAVES_Z), U(x0, 0, L.RIDGE_Z),
              U(x1, -run, L.EAVES_Z), U(x1, run, L.EAVES_Z), U(x1, 0, L.RIDGE_Z)]
         g = kit.mesh("Gable" + key, v, [(0, 2, 1), (3, 4, 5), (0, 1, 4, 3), (1, 2, 5, 4), (2, 0, 3, 5)], stone)
@@ -115,15 +115,15 @@ def build(kit):
         along_x = w in ("+Y", "-Y")
         c = opening["centre"]
         if w[1] == "X":
-            x = (L.OUT_X / 2 - L.WALL / 2) * (1 if w[0] == "+" else -1)
+            x = (L.IN_E + L.OUT_X / 2) / 2 if w[0] == "+" else (L.IN_W - L.OUT_X / 2) / 2
             centre_rect = (x, c)
         else:
             y = (L.OUT_Y / 2 - L.WALL / 2) * (1 if w[0] == "+" else -1)
             centre_rect = (c, y)
         sill, spring = opening["sill"], opening["spring"]
-        size = (2 * half, L.WALL * 3, spring - sill) if along_x else (L.WALL * 3, 2 * half, spring - sill)
+        size = (2 * half, L.BOB_WALL * 3, spring - sill) if along_x else (L.BOB_WALL * 3, 2 * half, spring - sill)
         rect = kit.box("Cut", size, U(centre_rect[0], centre_rect[1], (sill + spring) / 2), material=stone)
-        arch = kit.cylinder("CutArch", half, L.WALL * 3, U(centre_rect[0], centre_rect[1], spring),
+        arch = kit.cylinder("CutArch", half, L.BOB_WALL * 3, U(centre_rect[0], centre_rect[1], spring),
                             rotation=(90, 0, 0) if along_x else (0, 90, 0), sides=24, material=stone)
         targets = [wall_objs[w]] + ([wall_objs[w + "g"]] if spring + half > L.EAVES_Z else [])
         for target in targets:
@@ -150,12 +150,18 @@ def build(kit):
             lo = [min(a, b) for a, b in zip(*sl)]
             hi = [max(a, b) for a, b in zip(*sl)]
             box("Sill", lo, hi, dressed)
+        if opening.get("boarded"):
+            # Boarded up: planks set back in the reveal (rectangle plus a disc for the arch).
+            xb = (L.IN_W - L.OUT_X / 2) / 2 + 0.35
+            box("Boards", (xb - 0.03, c - half, sill), (xb + 0.03, c + half, spring), timber)
+            parts.append(kit.cylinder("BoardsArch", half, 0.06, U(xb, c, spring), rotation=(0, 90, 0), sides=24,
+                                      material=timber))
 
     # Door leaves: a pair of plank doors folded right back against the inside of the gable, open.
     dh = L.DOOR["width"] / 2
     for side in (-1, 1):
         y_lo, y_hi = (dh + 0.03, dh + 0.78) if side > 0 else (-dh - 0.78, -dh - 0.03)
-        box(f"DoorLeaf{side}", (L.IN_X - 0.07, y_lo, L.FLOOR_Z), (L.IN_X - 0.01, y_hi, L.FLOOR_Z + 2.3), timber)
+        box(f"DoorLeaf{side}", (L.IN_E - 0.07, y_lo, L.FLOOR_Z), (L.IN_E - 0.01, y_hi, L.FLOOR_Z + 2.3), timber)
     box("DoorStep", (L.OUT_X / 2, -dh - 0.2, -0.2), (L.OUT_X / 2 + 0.45, dh + 0.2, L.FLOOR_Z - 0.02), dressed)
 
     # --- roof and stack
@@ -177,9 +183,9 @@ def build(kit):
     dx, dy = L.DESK["centre"]
     sx_, sy_, sz_ = L.DESK["size"]
     box("DeskTop", (dx - sx_ / 2, dy - sy_ / 2, L.FLOOR_Z + sz_ - 0.05), (dx + sx_ / 2, dy + sy_ / 2, L.FLOOR_Z + sz_), timber)
-    box("DeskPedestal", (dx - sx_ / 2, dy - sy_ / 2, L.FLOOR_Z), (dx - sx_ / 2 + 0.42, dy + sy_ / 2, L.FLOOR_Z + sz_ - 0.05), timber)
-    for lx in (dx + sx_ / 2 - 0.06,):
-        for ly in (dy - sy_ / 2 + 0.06, dy + sy_ / 2 - 0.06):
+    box("DeskPedestal", (dx - sx_ / 2, dy - sy_ / 2, L.FLOOR_Z), (dx + sx_ / 2, dy - sy_ / 2 + 0.42, L.FLOOR_Z + sz_ - 0.05), timber)
+    for ly in (dy + sy_ / 2 - 0.06,):
+        for lx in (dx - sx_ / 2 + 0.06, dx + sx_ / 2 - 0.06):
             box("DeskLeg", (lx - 0.03, ly - 0.03, L.FLOOR_Z), (lx + 0.03, ly + 0.03, L.FLOOR_Z + sz_ - 0.05), timber)
     cx, cy = L.CHAIR["centre"]
     box("ChairSeat", (cx - 0.22, cy - 0.22, L.FLOOR_Z + 0.42), (cx + 0.22, cy + 0.22, L.FLOOR_Z + 0.47), timber)
@@ -196,15 +202,15 @@ def build(kit):
         a = rng.uniform(0, 2 * math.pi)
         d = rng.uniform(0, L.ROCK_PILE["radius"]) ** 0.8
         x, y = px + math.cos(a) * d, py + math.sin(a) * d
-        x, y = min(x, L.IN_X), min(max(y, -L.IN_Y), L.IN_Y - 0.15)
+        x, y = min(x, L.IN_E), min(max(y, -L.IN_Y), L.IN_Y - 0.15)
         z = L.FLOOR_Z + L.ROCK_PILE["height"] * max(0.0, 1 - d / L.ROCK_PILE["radius"]) * 0.8
         s = rng.uniform(0.16, 0.32)
-        o = kit.sphere("Rock", s, U(max(x, -L.IN_X + s * 0.7), y, z), material=rock, segments=8, rings=5,
+        o = kit.sphere("Rock", s, U(max(x, L.IN_W + s * 0.7), y, z), material=rock, segments=8, rings=5,
                        scale=(1.0, rng.uniform(0.7, 1.0), rng.uniform(0.55, 0.8)))
         parts.append(o)
     # A pick and a shovel leaning by the pile; a couple of crates by the door.
-    box("Crate1", (L.IN_X - 1.6, L.IN_Y - 0.65, L.FLOOR_Z), (L.IN_X - 0.95, L.IN_Y - 0.05, L.FLOOR_Z + 0.55), boards)
-    box("Crate2", (L.IN_X - 1.5, L.IN_Y - 0.6, L.FLOOR_Z + 0.55), (L.IN_X - 1.05, L.IN_Y - 0.15, L.FLOOR_Z + 0.95), boards)
+    box("Crate1", (L.IN_E - 1.6, L.IN_Y - 0.65, L.FLOOR_Z), (L.IN_E - 0.95, L.IN_Y - 0.05, L.FLOOR_Z + 0.55), boards)
+    box("Crate2", (L.IN_E - 1.5, L.IN_Y - 0.6, L.FLOOR_Z + 0.55), (L.IN_E - 1.05, L.IN_Y - 0.15, L.FLOOR_Z + 0.95), boards)
 
     # Apply booleans, drop the cutters, join.
     for obj in parts:

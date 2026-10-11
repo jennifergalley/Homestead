@@ -4,7 +4,7 @@
 
 The yard's landscape runs under the house's floorboards, 18 cm down, so without a hole the shaft under the
 trapdoor shows grass. The trapdoor opening is centred on a landscape vertex (``layout.TRAPDOOR``), so the
-2 x 2 landscape quads round it are painted as holes on the Visibility layer (the sea cave's hole material,
+4 x 4 landscape quads round it are painted as holes on the Visibility layer (the sea cave's hole material,
 ``build_landscape_holes.py``, renders them); the shaft lining fills those quads, and the floorboards hide the
 part-transparent ring the painted vertices leave on the quads beyond. ``HOLE_PAINT_RECT`` is cleared first, so
 a moved trapdoor repaints cleanly.
@@ -23,8 +23,8 @@ from mine import layout as L  # noqa: E402
 importlib.reload(L)
 
 HALF = 2016                 # landscape vertex index = world metres + HALF (EstateHeightfield.r16)
-QUADS = 1                   # quads holed on each side of the opening's centre vertex
-RING = 2                    # the paint rectangle reaches this far round it (cleared, then painted)
+QUADS = 2                   # quads holed on each side of the opening's centre vertex (4 x 4 m under the boards)
+RING = 4                    # the paint rectangle reaches this far round it (cleared, then painted)
 
 
 def main(dry_run=False):

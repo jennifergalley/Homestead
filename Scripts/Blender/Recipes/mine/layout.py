@@ -23,50 +23,61 @@ HOUSE_YAW = 0.0
 TUNNEL_FLOOR_Z = 8.0                       # world metres: about 44 m under the house floor
 
 # --------------------------------------------------------------------------- house shell
-OUT_X, OUT_Y = 10.0, 7.0                   # outer footprint
-WALL = 0.65                                # granite rubble walls
-IN_X, IN_Y = OUT_X / 2 - WALL, OUT_Y / 2 - WALL   # interior half sizes (4.35, 2.85)
+# Jenny (blockout review): "more engine-house: a bit taller and narrower (massive bob wall, stack
+# tight to a corner)". Three storeys under a steep gable; the west end is the 1.3 m bob wall with
+# the big arched opening high up where the beam once came out; the stack is built into the
+# north-west corner and rises 5 m clear of the ridge.
+OUT_X, OUT_Y = 9.0, 6.0                    # outer footprint
+WALL = 0.70                                # granite rubble side and door-end walls
+BOB_WALL = 1.30                            # the west end
+IN_W, IN_E = -OUT_X / 2 + BOB_WALL, OUT_X / 2 - WALL   # interior x range (-3.2 .. 3.8)
+IN_Y = OUT_Y / 2 - WALL                    # interior half width (2.3)
+IN_CX = (IN_W + IN_E) / 2
 FLOOR_Z = 0.18                             # ground-floor boards above the yard
 PLINTH = 0.35                              # footing course visible above the yard
 CEILING_Z = 3.70                           # underside of the first-floor joists
 UPPER_FLOOR_Z = 3.95
-EAVES_Z = 7.20
+EAVES_Z = 9.40
 ROOF_PITCH = 40.0                          # degrees
-EAVES_OVERHANG, VERGE_OVERHANG = 0.30, 0.20
+EAVES_OVERHANG, VERGE_OVERHANG = 0.25, 0.15
 RIDGE_Z = EAVES_Z + (OUT_Y / 2) * math.tan(math.radians(ROOF_PITCH))
 
-# The stack rises from the west (bob-wall) end on the +Y side, built into the corner.
-STACK = {"centre": (-OUT_X / 2 + 0.75, OUT_Y / 2 - 0.75), "half": 0.85, "top_z": 15.0,
-         "brick_from_z": 11.5, "brick_half": 0.55}
+# The stack is built into the north-west corner, flush with both outer faces.
+STACK = {"centre": (-OUT_X / 2 + 0.80, OUT_Y / 2 - 0.80), "half": 0.80, "top_z": 17.0,
+         "brick_from_z": 13.6, "brick_half": 0.52}
 
 # Openings: (wall, centre along the wall, sill z, width, spring z, arch) - wall is "+X" (east
 # gable, door end), "-X" (west, bob wall), "+Y" (sea side) or "-Y". Arch "round" is semicircular.
 DOOR = {"wall": "+X", "centre": 0.0, "sill": FLOOR_Z, "width": 1.50, "spring": 2.35, "arch": "round"}
 WINDOWS = [
-    {"wall": "+X", "centre": 0.0, "sill": 4.70, "width": 1.10, "spring": 6.05, "arch": "round"},
-    {"wall": "+Y", "centre": 1.90, "sill": 1.05, "width": 1.10, "spring": 2.55, "arch": "round"},
-    {"wall": "+Y", "centre": -1.60, "sill": 1.05, "width": 1.10, "spring": 2.55, "arch": "round"},
-    {"wall": "-Y", "centre": 0.60, "sill": 1.05, "width": 1.10, "spring": 2.55, "arch": "round"},
-    {"wall": "+Y", "centre": 1.90, "sill": 4.75, "width": 1.00, "spring": 5.90, "arch": "round"},
-    {"wall": "-Y", "centre": 0.60, "sill": 4.75, "width": 1.00, "spring": 5.90, "arch": "round"},
-    {"wall": "-Y", "centre": -2.60, "sill": 4.75, "width": 1.00, "spring": 5.90, "arch": "round"},
-    {"wall": "-X", "centre": -0.90, "sill": 5.20, "width": 0.80, "spring": 6.10, "arch": "round"},
+    {"wall": "+X", "centre": 0.0, "sill": 4.90, "width": 1.10, "spring": 6.40, "arch": "round"},
+    {"wall": "+X", "centre": 0.0, "sill": 8.60, "width": 0.70, "spring": 9.30, "arch": "round"},
+    {"wall": "+Y", "centre": 1.60, "sill": 1.05, "width": 1.00, "spring": 2.65, "arch": "round"},
+    {"wall": "-Y", "centre": 1.60, "sill": 1.05, "width": 1.00, "spring": 2.65, "arch": "round"},
+    {"wall": "+Y", "centre": 1.60, "sill": 4.85, "width": 1.00, "spring": 6.30, "arch": "round"},
+    {"wall": "-Y", "centre": 1.60, "sill": 4.85, "width": 1.00, "spring": 6.30, "arch": "round"},
+    {"wall": "+Y", "centre": -1.20, "sill": 4.85, "width": 1.00, "spring": 6.30, "arch": "round"},
+    {"wall": "-Y", "centre": -1.20, "sill": 4.85, "width": 1.00, "spring": 6.30, "arch": "round"},
+    {"wall": "-Y", "centre": 0.20, "sill": 7.50, "width": 0.90, "spring": 8.45, "arch": "round"},
+    # The bob wall's great arched opening, boarded up (the beam's way out to the shaft).
+    {"wall": "-X", "centre": -0.30, "sill": 6.40, "width": 1.70, "spring": 8.10, "arch": "round", "boarded": True},
 ]
 
 # --------------------------------------------------------------------------- furnishing (house frame)
-# Entering through the east door facing west: the desk stands under the -Y window on the right,
-# the rock pile fills the far left corner, the trapdoor is in the floor in the west half.
+# Jenny: "move the desk ... centred in the room, set back against the far wall opposite the door.
+# Put the trapdoor a few feet in front of the desk, so it sits between the desk and the door."
+# Entering through the east door facing west: the desk is straight ahead against the bob wall, the
+# trapdoor a pace in front of it, the rock pile in the far left-hand corner (+Y), crates by the door.
 # The opening is centred on a landscape vertex so the 2 x 2 landscape quads round it can be holed
 # (Scripts/Mine/paint_mine_holes.py): the shaft is seen through the boards, not the yard under them.
-TRAPDOOR = {"centre": (-2.00, 0.00), "size": (1.20, 1.20), "hinge": "-X"}   # opening in the boards
+TRAPDOOR = {"centre": (-1.00, 0.00), "size": (1.20, 1.20), "hinge": "+Y"}   # opening in the boards
 SHAFT_WALL = 0.40                          # the shaft lining round the opening (fills the holed quads)
 SHAFT_DEPTH_SHOWN = 6.0                    # the shaft drawn under the trapdoor before it fades to black
-DESK = {"centre": (0.55, -IN_Y + 0.42), "size": (1.45, 0.72, 0.78), "yaw": 0.0}
-LAMP_ON_DESK = (0.95, -IN_Y + 0.40, FLOOR_Z + 0.78)   # base of the desk lamp
-CHAIR = {"centre": (0.45, -IN_Y + 1.05), "yaw": 170.0}
-ROCK_PILE = {"centre": (-3.45, IN_Y - 0.85), "radius": 1.05, "height": 1.05}
-ROCK_PILE_PICKUP = (-2.70, IN_Y - 1.45)    # where she stands to take the stone (walkable)
-
+DESK = {"centre": (IN_W + 0.38, 0.0), "size": (0.72, 1.30, 0.78), "yaw": 90.0}   # long side across the room
+LAMP_ON_DESK = (IN_W + 0.36, -0.40, FLOOR_Z + 0.78)   # base of the desk lamp
+CHAIR = {"centre": (IN_W + 0.55, -1.05), "yaw": 60.0}  # set aside at the desk's -Y end
+ROCK_PILE = {"centre": (IN_W + 0.75, IN_Y - 0.70), "radius": 0.85, "height": 0.95}
+ROCK_PILE_PICKUP = (-1.15, 1.55)          # where she stands to take the stone (walkable)
 
 def house_to_world(x, y, z=0.0):
     """House-frame metres to world metres."""

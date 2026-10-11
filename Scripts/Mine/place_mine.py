@@ -37,11 +37,24 @@ def world():
 
 
 def remove_old(actors):
-    removed = 0
+    """Destroy every mine actor, loading them first: after an editor restart World Partition hasn't
+    loaded the mine's region, so tagged actors wouldn't be found and the script would place duplicates."""
+    hx, hy, _ = L.house_to_world(0, 0)
+    box = unreal.Box(unreal.Vector(hx * 100 - 2500, hy * 100 - 8000, -5000), unreal.Vector(hx * 100 + 9000, hy * 100 + 4000, 12000))
+    descs = unreal.WorldPartitionBlueprintLibrary.get_intersecting_actor_descs(box)
+    labels = {label for label, _, _ in PIECES} | {"MineDeskLampLight"}
+    guids = [d.get_editor_property("guid") for d in descs if str(d.get_editor_property("label")) in labels]
+    if guids:
+        unreal.WorldPartitionBlueprintLibrary.load_actors(guids)
+    removed = []
     for actor in actors.get_all_level_actors():
         if actor.actor_has_tag(TAG):
+            removed.append(actor.get_outermost().get_name())
             actors.destroy_actor(actor)
-            removed += 1
+    if removed:
+        # Saving a destroyed actor's external package deletes it.
+        dirty = [p for p in unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages() if p.get_name() in removed]
+        unreal.EditorLoadingAndSavingUtils.save_packages(dirty, False)
     return removed
 
 

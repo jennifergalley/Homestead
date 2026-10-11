@@ -16,8 +16,8 @@ from mine import layout as L  # noqa: E402
 
 OUT = ROOT / "Source" / "SurvivalGame" / "Simulation" / "HomesteadMineLayout.inc"
 CM = 100.0
-WAKE_POINT = (2.6, 0.9)          # house frame: inside the door, clear of the desk and the trapdoor
-LADDER_TOP_GAP = 0.45            # she stands this far east of the opening's east edge
+WAKE_POINT = (2.2, -1.2)         # house frame: inside the door, clear of the desk, crates and trapdoor
+LADDER_TOP_GAP = 0.45            # she stands this far east of the opening's east edge, facing the desk
 LADDER_FOOT = (1.1, 0.0)         # tunnel frame: a pace east of the ladder, facing down the adit
 SUMP_CLEAR = 1.3                 # the alcove's walkable floor stops this short of the sump's centre
 
@@ -52,9 +52,10 @@ def lines():
     out.append("MINE_HOUSE_FLOOR({}, {}, {})".format(*map(c, house(*WAKE_POINT, L.FLOOR_Z))))
     tx, ty = L.TRAPDOOR["centre"]
     sx, sy = L.TRAPDOOR["size"]
-    out.append("// Trapdoor: hinge line centre, yaw from the hinge toward the lid's free edge, lid length x width.")
-    out.append("MINE_TRAPDOOR({}, {}, {}, {}, {}, {})".format(*map(c, house(tx - sx / 2, ty, L.FLOOR_Z)), yaw(0.0),
-                                                           c(sx), c(sy)))
+    out.append("// Trapdoor: hinge line centre (the +Y edge of the opening), yaw from the hinge toward the closed")
+    out.append("// lid's free edge, lid length (hinge to free edge) x width (along the hinge).")
+    out.append("MINE_TRAPDOOR({}, {}, {}, {}, {}, {})".format(*map(c, house(tx, ty + sy / 2, L.FLOOR_Z)), yaw(-90.0),
+                                                           c(sy), c(sx)))
     out.append("// Ladder top: she stands east of the opening facing it; ladder foot: on the tunnel floor facing east.")
     out.append("MINE_LADDER_TOP({}, {}, {}, {})".format(*map(c, house(tx + sx / 2 + LADDER_TOP_GAP, ty, L.FLOOR_Z)),
                                                         yaw(180.0)))
