@@ -692,6 +692,136 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T18:04:52.289Z"
+    },
+    {
+      "id": "jenny-mv455cm5-u3ccq9",
+      "title": "Fingerpost for the cove by the manor should include the mine",
+      "description": "The fingerpost for the cove that is right beside the manor should include a second sign pointing down the path to the mine labeling it \"To the mine\"",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:12:54.941Z"
+    },
+    {
+      "id": "jenny-mv45ehn7-4lxps3",
+      "title": "When typing the name of a chest, the screen jitters",
+      "description": "When typing the name of a chest, the screen jitters up and down quite badly, like each character typed is shifting the menu screen down and then back up?",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:20:01.363Z"
+    },
+    {
+      "id": "jenny-mv45psq4-8h9mdi",
+      "title": "Able to place chests in the room",
+      "description": "I should be able to place chests anywhere in the standing room of the manor I please",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:28:48.940Z"
+    },
+    {
+      "id": "jenny-mv45tx98-dlxn1q",
+      "title": "Fingerpost for \"To the village\" and \"to the cove\" don't match",
+      "description": "They should both have dark lettering, high contrast, and a more stylized, Victorian-era font",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:32:01.436Z"
+    },
+    {
+      "id": "jenny-mv45vu1f-kvsj9t",
+      "title": "Picking berries needs a new animation",
+      "description": "Right now the berry picking animation assumes she is picking something up off the ground, but now that our berry bushes are tall bushes, we should create a new animation that kneels down, plucks the berries from the bush, and puts them in her pouch",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:33:30.579Z"
+    },
+    {
+      "id": "jenny-mv45zu94-atf5z0",
+      "title": "At the General Store, increasing the count of an item scrolls the list",
+      "description": "At the General Store, increasing the count of an item I want to buy scrolls the list. It should instead stay stationary and displaying the last thing I clicked on, the thing I selected to buy.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:36:37.480Z"
+    },
+    {
+      "id": "jenny-mv465zej-2nnt6t",
+      "title": "Starter inventory shows a linen tunic - moss that never actually equips",
+      "description": "My starter inventory, when I click the top or legs menu, shows a linen tunic - moss under the equip menu that definitely isn't equippable (equipping it changes nothing about how I look). Please remove it, I think it's a relic of the original heroine and her starter outfit. \n\nAlso, please don't treat the starter outfit as \"no clothes\", but have her crop tank and booty shorts be real items that you start out wearing and can store, which can be unequipped to show an actual bra and underwear underneath.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:41:24.091Z",
+      "updatedUtc": "2026-10-11T19:23:12.699Z"
+    },
+    {
+      "id": "jenny-mv468owu-unydl2",
+      "title": "The bridge over the river looks too pristine",
+      "description": "It looks far too pristine and sharp edges - it needs to look worn, rotted, textured from time in the weather and the elements, from decades sitting over this river, but still functional and practical. Just realistic textures and wear on it.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:43:30.462Z"
+    },
+    {
+      "id": "jenny-mv46ate4-mi5h3r",
+      "title": "Remove \"Estate Gateway\"",
+      "description": "The map still shows \"Estate Gateway\" where it is now the edge of the map - please remove it from the map.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:45:09.580Z"
+    },
+    {
+      "id": "jenny-mv46daiu-7ex610",
+      "title": "The cottages lining the road need gardens, distinguishing details",
+      "description": "Each one should have a little subsistence garden beside the cottage, to varying different directions (though not in the road). They should also have some flowers out front or other various and sundry items in their yards or leaning against the cottage to serve as distinguishing details and make each one feel unique and truly lived in. This will require creating some new assets like tools or wheelbarrows or chickens that can be pecking around, etc.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:47:05.094Z"
+    },
+    {
+      "id": "jenny-mv46fddc-37pwup",
+      "title": "Blue doors on cottages are unrealistic",
+      "description": "For one thing, who has a blue door? They should be stout wooden doors, panels that are worn by the elements, and they should have handles / door knobs.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:48:42.096Z"
+    },
+    {
+      "id": "jenny-mv46hauz-8qmvc0",
+      "title": "\"To the manor\" fingerpost should be \"To <X> Estate\"",
+      "description": "Instead of being a game-specific \"manor\", it should point to the user's selected name of the estate, as though this is an actual address sign",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:50:12.155Z"
+    },
+    {
+      "id": "jenny-mv46lud2-t0xs72",
+      "title": "Realistic fire",
+      "description": "The cookfire in the manor and the campfire on the beach both have extremely simplistic fire sprites. Please make me a realistic fire asset with flames that dance and kick off sparks, something worthy of the photorealistic description that applies to much of the game",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:53:44.054Z"
+    },
+    {
+      "id": "jenny-mv46nk2v-bu04mo",
+      "title": "Victorian-era photorealistic bed",
+      "description": "Please create an asset of a real, victorian-era looking bed with a straw mattress or whatever, raised, worn wooden frame, something more photorealistic and worthy of the appearance of the stone manor and photorealistic, rather than the simplified bed from the starter Survival game.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:55:04.039Z"
+    },
+    {
+      "id": "jenny-mv4701b5-4flmli",
+      "title": "Remove well fed explanation text \"work costs 15% less\" from HUD",
+      "description": "The text is overflowing the bounding box. Just put it back to \"Well fed until <time>\" as the bonus that Well fed provides is now explained in the hover text for a meal, so we don't need to duplicate it here",
+      "imageFile": "jenny-mv4701b5-4flmli-c309b6b7-b3bd-43a3-b91c-4d5ad9c988da.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T19:04:46.241Z",
+      "updatedUtc": "2026-10-11T19:06:12.357Z"
+    },
+    {
+      "id": "jenny-mv48a218-e7wpr0",
+      "title": "Remove building menu and ability to construct survival-era wooden buildings",
+      "description": "Move the chests into the crafting menu, keep the ability to craft and place those anywhere, but drop the freeform building of wooden structures, as we're going to go with a structured way to rebuild the manor out of stone materials instead and no longer need the original survival game building of wood foundations, walls, and roofs or cookfires.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T19:40:33.356Z"
     }
   ]
 }
