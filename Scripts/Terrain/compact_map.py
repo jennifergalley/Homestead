@@ -35,7 +35,7 @@ COMMONS = {
 }
 PLAYABLE = [(-900, -1360), (560, -1360), (560, 160), (-900, 160)]   # the map sheet and the world's edge
 MINE = (-410.0, -722.0)        # the mine ruin's yard on the clifftop west of the cove
-COVE = (-476.0, -616.0, 1.8, 200.0)   # the sand at the foot of the cove steps, facing the sea
+COVE = (-490.0, -580.0, 1.8, 200.0)   # the sand at the foot of the cove path (coast_mix.py), facing the sea
 OLD_FOR_SALE = ("ForSale.Woodland", "ForSale.MoorField", "ForSale.WestCove")
 
 

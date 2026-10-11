@@ -33,7 +33,7 @@ SIZE, H = 4033, 2016
 FLAT_M = 3.0                      # the bed and its shoulders are graded flat across out to this far from the centre line
 FALLOFF_M = 9.0                   # then blended back into the hillside over this width
 CROWN_FALL = 1.0 / 30.0           # the bed sheds water toward both edges at 1:30 (Balance: 1:30 cross-fall)
-KEEP_RESIDUAL = 0.35              # share of the hillside's own long (>= RESIDUAL_WINDOW_M) swell kept, so it is not a ramp
+KEEP_RESIDUAL = 0.10              # share of the hillside's own long (>= RESIDUAL_WINDOW_M) swell kept, so it is not a ramp
 RESIDUAL_WINDOW_M = 40.0
 END_EASE_M = 8.0                  # the hill's swell fades out toward the junction and the square over this length
 END_BLEND_M = 4.0                 # the profile starts from the existing ground at each end and eases to the even fall over this

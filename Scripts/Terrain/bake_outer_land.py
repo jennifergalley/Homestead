@@ -26,6 +26,8 @@ OVERLAP = 6.0        # the ring starts this far inside the map, under the landsc
 SINK = 0.6           # and this far below it
 FAR = 70000.0        # metres beyond the edge (the ocean mesh reaches 60 km)
 UPLAND = 110.0       # the height the hinterland settles to
+COAST_TOP = 38.0     # metres: the ring's land is at least this high by 250 m past the map, so its coast is cliff
+COAST_FACE = 0.08    # share of the old ~150 m land-to-sea fall the ring's coast now drops in (a cliff face)
 
 
 def load_heights():
@@ -82,6 +84,7 @@ def ring():
     fine_n = fine / max(fine.std(), 1e-6)
     hills = UPLAND + 38.0 * broad + 6.0 * fine_n
     land = base + (hills - base) * grow
+    land = np.maximum(land, COAST_TOP * smoothstep(0.0, 250.0, d))   # the coast's cliffs stand at least this high
     sea = np.minimum(base, -4.0) - 0.004 * d
     # Land or sea past the map starts from the edge's own profile, then broad noise bends the coast
     # as it goes out, so no coastline runs ruler-straight to the horizon. South of the map is open
@@ -95,14 +98,16 @@ def ring():
     edge_w = map_coordinates(hs, [wy + H, wx + H], order=1, mode="nearest")
     score = edge_w - 1.5 + 60.0 * smoothstep(200.0, 3000.0, d) * (broad + 0.6 * fine_n)
     score -= 0.6 * np.maximum(0.0, -X - H + 500.0 * shore)
-    # The land comes down to the water over ~150 m, a steep coast rather than a sheer wall.
+    # The land comes down to the water in a cliff (COAST_FACE below).
     # Only sea joined to the open water in the south stays sea; inland hollows would show the ocean
     # sheet as flat lakes, so they stay land.
     wet, _ = label(score <= 0.0)
     open_sea = np.setdiff1d(np.unique(wet[0, :]), [0])
     near_sea = binary_dilation(np.isin(wet, open_sea), iterations=4)
     score = np.where(near_sea, score, np.maximum(score, 22.0))
-    z = sea + (land - sea) * smoothstep(0.0, 22.0, score)
+    # The coast past the map ends in cliffs, as the map's own coast does (Jenny, 2026-10-10): the land keeps its
+    # height to the first COAST_FACE of the transition and drops to the sea in a face there.
+    z = sea + (land - sea) * smoothstep(0.0, 22.0 * COAST_FACE, score)
     # Right at the seam keep the edge's own land/sea split, so the ring meets the landscape cleanly.
     z = np.where(land_edge, land, sea) * np.exp(-d / 100.0) + z * (1.0 - np.exp(-d / 100.0))
     # Hug the landscape at the seam and fade the far rim down behind the haze.
