@@ -233,22 +233,29 @@ void UHomesteadGrassField::BuildChunk(FIntPoint Chunk, FChunk& Out, int32 Lod)
             const double CY = Chunk.Y * ChunkCm + (TY + 0.5) * TileCm;
             if (HomesteadEstateGround::GrassDensity(CX, CY) < 0.02f) continue;
             if (IsBlocked(FVector2D(CX, CY))) continue;
-            // The three nearest interactables the patch can reach; a crowded patch is left bare.
+            // The three interactables nearest the patch (by the edge of their clearing) graze it; past three, the
+            // farthest go uncleared rather than the whole patch going bare (bare 2 m squares, Jenny 2026-10-07).
             float Found[3][3] = {};
+            float FoundGap[3] = {};
             int32 Count = 0;
-            bool bCrowded = false;
             for (const int32 Index : Near)
             {
                 const FObstacle& O = Obstacles[Index];
                 const double Reach = FMath::Abs(O.Radius) * (O.Radius < 0 ? UE_SQRT_2 : 1.0) + TileCm * 0.72 + 35.0;
-                if (FVector2D::DistSquared(FVector2D(O.Centre.X, O.Centre.Y), FVector2D(CX, CY)) > Reach * Reach) continue;
-                if (Count == 3) { bCrowded = true; break; }
-                Found[Count][0] = O.Centre.X;
-                Found[Count][1] = O.Centre.Y;
-                Found[Count][2] = O.Radius;
-                ++Count;
+                const double Distance = FVector2D::Distance(FVector2D(O.Centre.X, O.Centre.Y), FVector2D(CX, CY));
+                if (Distance > Reach) continue;
+                const float Gap = static_cast<float>(Distance - FMath::Abs(O.Radius));
+                int32 Slot = Count < 3 ? Count++ : INDEX_NONE;
+                if (Slot == INDEX_NONE)
+                {
+                    Slot = FoundGap[0] >= FoundGap[1] ? (FoundGap[0] >= FoundGap[2] ? 0 : 2) : (FoundGap[1] >= FoundGap[2] ? 1 : 2);
+                    if (Gap >= FoundGap[Slot]) continue;
+                }
+                Found[Slot][0] = O.Centre.X;
+                Found[Slot][1] = O.Centre.Y;
+                Found[Slot][2] = O.Radius;
+                FoundGap[Slot] = Gap;
             }
-            if (bCrowded) continue;
             // Lie the patch on the ground's plane; the landscape's quads are 1 m, so over 2 m this is
             // within a few centimetres, and the patch sits 2 cm down to hide the gap.
             const float H = HomesteadEstateTerrain::Height(CX, CY);

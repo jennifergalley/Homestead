@@ -148,5 +148,5 @@ constexpr double CoveRouteTreadWidthCm = 150.0;
 constexpr double CoveRouteCornerHalfCm = 75.0;   // cove_route.py CORNER_HALF_M
 constexpr double CoveRouteGroundSampleCm = 75.0;
 // The route's own limit: steeper than this is on steps.
-constexpr double CoveRouteMaxPathGrade = 1.0 / 5.0;
+constexpr double CoveRouteMaxPathGrade = 1.0 / 4.0;
 }

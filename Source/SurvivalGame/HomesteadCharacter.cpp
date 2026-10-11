@@ -31,6 +31,9 @@ AHomesteadCharacter::AHomesteadCharacter()
     GetCharacterMovement()->MaxWalkSpeed = 180.0f;
     GetCharacterMovement()->MaxAcceleration = 700.0f;
     GetCharacterMovement()->MaxStepHeight = 42.0f;
+    // She never walks off a drop taller than a step or onto ground too steep to stand on, so she can't strand
+    // herself below a cliff (Jenny, 2026-10-10); she stops at the edge instead.
+    GetCharacterMovement()->bCanWalkOffLedges = false;
     GetCharacterMovement()->BrakingDecelerationWalking = 900.0f;
 
     CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraArm"));

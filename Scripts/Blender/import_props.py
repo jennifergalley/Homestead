@@ -53,7 +53,7 @@ def mask_default(value):
     path = f"{MASK_DEFAULTS}/{name}"
     if LIB.does_asset_exist(path):
         return LIB.load_asset(path)
-    source = Path(unreal.Paths.project_intermediate_dir()) / f"{name}.bmp"
+    source = Path(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_intermediate_dir())) / f"{name}.bmp"
     source.parent.mkdir(parents=True, exist_ok=True)
     level = 255 if value else 0
     width = height = 4
@@ -414,8 +414,10 @@ def granite_parent():
 
 def granite_instance(spec, info, folder, dest, report):
     maps = info.get("bake", {}).get("maps", {})
+    # The granite recipes' AO bakes come out as blotchy noise (black patches over half the stone; Jenny's
+    # "covered with shadows" boulder, 2026-10-10), so the big granite takes a neutral AO; Lumen shades its crevices.
     parameters = {"basecolor": "BaseColorTexture", "normal": "NormalTexture", "roughness": "RoughnessTexture",
-                  "ao": "AOTexture", "mask": "MaskTexture"}
+                  "mask": "MaskTexture"}
     name = "MI_" + spec["name"][2:]
     path = f"{dest}/{name}"
     instance = LIB.load_asset(path) if LIB.does_asset_exist(path) else TOOLS.create_asset(
@@ -423,6 +425,7 @@ def granite_instance(spec, info, folder, dest, report):
     if not instance:
         raise RuntimeError("Could not create " + path)
     EDIT.set_material_instance_parent(instance, granite_parent())
+    EDIT.set_material_instance_texture_parameter_value(instance, "AOTexture", mask_default(True))
     for role, parameter in parameters.items():
         source = folder / "Textures" / maps[role]
         if not source.exists():
