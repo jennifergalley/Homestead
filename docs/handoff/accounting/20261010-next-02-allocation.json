@@ -1,0 +1,118 @@
+{
+  "buildId": "20261010-next-02",
+  "authorizedAt": "2026-10-10T19:20:00.000Z",
+  "allocationPolicy": "Covers the Map feedback build (round 4's third lane set: Map, Beach, Gameplay, Names, Lighting, Cave, their Balance review, and Integration's merge/review/package/test/promote/closure) for build 20261010-next-02, allocated from the 2026-10-10 19:20 kickoff. Excludes 20261010-next-01 (map-shrink stage 2 and its own Balance/Integration segments), already allocated and reported separately.",
+  "limits": [
+    "DRAFT: prepared ahead of the batch gate clearing (Map/Gameplay/Cave/Beach not yet [ready] as of this draft). since/boundaryEvidence for those segments will be refined with final commit SHAs once each lane's [ready] lands and the batch pass completes.",
+    "Recorded nano-AIU is not billing-reconciled AI credits.",
+    "Some calls have no recorded reasoning effort; preserve unknown in the export, not an inferred high value.",
+    "authorizedAt is a single global floor applied across every session in this allocation; per-segment since values are evidence, not independent filters.",
+    "The orchestrator session (cfe8292c-5320-4ab3-a942-1b64c2cc956b) is coordination-only per standing policy and is not billed as a segment here."
+  ],
+  "segments": [
+    {
+      "sessionId": "94e0bd8e-ab39-402c-8aa3-0b9365489bc9",
+      "projectSessionId": "94e0bd8e-ab39-402c-8aa3-0b9365489bc9",
+      "task": "map-feedback-build",
+      "tasks": ["map-feedback-build"],
+      "category": "implementation",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Map Agent session (port 8776) for Jenny's terrain feedback: cliff/slope coast mix, map-edge cliffs, no inescapable areas, river mouth, cliff/grass artifacts, flush paths, cove stair edge, beach corner, boulder, cliff rock face, village street grade, river source. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+    },
+    {
+      "sessionId": "8c44fafc-9777-4063-86f9-071f7722293f",
+      "projectSessionId": "8c44fafc-9777-4063-86f9-071f7722293f",
+      "task": "map-feedback-build",
+      "tasks": ["map-feedback-build"],
+      "category": "implementation",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Beach Agent session (port 8777): beach shells, stones, driftwood and mussels (decor, daily gathers, dishes, store sales); placement ids 586000-586099 and EstateSceneryKinds 49-56. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+    },
+    {
+      "sessionId": "5b555e6e-49a2-4592-9abb-1a857ebd5a67",
+      "projectSessionId": "5b555e6e-49a2-4592-9abb-1a857ebd5a67",
+      "task": "map-feedback-build",
+      "tasks": ["map-feedback-build"],
+      "category": "implementation",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-sonnet-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Gameplay Agent session (port 8778): Start a new game label; derelict farm artifacts clear on till; half the meadow herbs sellable; directional signs replace teleport signs. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+    },
+    {
+      "sessionId": "72b7d774-d285-4f3d-93a5-d62f61927853",
+      "projectSessionId": "72b7d774-d285-4f3d-93a5-d62f61927853",
+      "task": "map-feedback-build",
+      "tasks": ["map-feedback-build"],
+      "category": "implementation",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-sonnet-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Names Agent session (port 8779): display-name changes away from Cornish names (Larkhollow, Aldridge's General Store, Ashgrove/Brackenburn/Thornley, Hollin Wood, Gull Sands, Marlbury, village fast-travel toast). [ready] at 8bfc59aa4 (branch jennifergalley-names-agent, on 1654413dc); held for the batch."
+    },
+    {
+      "sessionId": "0816ef4d-8f71-4df4-bb26-62e659d21fdb",
+      "projectSessionId": "0816ef4d-8f71-4df4-bb26-62e659d21fdb",
+      "task": "map-feedback-build",
+      "tasks": ["map-feedback-build"],
+      "category": "implementation",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-sonnet-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Lighting Agent session (port 8780): realistic night lighting; moonrise removed in favour of a fixed, hidden-disc moon that fades with dusk/dawn, nights at 0.2 lux. [ready] at e9815ce4a (branch only); held for the batch."
+    },
+    {
+      "sessionId": "d6ef3d58-ed8a-4297-9f27-e3a51528c59d",
+      "projectSessionId": "d6ef3d58-ed8a-4297-9f27-e3a51528c59d",
+      "task": "map-feedback-build",
+      "tasks": ["map-feedback-build"],
+      "category": "implementation",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Cave Agent session (port 8781): beach sea cave with a pool. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+    },
+    {
+      "sessionId": "ceb1109b-f156-451c-b890-ca91fa92f1c1",
+      "projectSessionId": "ceb1109b-f156-451c-b890-ca91fa92f1c1",
+      "task": "balance-docs-map-feedback",
+      "tasks": ["balance-docs-map-feedback"],
+      "category": "docs",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Balance Agent review-only segment for this build's lanes: hard-fishing/store-clothing values, beach-gathering plan (balance.md §8a), cohesion.md §1-2 and balance.md neutral-name updates, Gameplay batch and Lighting-night OK, cove-cap iterations (§9: held at 90s, reverted to 60s, then set to 75s per Jenny's option c), coast review notes. Docs-only commits d2211552c, f21443983, 281803b3a, 9fde6e7b7, 2c1bcb89f, 5f804c3c7, 563c6b66d, 6ca8648f1 (888ec9128 superseded, not separately billed) on branch jennifergalley-balance-agent-2c8, plus pending final-numbers Balance OK for Map/Beach/Cave once ready."
+    },
+    {
+      "sessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
+      "projectSessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
+      "task": "integration-round4-map-feedback",
+      "tasks": ["integration-round4-map-feedback"],
+      "category": "integration",
+      "since": "2026-10-10T19:20:00.000Z",
+      "model": "claude-sonnet-5",
+      "reasoningEffort": "medium",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Integration Agent session (reserved editor slot). Docs-liaison work (recording Gameplay/Lighting/Beach/docs findings; merging Balance docs and Beach's terrain-staleness note to main), and pending: the single batch merge (Names 8bfc59aa4, Lighting e9815ce4a, Map/Gameplay/Cave/Beach once ready), Opus 5 risky review of save/placement changes, native test run, editor compile, Development package, EstateSmoke/ToolRepeat/FullLoop F5/F9, PIE checks, install, shortcut promotion, and full delivery closure (builds.md card, this accounting report, planner slots/archive). Mixed models across calls; segment label reflects the dominant model (claude-sonnet-5 medium), actual per-call model/effort preserved in exported records."
+    }
+  ]
+}
