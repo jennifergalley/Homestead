@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "FingerpostRoad",
+  "description": "Silvered oak fingerposts for the public road: 'To the village', 'To the manor' and a two-armed 'Village / Manor' (original; lettering in Blender's bundled DejaVu Sans). Pivot = post foot; the (upper) arm points +X, the second arm -X.",
+  "collision": "box",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/fingerpost_road.py",
+  "source_sha256": "45f54019bbf1abc1c37028e2d94eb7e9ade0c1004479e6f30f1c5be55a19e1d2",
+  "provenance": "Original project-authored procedural geometry and materials. Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence, permits embedding and modification).",
+  "meshes": {
+    "SM_Fingerpost_ToTheVillage": {
+      "vertices": 3734,
+      "triangles": 7400,
+      "size_cm": [
+        90.25,
+        13.08,
+        252.0
+      ],
+      "materials": [
+        {
+          "name": "M_Fingerpost_ToTheVillage",
+          "textures": {
+            "basecolor": "T_Fingerpost_ToTheVillage_basecolor.png",
+            "roughness": "T_Fingerpost_ToTheVillage_roughness.png",
+            "normal": "T_Fingerpost_ToTheVillage_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Fingerpost_ToTheVillage_basecolor.png",
+          "roughness": "T_Fingerpost_ToTheVillage_roughness.png",
+          "normal": "T_Fingerpost_ToTheVillage_normal.png",
+          "ao": "T_Fingerpost_ToTheVillage_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "focus": [
+          0.35,
+          0.0,
+          1.7
+        ]
+      },
+      "fbx": "SM_Fingerpost_ToTheVillage.fbx",
+      "sha256": "12c62c56e386638cd600c66421898220bdf1ec66375ec15d1bcd8416094378f5",
+      "preview": "preview_SM_Fingerpost_ToTheVillage.png"
+    },
+    "SM_Fingerpost_ToTheManor": {
+      "vertices": 3306,
+      "triangles": 6552,
+      "size_cm": [
+        90.25,
+        13.08,
+        252.0
+      ],
+      "materials": [
+        {
+          "name": "M_Fingerpost_ToTheManor",
+          "textures": {
+            "basecolor": "T_Fingerpost_ToTheManor_basecolor.png",
+            "roughness": "T_Fingerpost_ToTheManor_roughness.png",
+            "normal": "T_Fingerpost_ToTheManor_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Fingerpost_ToTheManor_basecolor.png",
+          "roughness": "T_Fingerpost_ToTheManor_roughness.png",
+          "normal": "T_Fingerpost_ToTheManor_normal.png",
+          "ao": "T_Fingerpost_ToTheManor_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "focus": [
+          0.35,
+          0.0,
+          1.7
+        ]
+      },
+      "fbx": "SM_Fingerpost_ToTheManor.fbx",
+      "sha256": "2100d504495507047517806515bb2bede4cfbbd65530de25030e91fba1c2c8c4",
+      "preview": "preview_SM_Fingerpost_ToTheManor.png"
+    },
+    "SM_Fingerpost_VillageManor": {
+      "vertices": 4064,
+      "triangles": 8056,
+      "size_cm": [
+        160.0,
+        13.08,
+        252.0
+      ],
+      "materials": [
+        {
+          "name": "M_Fingerpost_VillageManor",
+          "textures": {
+            "basecolor": "T_Fingerpost_VillageManor_basecolor.png",
+            "roughness": "T_Fingerpost_VillageManor_roughness.png",
+            "normal": "T_Fingerpost_VillageManor_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Fingerpost_VillageManor_basecolor.png",
+          "roughness": "T_Fingerpost_VillageManor_roughness.png",
+          "normal": "T_Fingerpost_VillageManor_normal.png",
+          "ao": "T_Fingerpost_VillageManor_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "focus": [
+          0.35,
+          0.0,
+          1.7
+        ]
+      },
+      "fbx": "SM_Fingerpost_VillageManor.fbx",
+      "sha256": "a45521595d8de1b351312d46a4af47e442de7bbfa7db44ef0529f51329b90699",
+      "preview": "preview_SM_Fingerpost_VillageManor.png"
+    }
+  },
+  "warnings": [],
+  "pivot": "foot of the post on the ground; the upper arm points along +X",
+  "arm_height_m": 1.7,
+  "texts": [
+    "To the village",
+    "To the manor",
+    "Village",
+    "Manor"
+  ],
+  "textures": {
+    "T_Fingerpost_ToTheVillage_basecolor.png": "4fadc88230e5b4965c738b424cb7609c7388273c8a8214e6012387172b693c52",
+    "T_Fingerpost_ToTheVillage_roughness.png": "b2d16294d7b405d5e93d970e0ab875f567417cf0661e4e20d8d9de4f7310d24c",
+    "T_Fingerpost_ToTheVillage_normal.png": "46d88054b2d06cce444e24bc610c3735b9f717fb86b6173112b195ef1a2b1225",
+    "T_Fingerpost_ToTheManor_basecolor.png": "d6c4cd240f2c5517f1a953e55d13a842d6a4349ced3b4401c72825a2cfde177c",
+    "T_Fingerpost_ToTheManor_roughness.png": "e267e3f30edc9a26a4491331f3a0a54308bfe2a84d92fd3ddd0f2eefec882813",
+    "T_Fingerpost_ToTheManor_normal.png": "128d7b3a37baabb956cdb9734caf30ce7554420e57ff85cafdc4642c59462176",
+    "T_Fingerpost_VillageManor_basecolor.png": "e075b11054a7399c018df398ebb6924add98b445937228d583dfebe3e1479370",
+    "T_Fingerpost_VillageManor_roughness.png": "cb380f4d353839327dec08ac90eb9aeab0cf797acf11f76ec18d9755a4d50a17",
+    "T_Fingerpost_VillageManor_normal.png": "bcfd261105abec3bb9499c7cbdd03d06b268264a90101d63b6c75098ab5cf794"
+  }
+}

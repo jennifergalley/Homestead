@@ -262,31 +262,23 @@ Result Simulation::WalkRoad(TravelDestination destination, Point from)
     return TravelGood("You walk to " + where + ". It's " + FormatHour(state_.hour) + ".", revision_);
 }
 
-std::vector<TravelDestination> RoadSignDestinations(const std::string& signName)
-{
-    if (signName == "ManorRoadSign") return {TravelDestination::Town};
-    if (signName == "TownRoadSign") return {TravelDestination::Manor};
-    if (signName == "GatewayRoadSign") return {TravelDestination::Town, TravelDestination::Manor};
-    return {};
-}
-
-const PublicRoadSign* RoadSignNear(Point at, double reachCm)
-{
-    const PublicRoadSign* nearest = nullptr;
-    double best = reachCm;
-    for (const PublicRoadSign& sign : EstatePublicRoad().signs)
-    {
-        const double distance = std::hypot(at.x - sign.position.x, at.y - sign.position.y);
-        if (distance <= best && !RoadSignDestinations(sign.name).empty()) { best = distance; nearest = &sign; }
-    }
-    return nearest;
-}
-
 std::string RoadSignLabel(const std::string& signName)
 {
-    const auto destinations = RoadSignDestinations(signName);
-    if (destinations.size() == 2) return "Town / Manor";
-    if (destinations.size() == 1) return destinations[0] == TravelDestination::Town ? "To town" : "To the manor";
+    if (signName == "ManorRoadSign") return "To the village";
+    if (signName == "TownRoadSign") return "To the manor";
+    if (signName == "GatewayRoadSign") return "Village / Manor";
     return {};
+}
+
+double RoadSignArmYaw(const PublicRoadSign& sign)
+{
+    constexpr double ProbeMetres = 2.0;
+    const PublicRoad& road = EstatePublicRoad();
+    const Point behind = road.At(sign.chainage - ProbeMetres);
+    const Point ahead = road.At(sign.chainage + ProbeMetres);
+    double yaw = std::atan2(ahead.y - behind.y, ahead.x - behind.x) * 180.0 / 3.14159265358979323846;
+    if (sign.name == "TownRoadSign") yaw += 180.0;
+    yaw = std::fmod(yaw, 360.0);
+    return yaw < 0.0 ? yaw + 360.0 : yaw;
 }
 }

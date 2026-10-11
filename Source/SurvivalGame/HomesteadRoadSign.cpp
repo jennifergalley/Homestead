@@ -4,6 +4,7 @@
 #include "Components/TextRenderComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
+#include "Engine/CollisionProfile.h"
 #include "Misc/PackageName.h"
 
 // The stand-in's proportions, cm: a weathered post with a board across its top.
@@ -12,12 +13,7 @@ namespace RoadSignStyle
 constexpr float PostHeight = 190.0f, PostWidth = 12.0f;
 constexpr float BoardWidth = 110.0f, BoardHeight = 30.0f, BoardDepth = 5.0f;
 constexpr float TextSize = 11.0f;
-// Props' SM_RoadSign (Content/Python road_sign.py): same board height and width, pivot at the post
-// foot, a 4 cm board whose painted face is 2 cm off the centreline with a bead frame 0.6 cm proud,
-// and a painted field of 98 x 20 cm inside the bead that the words must stay within.
-constexpr float AuthoredBoardDepth = 4.0f, AuthoredFaceProud = 0.6f;
-constexpr float PaintedWidth = 98.0f, PaintedHeight = 20.0f;
-// Words sit just proud of the board's face (or the authored bead) so they never z-fight it.
+// Words sit just proud of the board's face so they never z-fight it.
 constexpr float StandInFaceProud = 0.6f;
 const FColor Paint(238, 226, 196);
 const TCHAR* Cube = TEXT("/Engine/BasicShapes/Cube.Cube");
@@ -41,6 +37,13 @@ AHomesteadRoadSign::AHomesteadRoadSign()
     Board = Part(TEXT("StandInBoard"));
     Authored = Part(TEXT("SignMesh"));
     Authored->SetVisibility(false);
+    // Solid like the Cove's fingerpost: she walks round it, not through it, and the camera sees past it.
+    for (UStaticMeshComponent* Solid : {Post.Get(), Authored.Get()})
+    {
+        Solid->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+        Solid->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+        Solid->CanCharacterStepUpOn = ECB_No;
+    }
     const auto Words = [this](const TCHAR* Name, float Yaw)
     {
         auto* Text = CreateDefaultSubobject<UTextRenderComponent>(Name);
@@ -58,11 +61,20 @@ AHomesteadRoadSign::AHomesteadRoadSign()
     Back = Words(TEXT("BackWords"), 180.0f);
 }
 
+const TCHAR* AHomesteadRoadSign::MeshObjectFor(const FString& Name)
+{
+    if (Name == TEXT("ManorRoadSign")) return TEXT("/Game/SurvivalGame/Environment/Props/FingerpostRoad/SM_Fingerpost_ToTheVillage.SM_Fingerpost_ToTheVillage");
+    if (Name == TEXT("TownRoadSign")) return TEXT("/Game/SurvivalGame/Environment/Props/FingerpostRoad/SM_Fingerpost_ToTheManor.SM_Fingerpost_ToTheManor");
+    if (Name == TEXT("GatewayRoadSign")) return TEXT("/Game/SurvivalGame/Environment/Props/FingerpostRoad/SM_Fingerpost_VillageManor.SM_Fingerpost_VillageManor");
+    return nullptr;
+}
+
 void AHomesteadRoadSign::Place(const FString& Name, const FVector& Location, float Yaw, const FString& Words)
 {
     SignName = Name;
     SetActorLocationAndRotation(Location, FRotator(0, Yaw, 0));
-    if (!Authored->GetStaticMesh() && FPackageName::DoesPackageExist(MeshPackage))
+    const TCHAR* MeshObject = MeshObjectFor(Name);
+    if (!Authored->GetStaticMesh() && MeshObject && FPackageName::DoesPackageExist(FPackageName::ObjectPathToPackageName(MeshObject)))
         if (UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, MeshObject)) Authored->SetStaticMesh(Mesh);
     bStandIn = Authored->GetStaticMesh() == nullptr;
     Authored->SetVisibility(!bStandIn);
@@ -83,9 +95,12 @@ void AHomesteadRoadSign::Place(const FString& Name, const FVector& Location, flo
         if (Material) { Post->SetMaterial(0, Material); Board->SetMaterial(0, Material); }
         if (!Cylinder || !Cube) UE_LOG(LogTemp, Warning, TEXT("Road sign stand-in shapes are missing."));
     }
-    const float Standoff = bStandIn ? RoadSignStyle::BoardDepth * 0.5f + RoadSignStyle::StandInFaceProud
-        : RoadSignStyle::AuthoredBoardDepth * 0.5f + RoadSignStyle::AuthoredFaceProud;
-    const FText Text = FText::FromString(bStandIn ? Words + TEXT("\n(stand-in sign)") : Words);
+    // The authored fingerpost has its words painted on; only the stand-in needs text.
+    Front->SetVisibility(bStandIn);
+    Back->SetVisibility(bStandIn);
+    if (!bStandIn) return;
+    const float Standoff = RoadSignStyle::BoardDepth * 0.5f + RoadSignStyle::StandInFaceProud;
+    const FText Text = FText::FromString(Words + TEXT("\n(stand-in sign)"));
     for (UTextRenderComponent* Face : {Front.Get(), Back.Get()})
     {
         const float FaceYaw = Face == Front ? 0.0f : 180.0f;
@@ -93,13 +108,5 @@ void AHomesteadRoadSign::Place(const FString& Name, const FVector& Location, flo
             + FRotator(0, FaceYaw, 0).Vector() * Standoff);
         Face->SetWorldSize(RoadSignStyle::TextSize);
         Face->SetText(Text);
-        // On the authored board, a longer label shrinks to stay inside the painted field.
-        if (!bStandIn)
-        {
-            const FVector Size = Face->GetTextLocalSize();
-            const float Fit = FMath::Min(Size.Y > 0 ? RoadSignStyle::PaintedWidth / Size.Y : 1.0f,
-                Size.Z > 0 ? RoadSignStyle::PaintedHeight / Size.Z : 1.0f);
-            if (Fit < 1.0f) Face->SetWorldSize(RoadSignStyle::TextSize * Fit);
-        }
     }
 }

@@ -51,3 +51,26 @@ retired(584056);
 retired(584131);
 retired(584146);
 retired(584160);
+// A berry bush stood inside the manor's standing room (Jenny): topUp 585200, put by the door by compact_placements.py (the generator now keeps the room clear).
+retired(585200);
+// HAND-RETIRED below: compact_placements.py keeps everything after this line when it rewrites this file.
+// Meadow herbs: about half of the 500355-500389 patches, thinned on Jenny's feedback (twice as many as she needs).
+retired(500356);
+retired(500358);
+retired(500360);
+retired(500362);
+retired(500364);
+retired(500366);
+retired(500368);
+retired(500370);
+retired(500372);
+retired(500374);
+retired(500376);
+retired(500378);
+retired(500380);
+retired(500382);
+retired(500384);
+retired(500386);
+retired(500388);
+retired(500387);
+retired(500389);

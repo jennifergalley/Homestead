@@ -4,6 +4,8 @@
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
 #include "HomesteadEstateTerrain.h"
+#include "HomesteadDerelictFarm.h"
+#include "EngineUtils.h"
 #include "Simulation/HomesteadFlowerCover.h"
 
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
@@ -296,6 +298,28 @@ bool AHomesteadWorld::BuildEstateScenery()
     UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches (%d of them non-Nanite cells)."),
         Total, EstateScenery.Num(), Cells);
     return true;
+}
+
+void AHomesteadWorld::ClearDerelictFarmUnderPlots(const Homestead::State& State)
+{
+    if (!DerelictFarm.IsValid() && !bDerelictFarmSearched && !State.plots.empty() && GetWorld())
+    {
+        bDerelictFarmSearched = true;
+        for (TActorIterator<AHomesteadDerelictFarm> It(GetWorld()); It; ++It)
+        {
+            DerelictFarm = *It;
+            break;
+        }
+    }
+    AHomesteadDerelictFarm* Farm = DerelictFarm.Get();
+    if (!Farm) return;
+    TArray<FVector2D> Centres;
+    for (const auto& Plot : State.plots)
+    {
+        const Homestead::Point Centre = Homestead::PlotCenter(Plot);
+        Centres.Add(FVector2D(Centre.x, Centre.y));
+    }
+    Farm->ClearForPlots(Centres);
 }
 
 void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::Simulation& Simulation, uint64 LayoutKey)

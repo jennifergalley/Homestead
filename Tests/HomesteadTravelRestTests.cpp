@@ -132,9 +132,8 @@ void DiscoveryAndSaves()
         CHECK(!result && result.code == Homestead::ResultCode::CorruptSave);
         CHECK(sim.Serialize() == saved && sim.GetRevision() == revision);
     }
-    for (const auto destination : Homestead::RoadSignDestinations("ManorRoadSign"))
     {
-        CHECK(destination == Homestead::TravelDestination::Town);
+        const auto destination = Homestead::TravelDestination::Town;
         const auto* sign = Homestead::EstatePublicRoad().FindSign("ManorRoadSign");
         CHECK(sign && !Homestead::PlanTravel(loaded.GetState(), sign->position, destination).ok);
         CHECK(!loaded.WalkRoad(destination, sign->position));

@@ -27,7 +27,7 @@ class USkyLightComponent;
 class UExponentialHeightFogComponent;
 class UPostProcessComponent;
 class AHomesteadRoadEndGate;
-
+class AHomesteadDerelictFarm;
 USTRUCT()
 struct FHomesteadWorldVisual
 {
@@ -420,6 +420,11 @@ private:
     // are also cleared off every interactable (berry bush, herb, bramble, salvage), so each one stands
     // in the open where she can see and reach it.
     void ClearEstateSceneryUnderPieces(const Homestead::Simulation& Simulation, uint64 LayoutKey);
+    // Hides the derelict farm's old ridges, stalks and bean poles under every tilled square; they come
+    // back if the square doesn't (a new game).
+    void ClearDerelictFarmUnderPlots(const Homestead::State& State);
+    TWeakObjectPtr<AHomesteadDerelictFarm> DerelictFarm;
+    bool bDerelictFarmSearched = false;
     TArray<TArray<FTransform>> EstateSceneryTransforms;
     TArray<float> EstateSceneryClearRadius; // 0 for trees and rocks, which are never hidden under pieces.
     TArray<float> EstateSceneryTrunkRadius; // Trees only: the trunk footprint kept clear of interactables.

@@ -268,7 +268,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), FString()});
         Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), FString()});
         Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), FString()});
-        Result.Add({8, TEXT("Start a new woodland"), FString()});
+        Result.Add({8, TEXT("Start a new game"), FString()});
         Result.Add({9, TEXT("Quit game"), FString()});
         if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
         {

@@ -24,8 +24,24 @@ public:
     virtual void BeginPlay() override;
     // Lays everything out again; returns the number of instances placed.
     int32 Rebuild();
+    // Hides the old crop ridges, dead stalks and bean poles that stand where a tilled garden square
+    // (world XY centres) lies, and brings them back where none does. Cheap when the squares are unchanged.
+    void ClearForPlots(const TArray<FVector2D>& PlotCentres);
 
 private:
+    // One old-field instance that tilling can clear: its home transform and its world footprint.
+    struct FClearable
+    {
+        TWeakObjectPtr<UInstancedStaticMeshComponent> Part;
+        int32 Index = 0;
+        FTransform Home;
+        FBox LocalBounds; // the mesh's bounds in the instance's own space, scale included
+        bool bHidden = false;
+    };
+    TArray<FClearable> Clearables;
+    TArray<FVector2D> TilledCentres;
+    void ApplyClearing();
+
     UPROPERTY(Transient)
     TArray<TObjectPtr<UInstancedStaticMeshComponent>> Parts;
     UPROPERTY(Transient)
@@ -35,7 +51,8 @@ private:
     UStaticMesh* Mesh(const TCHAR* Folder, const TCHAR* Name);
     // The instanced batch for one mesh, with or without collision; null when the mesh isn't imported.
     UInstancedStaticMeshComponent* Batch(const TCHAR* Folder, const TCHAR* Name, bool bBlocks);
-    bool Add(const TCHAR* Folder, const TCHAR* Name, const FTransform& World, bool bBlocks);
+    // bClearable: the instance is old-field litter that tilling the soil under it removes (ClearForPlots).
+    bool Add(const TCHAR* Folder, const TCHAR* Name, const FTransform& World, bool bBlocks, bool bClearable = false);
     float Ground(double X, double Y) const;
     // The ground's up vector at a world XY, from the heightfield over a Span (cm) footprint.
     FVector GroundUp(double X, double Y, double Span) const;

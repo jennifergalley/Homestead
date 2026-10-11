@@ -285,13 +285,13 @@ void SHomesteadMenu::BuildDialog()
     {
         Title = TEXT("This test save could not be loaded");
         Description = Controller->MenuLoadProblem() + TEXT("\n\nA reset starts a fresh test world. It is not a migration of the old progress.");
-        Labels = {TEXT("Stay in Settings"), TEXT("Start a new test woodland")};
+        Labels = {TEXT("Stay in Settings"), TEXT("Start a new game")};
     }
     else
     {
-        Title = TEXT("Start a new woodland?");
-        Description = TEXT("This replaces the current test session with a new woodland seed. Unsaved progress will be lost.");
-        Labels = {TEXT("Cancel"), TEXT("Start a new woodland")};
+        Title = TEXT("Start a new game?");
+        Description = TEXT("This replaces the current game with a new one. Unsaved progress will be lost.");
+        Labels = {TEXT("Cancel"), TEXT("Start a new game")};
     }
     TSharedPtr<SVerticalBox> Choices;
     const bool bCompactQuit = Dialog == EDialog::Exit || Dialog == EDialog::Unsaved

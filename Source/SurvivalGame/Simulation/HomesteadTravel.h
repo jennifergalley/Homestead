@@ -75,13 +75,13 @@ bool WithinTravelReachOfRoad(Point at);
 // "7 h 12 min", "45 min".
 std::string FormatWalkDuration(double gameHours);
 
-// The road signs (HomesteadEstatePublicRoad.h PublicRoad::signs) offer the same walk as the Map tab:
-// the manor's sign points to town, town's points home, and the gateway's both ways.
-// How near she stands to read a sign and set off from it, cm.
-constexpr double RoadSignReachCm = 280.0;
-std::vector<TravelDestination> RoadSignDestinations(const std::string& signName);
-// The sign within reach of t, nearest first, or null.
-const struct PublicRoadSign* RoadSignNear(Point at, double reachCm = RoadSignReachCm);
-// The words painted on it ("To town", "To the manor", "Town / Manor").
+struct PublicRoadSign;
+// The road signs (HomesteadEstatePublicRoad.h PublicRoad::signs) are wooden fingerposts that only point the way:
+// the manor's sign points toward the village, the village's toward the manor, the gateway's both ways. They don't
+// travel; walking is the Map tab's and the places she has visited.
+// The words painted on it ("To the village", "To the manor", "Village / Manor"); empty for any other name.
 std::string RoadSignLabel(const std::string& signName);
+// The yaw (degrees, 0..360) its upper arm points along: the road's heading toward the village for the manor and
+// gateway signs, toward the manor for the village's. The gateway's second arm points the opposite way.
+double RoadSignArmYaw(const PublicRoadSign& sign);
 }
