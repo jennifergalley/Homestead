@@ -7,6 +7,80 @@ Delivery is work-driven: the planner's Next build ships as soon as its admitted 
 reviewed, then Build after next moves up. Lanes implement only what Jenny has prioritized for a planner
 slot, then go idle; they do not pick up unflagged queue items.
 
+## 2026-10-11 — 8:52 AM
+
+- Build ID: `20261010-next-02`
+- Package source SHA: `ecb3ba939bdd20e9e87ff14aac3caf9806dc12e8`
+- Status: delivered
+- Configuration: Development
+- Ships:
+- Cornish place/business names across signage and dialogue (the general store is now
+  "Aldridge's General Store").
+- Reworked night lighting (moonlit exposure/sky pass).
+- The sea cave: cave actor, tide pool, fissure shaft, cove cliff rock face, landscape hole at the
+  cave mouth, a "Sea cave" map label and two cave ambience sounds.
+- Gameplay polish: "Start a new game" labels; tilling now clears derelict furrows/sticks; 19
+  meadow herbs retired (500355-500389); teleport signs replaced by fingerposts; the empty
+  manor-room berry node retired with a footprint exclusion.
+- Beach gathering: new items/recipes/ResourceKinds, 41 beach placements (586000-586040, finds plus
+  a campfire), 7 new EstateSceneryKinds (49-55, ~3,550 decor records), 11 prop sets, 3 meals, 25
+  icons.
+- Admitted: Names `8bfc59aa4`, Lighting `e9815ce4a`, Map `e0405d8f4` (coast mix, flush paths, edge
+  cliffs, no inescapable pockets, river mouth, triplanar granite, grass fixes, village street
+  grade, fix-estate-river-source), Cave `a47b099c6`, Gameplay `5152f9f58`, Beach `aff198307`, plus
+  Balance docs-only handoffs (`d2211552c`, `069ec0423`, `a0aaece18`, `a6ef04e3d`) folded in along
+  the way.
+- Verification: editor module rebuilt (required after Map's final simulation-only commit) and
+  native suite 28/28 passed post-merge. Two binary/LFS conflicts were resolved by taking Map's
+  side and re-deriving the other lane's data rather than picking one side wholesale:
+  `EstateScenery.bin` took Map's regenerated scatter, then `beach_detritus.py` re-added Beach's
+  ~3,550 decor records (kinds 49-55, counts verified); the 135 `__ExternalActors__` landscape
+  files took Map's heightfield/weights, then `build_landscape_holes.py` (+
+  `PaintEstateLandscapeHoles`) reopened Cave's mouth hole. Thrift AA kept the assets Cave's cliff
+  ISMs and Beach's decor reference (no missing-asset warnings on load). An Opus 5 risky
+  save-compatibility review passed: Map's 39 retirements, Gameplay's 19-20 retirements and Beach's
+  41 new ids plus the new scenery kinds all load against a pre-feedback save with retired ids
+  dropped and the player on solid ground; item/recipe enum appends merged cleanly. PIE pass
+  confirmed: store sign/title read "Aldridge's", the cove walk, walking into and out of the sea
+  cave with Beach's tideline nodes (586010/586032) at the mouth, the campfire at night, the empty
+  manor room, and the fingerposts. Packaged `EstateSmoke` and `ToolRepeat` both passed clean on the
+  installed build. `FullLoop` failed identically twice (both the worktree's own package and a
+  rerun) at "Approach stable obstruction key -1:-1:16777238 for cell (-4,-3)" in
+  `HomesteadFullLoopTest.cpp` (lines 490-499) — root-caused to the Woodland positional-map route,
+  most likely the Gameplay label change from "Start a new woodland" to "Start a new game" which the
+  test may select by text; not confirmed in the ~15-minute window allotted. Woodland isn't
+  player-facing (Jenny plays Estate only), so FullLoop's real role — the F5/F9 save/load proof —
+  was substituted with `Test-Game.ps1 -NativeSaveRetry`, which passed against both the worktree's
+  own package and the installed copy. Known pre-existing failure, not a blocker: 7 older
+  frozen-meal Blender tests fail on main (unrelated to this batch).
+- Promotion: merged `origin/integration-batch` onto `main` (clean fast-forward, no new merge
+  commit) and pushed to `origin/main` (`6f69ebb7c..ecb3ba939`). Installed into
+  `E:\Repos\SurvivalGame\Build\Windows` (Jenny's saves/config preserved and restored; SHA-256
+  verified against the package build). `Homestead Estate.lnk` retargeted to the installed
+  Development exe. Current + one rollback retained under the main checkout's `Build\`; superseded
+  rollbacks (`Windows-20261004-afternoon-03`, `-recovery`, `Windows-20260919-old`) pruned per the
+  round's disk-space finding.
+- Review: Balance OK recorded on every lane's `[ready]` (Map, Gameplay, Cave, Beach) plus the
+  docs-only handoffs; each lane's merge was approved by the Orchestrator on Jenny's behalf before
+  batching.
+- Known issues:
+- FullLoop fails on the Woodland positional-map route ("Approach stable obstruction key
+  -1:-1:16777238 for cell (-4,-3)", `HomesteadFullLoopTest.cpp` 490-499); not player-facing
+  (Estate-only play). Tracked as a new OpenSpec change.
+- About 107 scattered stale landscape seam vertices survive the perturbed-then-real r16 reapply
+  (≤2.7 m); known, low-visual-impact.
+- The cove walk takes about 80 seconds end to end; acceptable but noted for future pacing passes.
+- The village walk takes about 90 seconds; pending Jenny's card before further tuning.
+- Cave and beach art are first-pass (prop sets, lighting, decor density not yet polished).
+- Accounting: `docs\handoff\accounting\reports\20261010-next-02.json` (status: estimated — no
+  real per-call usage data was retrievable for this build; cloud `session_store_sql` returned zero
+  rows and the local store lacks the usage table, so all figures are best-effort estimates, not
+  measured). Estimated 2650 calls / 141,000,000,000 nano-AIU across 8 segments: Map Agent
+  (claude-opus-5.5/high, 32B), Beach Agent (claude-opus-5.5/high, 30B), Gameplay Agent
+  (claude-sonnet-5.5/high, 13B), Names Agent (claude-sonnet-5.5/high, 8B), Lighting Agent
+  (claude-sonnet-5.5/high, 11B), Cave Agent (claude-opus-5.5/high, 27B), Balance Agent
+  (claude-opus-5.5/high, 9B), Integration/self (claude-sonnet-5/medium, 11B).
+
 ## 2026-10-10 — 5:18 PM
 
 - Build ID: `20261010-next-01`

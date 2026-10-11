@@ -3,7 +3,7 @@
   "authorizedAt": "2026-10-10T19:20:00.000Z",
   "allocationPolicy": "Covers the Map feedback build (round 4's third lane set: Map, Beach, Gameplay, Names, Lighting, Cave, their Balance review, and Integration's merge/review/package/test/promote/closure) for build 20261010-next-02, allocated from the 2026-10-10 19:20 kickoff. Excludes 20261010-next-01 (map-shrink stage 2 and its own Balance/Integration segments), already allocated and reported separately.",
   "limits": [
-    "DRAFT: prepared ahead of the batch gate clearing (Map/Gameplay/Cave/Beach not yet [ready] as of this draft). since/boundaryEvidence for those segments will be refined with final commit SHAs once each lane's [ready] lands and the batch pass completes.",
+    "FINAL: batch cleared (Names, Lighting, Map, Gameplay, Cave, Beach all [ready] and merged); segments below carry final commit SHAs. session_store_sql returned no per-call usage rows for these local worktree sessions (cloud query: 0 rows on exact session IDs; local source: session_usage table absent), so recordedNanoAiu/estimatedNanoAiu in the paired usage/report files are best-effort estimates from each segment's authorized limit and call pattern, not reconciled actuals; see reports\\20261010-next-02.json coverage.disposition.",
     "Recorded nano-AIU is not billing-reconciled AI credits.",
     "Some calls have no recorded reasoning effort; preserve unknown in the export, not an inferred high value.",
     "authorizedAt is a single global floor applied across every session in this allocation; per-segment since values are evidence, not independent filters.",
@@ -21,7 +21,7 @@
       "reasoningEffort": "high",
       "launchContextTier": "default",
       "contextTier": null,
-      "boundaryEvidence": "Map Agent session (port 8776) for Jenny's terrain feedback: cliff/slope coast mix, map-edge cliffs, no inescapable areas, river mouth, cliff/grass artifacts, flush paths, cove stair edge, beach corner, boulder, cliff rock face, village street grade, river source. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+      "boundaryEvidence": "Map Agent session (port 8776) for Jenny's terrain feedback: cliff/slope coast mix, map-edge cliffs, no inescapable areas, river mouth, cliff/grass artifacts, flush paths, cove stair edge, beach corner, boulder, cliff rock face, village street grade, river source, fix-estate-river-source. [ready] at e0405d8f4 (already on main, 6 commits over 1f11cc7a5); Balance OK; native 26/26; merged into the batch."
     },
     {
       "sessionId": "8c44fafc-9777-4063-86f9-071f7722293f",
@@ -34,7 +34,7 @@
       "reasoningEffort": "high",
       "launchContextTier": "default",
       "contextTier": null,
-      "boundaryEvidence": "Beach Agent session (port 8777): beach shells, stones, driftwood and mussels (decor, daily gathers, dishes, store sales); placement ids 586000-586099 and EstateSceneryKinds 49-56. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+      "boundaryEvidence": "Beach Agent session (port 8777): beach shells, stones, driftwood and mussels (decor, daily gathers, dishes, store sales); items/recipes/ResourceKinds (HomesteadBeach), placement ids 586000-586040 (40 finds + campfire) in the base estate table, EstateSceneryKinds 49-55 (~3,550 decor records), campfire burn state in the node's readyAtHour (no Serialize change), 11 prop sets, 3 meals, 25 icons. [ready] at aff198307 (origin/main merged in; branch only); Balance OK; native 27/27; last lane, merged into the batch."
     },
     {
       "sessionId": "5b555e6e-49a2-4592-9abb-1a857ebd5a67",
@@ -47,7 +47,7 @@
       "reasoningEffort": "high",
       "launchContextTier": "default",
       "contextTier": null,
-      "boundaryEvidence": "Gameplay Agent session (port 8778): Start a new game label; derelict farm artifacts clear on till; half the meadow herbs sellable; directional signs replace teleport signs. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+      "boundaryEvidence": "Gameplay Agent session (port 8778): \"Start a new game\" labels; tilling clears derelict furrows/sticks; 19 meadow herbs retired (500355-500389, no renumbering); teleport signs replaced by fingerposts; manor-room berry 585200 retired with a footprint exclusion in compact_placements.py. [ready] at 5152f9f58 (rebased on main incl. Map e0405d8f4; branch only); Serialize unchanged; native 26/26; Balance OK; merged into the batch."
     },
     {
       "sessionId": "72b7d774-d285-4f3d-93a5-d62f61927853",
@@ -86,7 +86,7 @@
       "reasoningEffort": "high",
       "launchContextTier": "default",
       "contextTier": null,
-      "boundaryEvidence": "Cave Agent session (port 8781): beach sea cave with a pool. Not yet [ready] at draft time; final commit SHA to be added when it lands."
+      "boundaryEvidence": "Cave Agent session (port 8781): sea cave actor, pool, fissure shaft, cove cliff rock face (generated HomesteadCoveCliff.inc ISMs, no placement ids), a \"Sea cave\" map label, two cave sounds, and the landscape hole at the mouth (~257 landscape external-actor packages re-saved). [ready] at a47b099c6 (pushed; origin/main merged in rather than rebased); no save changes; Balance OK as a first pass; native 27/27; merged into the batch."
     },
     {
       "sessionId": "ceb1109b-f156-451c-b890-ca91fa92f1c1",
@@ -99,7 +99,7 @@
       "reasoningEffort": "high",
       "launchContextTier": "default",
       "contextTier": null,
-      "boundaryEvidence": "Balance Agent review-only segment for this build's lanes: hard-fishing/store-clothing values, beach-gathering plan (balance.md §8a), cohesion.md §1-2 and balance.md neutral-name updates, Gameplay batch and Lighting-night OK, cove-cap iterations (§9: held at 90s, reverted to 60s, then set to 75s per Jenny's option c), coast review notes. Docs-only commits d2211552c, f21443983, 281803b3a, 9fde6e7b7, 2c1bcb89f, 5f804c3c7, 563c6b66d, 6ca8648f1 (888ec9128 superseded, not separately billed) on branch jennifergalley-balance-agent-2c8, plus pending final-numbers Balance OK for Map/Beach/Cave once ready."
+      "boundaryEvidence": "Balance Agent review-only segment for this build's lanes: hard-fishing/store-clothing values, beach-gathering plan (balance.md §8a), cohesion.md §1-2 and balance.md neutral-name updates, Gameplay batch and Lighting-night OK, cove-cap iterations (§9: held at 90s, reverted to 60s, then set to 75s per Jenny's option c), coast review notes, sea-cave review notes (a0aaece18), beach review notes and the Aldridge's-vs-Trethewey's merge-order catch (a6ef04e3d), post-Map travel notes (069ec0423). Docs-only commits d2211552c, f21443983, 281803b3a, 9fde6e7b7, 2c1bcb89f, 5f804c3c7, 563c6b66d, 6ca8648f1, a0aaece18, a6ef04e3d, 069ec0423 (888ec9128 superseded, not separately billed) on branch jennifergalley-balance-agent-2c8; final-numbers Balance OK recorded for Map, Gameplay, Cave and Beach."
     },
     {
       "sessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
@@ -112,7 +112,7 @@
       "reasoningEffort": "medium",
       "launchContextTier": "default",
       "contextTier": null,
-      "boundaryEvidence": "Integration Agent session (reserved editor slot). Docs-liaison work (recording Gameplay/Lighting/Beach/docs findings; merging Balance docs and Beach's terrain-staleness note to main), and pending: the single batch merge (Names 8bfc59aa4, Lighting e9815ce4a, Map/Gameplay/Cave/Beach once ready), Opus 5 risky review of save/placement changes, native test run, editor compile, Development package, EstateSmoke/ToolRepeat/FullLoop F5/F9, PIE checks, install, shortcut promotion, and full delivery closure (builds.md card, this accounting report, planner slots/archive). Mixed models across calls; segment label reflects the dominant model (claude-sonnet-5 medium), actual per-call model/effort preserved in exported records."
+      "boundaryEvidence": "Integration Agent session (reserved editor slot). Merged the batch onto integration-batch in order Names 8bfc59aa4 -> Lighting e9815ce4a -> Cave a47b099c6 -> Gameplay 5152f9f58 -> Beach aff198307 (Map e0405d8f4 already on main); resolved binary/LFS conflicts by taking Map's side for EstateScenery.bin (rerunning beach_detritus.py for Beach's ~3,550 decor records, kinds 49-55) and for the 135 __ExternalActors__ landscape files (rerunning build_landscape_holes.py / PaintEstateLandscapeHoles for Cave's mouth hole); Opus 5 risky save-compat review passed; editor module rebuild plus native suite 28/28; Development package built and verified (~5.44 GB); EstateSmoke and ToolRepeat packaged suites passed; FullLoop root-caused to a Woodland route selector issue (HomesteadFullLoopTest.cpp 490-499, not player-facing), substituted with an F5/F9 NativeSaveRetry proof that passed against both the worktree package and the installed copy; installed to E:\\Repos\\SurvivalGame\\Build\\Windows with Jenny's saves/config preserved, shortcut retargeted; pushed integration-batch to origin/main (6f69ebb7c..ecb3ba939); full delivery closure (builds.md card, this accounting report, FullLoop OpenSpec change, OpenSpec archives, planner slots, docs liaison write-ups). Mixed models across calls; segment label reflects the dominant model (claude-sonnet-5 medium), actual per-call model/effort preserved in exported records."
     }
   ]
 }
