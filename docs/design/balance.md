@@ -294,7 +294,7 @@ they are; the cove and mine come much closer.
 | Farm → manor | 5–10 s | 15 s (72 m) | 8–12 s ✅ keep |
 | Manor → pond | 20–35 s | 45 s (216 m) | 44 s ✅ keep (Jenny: fine) |
 | Manor → village store | 40–60 s | 75 s (360 m) | about 60 s (290 m walked, stage 1) ✅ keep |
-| Manor → cove (first dry sand) | about 75 s | 75 s (360 m): mostly ≤1 in 4 natural slope with one or two short stone flights (Jenny's pick, 2026-10-11, for the mixed-coast card) | 58 s with 350 steps (stage 2); new path about 350 m 🟡 |
+| Manor → cove (first dry sand) | about 75 s | 75 s (360 m): mostly ≤1 in 4 natural slope with one or two short stone flights (Jenny's pick, 2026-10-11, for the mixed-coast card) | 80 s (378 m, two railed flights of 30 and 58 steps), 5 s over; Balance OK to ship 🟡 |
 | Manor → mine entrance | 35–50 s | 60 s (288 m), on a woodland path like the pond's | about 91 s (estimate, no authored path) 🔴 |
 
 - **Daily loop:** farm, then store, then one fishing spot, then home. That's at most about 3 minutes
