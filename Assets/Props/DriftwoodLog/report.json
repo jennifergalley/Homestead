@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "name": "DriftwoodLog",
+  "description": "A 3.6 m bleached driftwood trunk, 34-45 cm thick, with a broken root plate, half-sunk in beach sand: silver-grey, spiral-ribbed, deeply checked and worn smooth. Landmark scenery.",
+  "collision": "capsule",
+  "triangle_budget": 15000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/driftwood_log.py",
+  "source_sha256": "77b1df5a3ba1f02aef6b7876d5366d7d640b7a9974cb2322fbb076e0f149d2d7",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_DriftwoodLog": {
+      "vertices": 6002,
+      "triangles": 12000,
+      "size_cm": [
+        401.29,
+        120.46,
+        100.74
+      ],
+      "materials": [
+        {
+          "name": "M_DriftwoodLog",
+          "textures": {
+            "basecolor": "T_DriftwoodLog_basecolor.png",
+            "roughness": "T_DriftwoodLog_roughness.png",
+            "normal": "T_DriftwoodLog_normal.png",
+            "ao": "T_DriftwoodLog_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.16789426803588867,
+          -0.12295905828475952,
+          0.17
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.6
+      },
+      "fbx": "SM_DriftwoodLog.fbx",
+      "sha256": "eebd69780749922582aac6ec49904937c5da637cffaad9c7b6dc8367cd6cf346",
+      "preview": "preview_SM_DriftwoodLog.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_DriftwoodLog_hero.png",
+          "detail": "beauty_SM_DriftwoodLog_detail.png",
+          "eye": "beauty_SM_DriftwoodLog_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_DriftwoodLog_LOD1": {
+      "vertices": 2402,
+      "triangles": 4800,
+      "size_cm": [
+        401.47,
+        120.52,
+        100.74
+      ],
+      "materials": [
+        {
+          "name": "M_DriftwoodLog",
+          "textures": {
+            "basecolor": "T_DriftwoodLog_basecolor.png",
+            "roughness": "T_DriftwoodLog_roughness.png",
+            "normal": "T_DriftwoodLog_normal.png",
+            "ao": "T_DriftwoodLog_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.16789426803588867,
+          -0.12295905828475952,
+          0.17
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.6
+      },
+      "fbx": "SM_DriftwoodLog_LOD1.fbx",
+      "sha256": "6a2e936c16a18f4e83d9899ccbd589efd85ff86abed764f88057eebb03d948f4",
+      "preview": "preview_SM_DriftwoodLog_LOD1.png"
+    },
+    "SM_DriftwoodLog_LOD2": {
+      "vertices": 852,
+      "triangles": 1700,
+      "size_cm": [
+        401.66,
+        120.62,
+        100.96
+      ],
+      "materials": [
+        {
+          "name": "M_DriftwoodLog",
+          "textures": {
+            "basecolor": "T_DriftwoodLog_basecolor.png",
+            "roughness": "T_DriftwoodLog_roughness.png",
+            "normal": "T_DriftwoodLog_normal.png",
+            "ao": "T_DriftwoodLog_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.16789426803588867,
+          -0.12295905828475952,
+          0.17
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.6
+      },
+      "fbx": "SM_DriftwoodLog_LOD2.fbx",
+      "sha256": "1918a695ddad657a7de30caab47eb00882f9a9201e620584d7fce2d3340f494f",
+      "preview": "preview_SM_DriftwoodLog_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.1,
+    "bake": {
+      "size": 4096,
+      "samples": 64,
+      "device": "OPTIX",
+      "normal": "OpenGL",
+      "method": "high-to-low selected-to-active",
+      "maps": {
+        "basecolor": "T_DriftwoodLog_basecolor.png",
+        "roughness": "T_DriftwoodLog_roughness.png",
+        "normal": "T_DriftwoodLog_normal.png",
+        "ao": "T_DriftwoodLog_ao.png"
+      }
+    },
+    "material": "Baked from a 5 mm displaced high mesh (homestead_highbake); M_PropTextured.",
+    "lods": {
+      "SM_DriftwoodLog": 12000,
+      "SM_DriftwoodLog_LOD1": 4800,
+      "SM_DriftwoodLog_LOD2": 1700
+    }
+  },
+  "capsule": {
+    "center_cm": [
+      28.0,
+      16.3,
+      4.0
+    ],
+    "radius_cm": 17.0,
+    "length_cm": 307.6,
+    "axis": [
+      0.9997,
+      0.0255,
+      0.0
+    ],
+    "note": "Unreal space (Y mirrored). Lies along the trunk axis, top ~21 cm above the sand, so the heroine can step onto or over it; the root plate has no blocker."
+  },
+  "collision_extra": {
+    "root_plate_box_cm": {
+      "center": [
+        -160.2,
+        14.3,
+        35.0
+      ],
+      "extent": [
+        30.0,
+        62.0,
+        35.0
+      ]
+    },
+    "note": "Optional second blocker (half extents) if the importer gains multi-shape collision; not applied by import_props.py today."
+  },
+  "placement": "Pivot is the ground line at the bottom centre of the visible footprint; place at sand height. Trunk along X: root plate toward -X, thin broken end toward +X.",
+  "textures": {
+    "T_DriftwoodLog_basecolor.png": "f69fd62af555ed5217897fbeada5eb9ad2103c0dc8cf1c454e62b79ece1e34ad",
+    "T_DriftwoodLog_roughness.png": "547fdf10e8bde5aed71137e2b68a4589e638c5218502daab28d924b99e671769",
+    "T_DriftwoodLog_normal.png": "ee1a7a7d5a9f3950c6f824fe5f97f4f5ca2a25f944ffb81d89dd9249956e5769",
+    "T_DriftwoodLog_ao.png": "934e57f1f982cf42c31dd2a91f65ab2811e2986766ce1fbfb471fdf5de2f70b5"
+  }
+}

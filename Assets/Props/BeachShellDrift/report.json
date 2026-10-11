@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "BeachShellDrift",
+  "description": "A 1.2 x 0.6 m tideline drift of whole and broken cockle, mussel, limpet, periwinkle and tellin shells with shell grit. Ground-hugging scenery, no collision.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/beach_shell_drift.py",
+  "source_sha256": "ed73e2519ccab687d48e86dd93516738aa4cacf022aa30ccecd2e83942b3f05c",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_BeachShellDrift": {
+      "vertices": 3023,
+      "triangles": 3996,
+      "size_cm": [
+        116.04,
+        47.07,
+        2.47
+      ],
+      "materials": [
+        {
+          "name": "M_BeachShellDrift",
+          "textures": {
+            "basecolor": "T_BeachShellDrift_basecolor.png",
+            "roughness": "T_BeachShellDrift_roughness.png",
+            "normal": "T_BeachShellDrift_normal.png",
+            "ao": "T_BeachShellDrift_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.053432691097259524,
+          -0.028176933526992798,
+          0.01
+        ],
+        "ground": "origin",
+        "detail_distance": 0.42,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.8
+      },
+      "fbx": "SM_BeachShellDrift.fbx",
+      "sha256": "55ea0e881fac5276b61a5b97f45e3c1fb80f188125bd335e6664c5c7c81507ef",
+      "preview": "preview_SM_BeachShellDrift.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BeachShellDrift_hero.png",
+          "detail": "beauty_SM_BeachShellDrift_detail.png",
+          "eye": "beauty_SM_BeachShellDrift_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_BeachShellDrift_LOD1": {
+      "vertices": 1855,
+      "triangles": 1998,
+      "size_cm": [
+        116.06,
+        47.07,
+        2.49
+      ],
+      "materials": [
+        {
+          "name": "M_BeachShellDrift",
+          "textures": {
+            "basecolor": "T_BeachShellDrift_basecolor.png",
+            "roughness": "T_BeachShellDrift_roughness.png",
+            "normal": "T_BeachShellDrift_normal.png",
+            "ao": "T_BeachShellDrift_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.053432691097259524,
+          -0.028176933526992798,
+          0.01
+        ],
+        "ground": "origin",
+        "detail_distance": 0.42,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.8
+      },
+      "fbx": "SM_BeachShellDrift_LOD1.fbx",
+      "sha256": "403b455839e94cb0ab2a61411cf658e8e1a28bdd4e986017b2de15bf11439490",
+      "preview": "preview_SM_BeachShellDrift_LOD1.png"
+    },
+    "SM_BeachShellDrift_LOD2": {
+      "vertices": 1041,
+      "triangles": 879,
+      "size_cm": [
+        116.03,
+        47.04,
+        2.52
+      ],
+      "materials": [
+        {
+          "name": "M_BeachShellDrift",
+          "textures": {
+            "basecolor": "T_BeachShellDrift_basecolor.png",
+            "roughness": "T_BeachShellDrift_roughness.png",
+            "normal": "T_BeachShellDrift_normal.png",
+            "ao": "T_BeachShellDrift_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.053432691097259524,
+          -0.028176933526992798,
+          0.01
+        ],
+        "ground": "origin",
+        "detail_distance": 0.42,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.8
+      },
+      "fbx": "SM_BeachShellDrift_LOD2.fbx",
+      "sha256": "5cd8f612eadf1001a45f18365d24a02336a838d23d52f6768c500d8ce3013f94",
+      "preview": "preview_SM_BeachShellDrift_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.003,
+    "bake": {
+      "size": 2048,
+      "samples": 64,
+      "device": "OPTIX",
+      "normal": "OpenGL",
+      "method": "high-to-low selected-to-active",
+      "maps": {
+        "basecolor": "T_BeachShellDrift_basecolor.png",
+        "roughness": "T_BeachShellDrift_roughness.png",
+        "normal": "T_BeachShellDrift_normal.png",
+        "ao": "T_BeachShellDrift_ao.png"
+      }
+    },
+    "counts": {
+      "valves": 50,
+      "cupped": 12,
+      "fragments": 26,
+      "winkles": 5,
+      "grit": 44
+    },
+    "lods": {
+      "SM_BeachShellDrift": 3996,
+      "SM_BeachShellDrift_LOD1": 1998,
+      "SM_BeachShellDrift_LOD2": 879
+    },
+    "material": "Baked from a dense displaced, vertex-coloured high mesh (homestead_highbake); M_PropTextured."
+  },
+  "placement": "Ground line at z = 0 (pivot, bottom centre); shell rims sink 1.5-3 mm below it. Long axis along X. Random yaw, 0.8-1.2 scale.",
+  "textures": {
+    "T_BeachShellDrift_basecolor.png": "9dc0b6a28a5137cbd27826e15f0a84d6c3c3795fe9039fa3cb546b196291c6f8",
+    "T_BeachShellDrift_roughness.png": "d9ae4fbf4f7f416386a1bfd697c442d64e1ac41a10b33f7051ec025be3c183ae",
+    "T_BeachShellDrift_normal.png": "4477cd3050a55a01cefe552a7c6a44e32b5239e5db41df3df51d1b7c62f0467a",
+    "T_BeachShellDrift_ao.png": "54683aafff084fba5f87d1729e133eb3914f6966eb5f19552bbe7cc52f4664bc"
+  }
+}

@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "BeachPebbleDrift",
+  "description": "A 1.5 x 0.8 m patch of rounded beach pebbles 2-8 cm (grey and pink granite, white quartz, dark slate and greenstone) half-bedded in sand. Ground-hugging scenery, no collision.",
+  "collision": "none",
+  "triangle_budget": 6000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/beach_pebble_drift.py",
+  "source_sha256": "1c950ac1253a00c22bacd53579579ed7c65a7a37ee317c925c7b4f449d287cd4",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_BeachPebbleDrift": {
+      "vertices": 3449,
+      "triangles": 5999,
+      "size_cm": [
+        114.35,
+        59.05,
+        6.62
+      ],
+      "materials": [
+        {
+          "name": "M_BeachPebbleDrift",
+          "textures": {
+            "basecolor": "T_BeachPebbleDrift_basecolor.png",
+            "roughness": "T_BeachPebbleDrift_roughness.png",
+            "normal": "T_BeachPebbleDrift_normal.png",
+            "ao": "T_BeachPebbleDrift_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.03466231226921082,
+          -0.041246148943901065,
+          0.02
+        ],
+        "ground": "origin",
+        "detail_distance": 0.5,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.0
+      },
+      "fbx": "SM_BeachPebbleDrift.fbx",
+      "sha256": "f262bc8c87d0d72d7bb7fd7b0d3edf94d3474bcf56bf805c899b235060e3fb24",
+      "preview": "preview_SM_BeachPebbleDrift.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BeachPebbleDrift_hero.png",
+          "detail": "beauty_SM_BeachPebbleDrift_detail.png",
+          "eye": "beauty_SM_BeachPebbleDrift_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_BeachPebbleDrift_LOD1": {
+      "vertices": 1917,
+      "triangles": 2998,
+      "size_cm": [
+        114.51,
+        59.05,
+        6.64
+      ],
+      "materials": [
+        {
+          "name": "M_BeachPebbleDrift",
+          "textures": {
+            "basecolor": "T_BeachPebbleDrift_basecolor.png",
+            "roughness": "T_BeachPebbleDrift_roughness.png",
+            "normal": "T_BeachPebbleDrift_normal.png",
+            "ao": "T_BeachPebbleDrift_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.03466231226921082,
+          -0.041246148943901065,
+          0.02
+        ],
+        "ground": "origin",
+        "detail_distance": 0.5,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.0
+      },
+      "fbx": "SM_BeachPebbleDrift_LOD1.fbx",
+      "sha256": "467dcbc43f8b546f4efce4388405dd39b7ce88e61524f841bb53b50b51254763",
+      "preview": "preview_SM_BeachPebbleDrift_LOD1.png"
+    },
+    "SM_BeachPebbleDrift_LOD2": {
+      "vertices": 1000,
+      "triangles": 1318,
+      "size_cm": [
+        114.7,
+        59.19,
+        6.9
+      ],
+      "materials": [
+        {
+          "name": "M_BeachPebbleDrift",
+          "textures": {
+            "basecolor": "T_BeachPebbleDrift_basecolor.png",
+            "roughness": "T_BeachPebbleDrift_roughness.png",
+            "normal": "T_BeachPebbleDrift_normal.png",
+            "ao": "T_BeachPebbleDrift_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.03466231226921082,
+          -0.041246148943901065,
+          0.02
+        ],
+        "ground": "origin",
+        "detail_distance": 0.5,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.0
+      },
+      "fbx": "SM_BeachPebbleDrift_LOD2.fbx",
+      "sha256": "c0fe1e0f46e3d5fcddcc17cb878d845f62900197aa77d4c68fe51d227ea550c1",
+      "preview": "preview_SM_BeachPebbleDrift_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.01,
+    "bake": {
+      "size": 2048,
+      "samples": 64,
+      "device": "OPTIX",
+      "normal": "OpenGL",
+      "method": "high-to-low selected-to-active",
+      "maps": {
+        "basecolor": "T_BeachPebbleDrift_basecolor.png",
+        "roughness": "T_BeachPebbleDrift_roughness.png",
+        "normal": "T_BeachPebbleDrift_normal.png",
+        "ao": "T_BeachPebbleDrift_ao.png"
+      }
+    },
+    "pebbles": 118,
+    "kinds": {
+      "granite": 53,
+      "pink": 18,
+      "greenstone": 10,
+      "slate": 26,
+      "quartz": 11
+    },
+    "lods": {
+      "SM_BeachPebbleDrift": 5999,
+      "SM_BeachPebbleDrift_LOD1": 2998,
+      "SM_BeachPebbleDrift_LOD2": 1318
+    },
+    "material": "Baked from a dense high mesh with kit.mats.granite + quartz/slate/greenstone materials (homestead_highbake); M_PropTextured."
+  },
+  "placement": "Ground line at z = 0 (pivot, bottom centre); pebble skirts reach ~1 cm below it. Long axis along X. Random yaw, 0.8-1.2 scale.",
+  "textures": {
+    "T_BeachPebbleDrift_basecolor.png": "834a7798bac7ac276a6bbf40300842ff9df95d382c6bc47ab11e744b838c3384",
+    "T_BeachPebbleDrift_roughness.png": "3a9e7cd8d23652f92fb265368a7b1af071e460dff9f48b14d84b5d750fcb5045",
+    "T_BeachPebbleDrift_normal.png": "3a77f1cf574776def08dd807f35837bbe45a6512281c71d4600b43bbb13ee3fd",
+    "T_BeachPebbleDrift_ao.png": "55a1f9d90ebcee1caab48d0cf87ca73cb8413585d53a87a4bbbe88d8ad1aecd5"
+  }
+}

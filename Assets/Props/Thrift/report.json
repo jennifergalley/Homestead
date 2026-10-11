@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Thrift",
+  "description": "A cushion of thrift (sea pinks), 20 cm tall and 22 cm across: dense narrow dark-green leaves with rose-pink globular flower heads on leafless stalks. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 5000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/thrift.py",
+  "source_sha256": "e9a360172c1b24657b8bbab5c33d13db31c2f6b2fc1651782221d1841cd2f56d",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_ThriftClump": {
+      "vertices": 5226,
+      "triangles": 4756,
+      "size_cm": [
+        21.4,
+        21.49,
+        24.67
+      ],
+      "materials": [
+        {
+          "name": "M_Thrift",
+          "textures": {
+            "basecolor": "T_Thrift_basecolor.png",
+            "normal": "T_Thrift_normal.png",
+            "roughness": "T_Thrift_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0005251169204711914,
+          0.00019156932830810547,
+          0.12
+        ],
+        "ground": "origin",
+        "detail_distance": 0.45,
+        "detail_fstop": 9.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4
+      },
+      "fbx": "SM_ThriftClump.fbx",
+      "sha256": "5e7732d3b085da5399cfd5dad81ccb0d3dd9edeb62178e7f3628e897ad4ddc36",
+      "preview": "preview_SM_ThriftClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_ThriftClump_hero.png",
+          "detail": "beauty_SM_ThriftClump_detail.png",
+          "eye": "beauty_SM_ThriftClump_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_ThriftClump_LOD1": {
+      "vertices": 1917,
+      "triangles": 1646,
+      "size_cm": [
+        21.08,
+        21.0,
+        24.66
+      ],
+      "materials": [
+        {
+          "name": "M_Thrift",
+          "textures": {
+            "basecolor": "T_Thrift_basecolor.png",
+            "normal": "T_Thrift_normal.png",
+            "roughness": "T_Thrift_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0005251169204711914,
+          0.00019156932830810547,
+          0.12
+        ],
+        "ground": "origin",
+        "detail_distance": 0.45,
+        "detail_fstop": 9.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4
+      },
+      "fbx": "SM_ThriftClump_LOD1.fbx",
+      "sha256": "d11178a066cc03832a5678139ad95041e7fca80319b66e2087aaee2276c6db4a",
+      "preview": "preview_SM_ThriftClump_LOD1.png"
+    },
+    "SM_ThriftClump_LOD2": {
+      "vertices": 343,
+      "triangles": 296,
+      "size_cm": [
+        20.29,
+        21.51,
+        24.39
+      ],
+      "materials": [
+        {
+          "name": "M_Thrift",
+          "textures": {
+            "basecolor": "T_Thrift_basecolor.png",
+            "normal": "T_Thrift_normal.png",
+            "roughness": "T_Thrift_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0005251169204711914,
+          0.00019156932830810547,
+          0.12
+        ],
+        "ground": "origin",
+        "detail_distance": 0.45,
+        "detail_fstop": 9.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4
+      },
+      "fbx": "SM_ThriftClump_LOD2.fbx",
+      "sha256": "71bfd2cbd7f973734646117cb5fe9949a6fe57f4a670b4d6ce00c676f1ae9f21",
+      "preview": "preview_SM_ThriftClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.008
+  },
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_Thrift: T_Thrift_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "placement": "Ground line at z = 0 (pivot); the leaf skirt starts 8 mm below. Random yaw, 0.8-1.2 scale.",
+  "textures": {
+    "T_Thrift_basecolor.png": "d7c55e50dbcd76e72b2ce0413a25331af22ad36a73108a299b9f2b41186f7125",
+    "T_Thrift_normal.png": "6927b405136b215f2d8fde179071b03aba4747a209ee622677ec419f40f3538b",
+    "T_Thrift_roughness.png": "d896d5a1d0cbb5c183a69efd3abfbd0bbc653460c3521bb48376d0c9c9a0b3ee"
+  }
+}
