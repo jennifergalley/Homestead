@@ -370,6 +370,7 @@ clashes between parallel callers.
 | `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
 | `pyfile <path>` | run a Python file in the editor with `__file__` set |
 | `tp <x> <y> [z]` | `HomesteadTeleport`: stands her on the ground at x,y once its collision has streamed in (with z: on the first surface at or below z, for an upper floor). Works in packaged Development builds too |
+| `sellat ["Name N,Name N"]` | `HomesteadSellAtStore`: skips to 9 AM if the General Store is closed (or it's Sunday), teleports her to its real counter, sells the carried items (by item name or key, e.g. `Coal 3,CopperOre 2`; give them first with `HomesteadGive`), opens the shop screen and logs per-item prices and the purse delta to `LogHomesteadPlaytest`. The sale waits for the teleport to settle; read the log a few seconds later. Works in packaged Development builds too |
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px). To click something seen in a `shot` capture, scale capture pixels by client width / capture width and add the window-rect origin: with a 3840-wide client, a 1280x692 capture and the rect at (-12, -12), `x = cap_x * 3 + 12`, `y = cap_y * 3 + 12` |
 
 Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,

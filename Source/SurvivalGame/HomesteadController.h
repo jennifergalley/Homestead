@@ -390,6 +390,10 @@ public:
     // ground's collision to stream in). Give Z to land on the first surface at or below Z instead
     // (an upper floor, say); omit it for the terrain.
     UFUNCTION(Exec) void HomesteadTeleport(float X, float Y, float Z = -1000000.0f);
+    // Playtest aid (HomesteadControllerTestShop.cpp): make the General Store open, teleport her to its
+    // real counter, sell what she carries from a list like "Coal 3,CopperOre 2", open the shop screen
+    // and log the purse delta and per-item prices to LogHomesteadPlaytest.
+    UFUNCTION(Exec) void HomesteadSellAtStore(const FString& SellList);
     // Oil lamp (add-oil-lamp): fill the lamp from a flask (the flask's pack menu, or F / X in hand).
     void MenuRefillLamp();
     // Console playtest aid: set the lamp's oil in game hours (0-6), e.g. HomesteadLampOil 0.5.
@@ -456,6 +460,15 @@ private:
     bool IsShopWaitArmed() const;
     bool CancelShopWait();
     FString GreetingFor(const Homestead::Shop& Shop) const;
+    // HomesteadSellAtStore: the sales wait here until the teleport's ground snap has settled.
+    struct FTestShopSale { Homestead::Item Item = Homestead::Item::Count; int32 Quantity = 0; };
+    TArray<FTestShopSale> TestShopSales;
+    FTimerHandle TestShopTimer;
+    double TestShopStartedAt = 0.0;
+    int32 TestShopId = INDEX_NONE;
+    FRotator TestShopFacing = FRotator::ZeroRotator;
+    void TickTestShop();
+    void FinishTestShop();
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;

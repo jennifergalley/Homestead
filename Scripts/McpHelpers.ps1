@@ -20,6 +20,7 @@ Functions:
     quit                                   stop PIE and quit the editor cleanly (releases DLL and .uasset locks)
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
     tp <x> <y> [z]                         HomesteadTeleport: stand her on the ground at x,y (with z: on the first surface at or below z)
+    sellat ["Name N,Name N"]               HomesteadSellAtStore: open the General Store's hours, stand her at its real counter, sell what she carries, open the shop; logs LogHomesteadPlaytest
     click <x> <y>                          real Win32 left click at editor-window pixels (Slate clicks don't reach game widgets)
 Variables: $McpEditor $McpScene $McpLogs $McpSlate $McpPlay $McpPython (toolset names for your own mcp calls).
 Short aliases $E $S $L $SL $H $PY are set too, but only if you haven't already defined those names; dot-sourcing
@@ -135,6 +136,16 @@ function tp([double]$x, [double]$y, $z = $null) {
     # HomesteadTeleport stands her on the ground at x,y (waiting for its collision to stream in), so she
     # never drops from a guessed height. With z she lands on the first surface at or below z (an upper floor).
     $cmd = "HomesteadTeleport $x $y" + $(if ($null -ne $z) { " $([double]$z)" } else { '' })
+    $null = con $cmd
+    $cmd
+}
+
+function sellat([string]$items = 'Coal 3,CopperOre 2,Quartz 2,Amethyst 1') {
+    # HomesteadSellAtStore: brings the General Store's hours round (skips to 9 AM if closed or Sunday), teleports her
+    # to the real village counter, sells the carried items through the shop's own sell path, opens the shop screen and
+    # logs per-item prices and the purse delta (filter the log for LogHomesteadPlaytest). It sells; it does not grant,
+    # so `con "HomesteadGive Coal 3"` first. The sale waits for the teleport to settle, so read the log a few seconds later.
+    $cmd = "HomesteadSellAtStore $items"
     $null = con $cmd
     $cmd
 }

@@ -68,5 +68,6 @@ The southeast corner of the square is open for the road in from the estate.
   For example, `BugItGo -54000 116500 9350 0 90 0` puts her in front of the store door.
 - **`BugItGo` also turns on `Ghost`**, so she walks through walls, the counter and knee-deep into floors. Type `Walk` afterwards to get collision back before judging anything physical.
 - `HomesteadGive Hay 20` and `HomesteadGive ScrapIron 6` stock her pack.
+- `HomesteadSellAtStore Coal 3,CopperOre 2` (or `sellat` from `McpHelpers.ps1`) sets the shop's hours, stands her at the real counter, sells what she carries through the shop's own sell path, opens the shop screen and logs per-item prices and the purse delta to `LogHomesteadPlaytest`. It works on a packaged Development build too.
 - The manor bedroll is next to (-25500, -63720). Sleeping through 6 AM runs the sell-down.
 - `HomesteadOpenStore` **moves** the store to 2.5 m ahead of her. It's for maps without a town. On the Estate the store is gone from the square until the save reloads, and loading puts it back at its anchor.
