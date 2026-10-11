@@ -144,6 +144,16 @@ if (drops > 0.01)
     n = normalize(n + float3(dv / max(r, 1e-3) * ring * 0.9 * drops, 0.0));
 }
 
+// Steep ground of any paint layer (Jenny's striated cliffs, 2026-10-10): the top-down layers stretch into streaks
+// on a steep face, so above about 35 degrees the triplanar granite takes over, greyed toward Cornish granite.
+float steepness = 1.0 - saturate(normalize(Nw).z);
+float rockAmt = smoothstep(0.17, 0.30, steepness);
+float rl = dot(CliffC, float3(0.333, 0.333, 0.333));
+float3 granite = lerp(float3(rl, rl, rl) * float3(0.96, 0.98, 1.03), CliffC, 0.45);
+col = lerp(col, granite, rockAmt);
+n = normalize(lerp(n, normalize(CliffN), rockAmt));
+rough = lerp(rough, CliffR, rockAmt);
+
 NormalOut = n;
 RoughOut = rough;
 #if GROUND_DEBUG
@@ -156,7 +166,7 @@ if _os.environ.get("GROUND_DEBUG"):
     FINISH_HLSL = "#define GROUND_DEBUG 1\n" + FINISH_HLSL
 
 
-def ground_finish(bc, nm, rg, y0):
+def ground_finish(bc, nm, rg, y0, cliff=None):
     def tex(path, x, y, kind, uvs, clamp=False):
         t = MEL.create_material_expression(mat, unreal.MaterialExpressionTextureSample, x, y)
         t.set_editor_property('texture', unreal.load_asset(path))
@@ -261,7 +271,8 @@ def ground_finish(bc, nm, rg, y0):
               ('SwardMix', scal('SwardMix', 0.8, y + 1180), ''),
               ('ZoneTint', vec('ZoneTint', (0.93, 1.02, 1.12), y + 1420), 'RGB'),
               ('Wet', wet_p, ''), ('RainNow', rain_p, ''), ('Time', time_p, ''),
-              ('T0', tints[0], 'RGB'), ('T1', tints[1], 'RGB'), ('T2', tints[2], 'RGB'), ('T3', tints[3], 'RGB')]
+              ('T0', tints[0], 'RGB'), ('T1', tints[1], 'RGB'), ('T2', tints[2], 'RGB'), ('T3', tints[3], 'RGB'),
+              ('CliffC', cliff[0], ''), ('CliffN', cliff[1], ''), ('CliffR', cliff[2], 'RoughOut'), ('Nw', cliff[3], '')]
     ins = []
     for name, *_ in inputs:
         ci = unreal.CustomInput(); ci.set_editor_property('input_name', name); ins.append(ci)
@@ -393,6 +404,8 @@ for n in LAYERS:
         colour[n] = (mul, '')
         MEL.connect_material_expressions(tri_n, '', nm, 'Layer ' + n)
         rough[n] = (tri, 'RoughOut')
+        nws_all = MEL.create_material_expression(mat, unreal.MaterialExpressionVertexNormalWS, -650, y + 60)
+        CLIFF = (mul, tri_n, tri, nws_all)
         y += 260
         continue
     near = sample(n, 'D', s, -1200, y, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
@@ -464,7 +477,7 @@ else:
 for n in LAYERS:
     MEL.connect_material_expressions(colour[n][0], colour[n][1], bc, 'Layer ' + n)
     MEL.connect_material_expressions(rough[n][0], rough[n][1], rg, 'Layer ' + n)
-finish = ground_finish(bc, nm, rg, y)
+finish = ground_finish(bc, nm, rg, y, CLIFF)
 MEL.connect_material_property(finish, '', unreal.MaterialProperty.MP_BASE_COLOR)
 MEL.connect_material_property(finish, 'NormalOut', unreal.MaterialProperty.MP_NORMAL)
 MEL.connect_material_property(finish, 'RoughOut', unreal.MaterialProperty.MP_ROUGHNESS)
