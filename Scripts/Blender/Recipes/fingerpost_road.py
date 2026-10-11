@@ -31,13 +31,15 @@ POST = 0.125
 HEIGHT = 2.10
 BURY = 0.35
 UPPER_Z = 1.70
-LOWER_Z = 1.52
-ARM_LEN = 0.80
-ARM_H = 0.13
+LOWER_Z = 1.40
+ARM_LEN = 1.25
+ARM_H = 0.22
 ARM_T = 0.03
-TEXT_SIZE = 0.078
+# Letters about 9 cm tall on a 22 cm board: readable from 4-5 m at 1080p (the first 5 cm letters were not).
+TEXT_SIZE = 0.13
+TEXT_WEIGHT = 0.006
 # The lettering stays inside this much of the arm, from the post's face toward the tip's taper.
-TEXT_FIELD = 0.60
+TEXT_FIELD = 0.95
 
 
 def lettering(kit, name, text, face, paint, arm_z, turn):
@@ -45,7 +47,8 @@ def lettering(kit, name, text, face, paint, arm_z, turn):
     curve = bpy.data.curves.new(name, type='FONT')
     curve.body = text
     curve.size = TEXT_SIZE
-    curve.extrude = 0.001
+    curve.extrude = 0.002
+    curve.offset = TEXT_WEIGHT
     curve.align_x = 'CENTER'
     curve.align_y = 'CENTER'
     obj = bpy.data.objects.new(name, curve)
@@ -108,9 +111,9 @@ def build_one(kit, oak, paint, mesh_name, arms):
 
 
 def build(kit):
-    oak = kit.mats.wood("M_FingerpostOak", light=(0.30, 0.28, 0.25), dark=(0.10, 0.095, 0.085), grain=1.1,
+    oak = kit.mats.wood("M_FingerpostOak", light=(0.26, 0.20, 0.14), dark=(0.08, 0.06, 0.042), grain=1.1,
                         roughness=0.8, weathering=0.8, grime=0.3, seed=71.0, relief=1.2)
-    # Near-black lettering: chalk-white letters vanish against the silvered oak in daylight.
+    # Weathered brown-grey oak like the cove's post, with near-black letters: chalk-white vanished against it.
     paint = kit.material("M_FingerpostPaint", (0.025, 0.023, 0.02), roughness=0.9)
     return [
         build_one(kit, oak, paint, "SM_Fingerpost_ToTheVillage", [("To the village", UPPER_Z, 1.0)]),
