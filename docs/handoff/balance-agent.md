@@ -94,6 +94,9 @@ have rewritten it (she turned "sleep 15/h" into "Sleep always resets the energy 
 
 ## How lanes reach me
 
+Orchestrator from 2026-10-11 afternoon: `fc0ce9e2-4586-4dec-8f40-6561960819c3` (replaces
+`cfe8292c`). Send [ready]s and backlog suggestions there.
+
 Order for new assets and animations (Jenny, 2026-10-04): the lane sends me review media
 (screenshots plus MP4) and I give a cohesion OK or blocking changes. The lane then sends the batch
 to Jenny, and she approves it before [ready]. My OK comes first; it doesn't replace hers.
