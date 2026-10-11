@@ -289,6 +289,7 @@ private:
     {
         TArray<TWeakObjectPtr<USceneComponent>> Parts;
         TArray<TWeakObjectPtr<UStaticMeshComponent>> Flames;
+        TArray<TWeakObjectPtr<UStaticMeshComponent>> Glowing;
         TArray<FVector> FlameScales;
         TWeakObjectPtr<class UPointLightComponent> Light;
         float Phase = 0.0f;

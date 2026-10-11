@@ -202,12 +202,16 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             else
             {
                 auto* Box = NewObject<UBoxComponent>(this);
-                Box->SetBoxExtent(FVector(Extent.X * 0.85f, Extent.Y * 0.85f, Extent.Z), false);
+                // The beach campfire's ring is only ankle-high and can sit a few cm under the drawn sand: a
+                // 40 cm box from below the ring up stops her at its edge rather than stepping into the fire.
+                const float BoxHalfZ = Kind == ResourceKind::BeachCampfire ? FMath::Max(Extent.Z, 20.0f) : Extent.Z;
+                Box->SetBoxExtent(FVector(Extent.X * 0.85f, Extent.Y * 0.85f, BoxHalfZ), false);
                 Blocker = Box;
             }
             Blocker->SetupAttachment(GetRootComponent());
             Blocker->SetMobility(EComponentMobility::Movable);
-            const float Rise = bRound ? CastChecked<UCapsuleComponent>(Blocker)->GetUnscaledCapsuleHalfHeight() : Extent.Z;
+            const float Rise = bRound ? CastChecked<UCapsuleComponent>(Blocker)->GetUnscaledCapsuleHalfHeight()
+                : CastChecked<UBoxComponent>(Blocker)->GetUnscaledBoxExtent().Z;
             const float Bottom = bPivotGround ? static_cast<float>(Bounds.Min.Z) * Scale : 0.0f;
             Blocker->SetRelativeTransform(FTransform(Rotation, Ground + FVector(0, 0, Bottom + Rise)));
             Blocker->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);

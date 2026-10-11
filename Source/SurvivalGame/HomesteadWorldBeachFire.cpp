@@ -61,7 +61,7 @@ void AHomesteadWorld::RefreshBeachCampfires(const Homestead::State& State)
         const FTransform At = Pit->GetRelativeTransform();
         FBeachCampfireFire& Fire = BeachCampfires.Add(Node.id);
         Fire.Phase = static_cast<float>(Node.id % 97) * 1.3f;
-        auto AddPart = [&](const TCHAR* Name, bool bFlame) -> UStaticMeshComponent*
+        auto AddPart = [&](const TCHAR* Name, const TCHAR* MaterialName) -> UStaticMeshComponent*
         {
             UStaticMesh* Mesh = HomesteadBeachLook::LoadProp(TEXT("BeachCampfire"), Name);
             if (!Mesh)
@@ -76,21 +76,24 @@ void AHomesteadWorld::RefreshBeachCampfires(const Homestead::State& State)
             Part->SetRelativeTransform(At);
             Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Part->SetCanEverAffectNavigation(false);
-            if (bFlame)
+            if (MaterialName)
             {
-                // The lamp's additive flame material: bright, unlit and shadowless.
-                if (UMaterialInterface* Flame = LoadObject<UMaterialInterface>(nullptr,
-                        TEXT("/Game/SurvivalGame/Environment/Props/OilLamp/M_OilLampFlame.M_OilLampFlame"), nullptr, LOAD_NoWarn | LOAD_Quiet))
-                    for (int32 Slot = 0; Slot < Mesh->GetStaticMaterials().Num(); ++Slot) Part->SetMaterial(Slot, Flame);
+                // Unlit, exposure-relative glow (Scripts/Props/build_campfire_materials.py), so the fire reads in sun too.
+                if (UMaterialInterface* Glow = LoadObject<UMaterialInterface>(nullptr, *FString::Printf(
+                        TEXT("/Game/SurvivalGame/Environment/Props/BeachCampfire/%s.%s"), MaterialName, MaterialName), nullptr, LOAD_NoWarn | LOAD_Quiet))
+                    for (int32 Slot = 0; Slot < Mesh->GetStaticMaterials().Num(); ++Slot) Part->SetMaterial(Slot, Glow);
+                else
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Beach campfire material %s is missing."), MaterialName);
                 Part->SetCastShadow(false);
+                Fire.Glowing.Add(Part);
             }
             Part->RegisterComponent();
             Fire.Parts.Add(Part);
             return Part;
         };
-        AddPart(TEXT("SM_CampfireBurning"), false);
-        AddPart(TEXT("SM_CampfireEmbers"), true);
-        if (UStaticMeshComponent* Flames = AddPart(TEXT("SM_CampfireFlames"), true))
+        AddPart(TEXT("SM_CampfireBurning"), nullptr);
+        AddPart(TEXT("SM_CampfireEmbers"), TEXT("M_BeachCampfireEmbers"));
+        if (UStaticMeshComponent* Flames = AddPart(TEXT("SM_CampfireFlames"), TEXT("M_BeachCampfireFlame")))
         {
             Fire.Flames.Add(Flames);
             Fire.FlameScales.Add(Flames->GetRelativeScale3D());
@@ -129,9 +132,10 @@ void AHomesteadWorld::UpdateBeachCampfires(float DeltaSeconds)
     {
         FBeachCampfireFire& Fire = Pair.Value;
         const float T = BeachCampfireTime + Fire.Phase;
+        const float Breath = HomesteadBeachFireLook::Flicker(T);
         if (UPointLightComponent* Light = Fire.Light.Get())
         {
-            Light->SetIntensity(HomesteadBeachFireLook::LightIntensity * HomesteadBeachFireLook::Flicker(T));
+            Light->SetIntensity(HomesteadBeachFireLook::LightIntensity * Breath);
             if (Camera)
             {
                 const bool bShadows = FVector::Dist(Camera->GetCameraLocation(), Light->GetComponentLocation())
@@ -139,6 +143,9 @@ void AHomesteadWorld::UpdateBeachCampfires(float DeltaSeconds)
                 if (Light->CastShadows != bShadows) Light->SetCastShadows(bShadows);
             }
         }
+        // The flames and coals brighten and dim with the light.
+        for (const auto& Part : Fire.Glowing)
+            if (UStaticMeshComponent* Glowing = Part.Get()) Glowing->SetScalarParameterValueOnMaterials(TEXT("Glow"), Breath);
         // The tongues stretch and lean as they lick up, quicker than the light breathes.
         for (int32 Index = 0; Index < Fire.Flames.Num(); ++Index)
             if (UStaticMeshComponent* Flames = Fire.Flames[Index].Get())

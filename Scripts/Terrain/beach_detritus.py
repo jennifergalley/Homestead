@@ -66,12 +66,16 @@ CAVE_CLEAR_M = 7.0
 # Scenery kinds (EstateSceneryKinds 49-55; 56 spare).
 SHELL_DRIFT, PEBBLE_DRIFT, WRACK, DRIFT_STICKS, DRIFT_LOG, THRIFT, SEA_CAMPION = range(49, 56)
 DECOR_KINDS = (SHELL_DRIFT, PEBBLE_DRIFT, WRACK, DRIFT_STICKS, DRIFT_LOG, THRIFT, SEA_CAMPION)
-DECOR_COUNTS = {SHELL_DRIFT: 260, PEBBLE_DRIFT: 140, WRACK: 160, DRIFT_STICKS: 90, DRIFT_LOG: 10,
+DECOR_COUNTS = {SHELL_DRIFT: 700, PEBBLE_DRIFT: 360, WRACK: 320, DRIFT_STICKS: 260, DRIFT_LOG: 18,
                 THRIFT: 600, SEA_CAMPION: 350}
-DECOR_SCALE = {SHELL_DRIFT: (0.8, 1.2), PEBBLE_DRIFT: (0.8, 1.25), WRACK: (0.8, 1.2), DRIFT_STICKS: (0.85, 1.2),
+DECOR_SCALE = {SHELL_DRIFT: (0.9, 1.35), PEBBLE_DRIFT: (0.85, 1.3), WRACK: (0.8, 1.25), DRIFT_STICKS: (0.9, 1.3),
                DRIFT_LOG: (0.85, 1.15), THRIFT: (0.85, 1.3), SEA_CAMPION: (0.85, 1.25)}
-DECOR_APART_M = {SHELL_DRIFT: 2.5, PEBBLE_DRIFT: 3.0, WRACK: 4.0, DRIFT_STICKS: 4.0, DRIFT_LOG: 25.0,
+DECOR_APART_M = {SHELL_DRIFT: 1.6, PEBBLE_DRIFT: 2.2, WRACK: 3.0, DRIFT_STICKS: 2.5, DRIFT_LOG: 20.0,
                  THRIFT: 0.9, SEA_CAMPION: 1.1}
+# PIE 2026-10-11: spread evenly over every beach, the cove she walks looked bare. Half of each strand kind goes within
+# COVE_DECOR_M of the foot of the cove steps, the rest along all the beaches.
+COVE_DECOR_M = 220.0
+COVE_DECOR_SHARE = 0.5
 
 # The beach (game metres; +x north, +y east; the sea lies south).
 WINDOW_X = (-900.0, -350.0)       # rows of the heightfield the coast lies in
@@ -297,7 +301,12 @@ def plan_decor(coast, rng, finds):
     for kind in (DRIFT_LOG, WRACK, SHELL_DRIFT, PEBBLE_DRIFT, DRIFT_STICKS, THRIFT, SEA_CAMPION):
         pool = p[zones[kind]]
         pool = pool[rng.permutation(len(pool))]
-        chosen = spread(pool, [], DECOR_COUNTS[kind], DECOR_APART_M[kind])
+        if kind not in (THRIFT, SEA_CAMPION):
+            near = np.hypot(pool[:, 0] - coast.steps[0], pool[:, 1] - coast.steps[1]) < COVE_DECOR_M
+            cove = spread(pool[near], [], int(DECOR_COUNTS[kind] * COVE_DECOR_SHARE), DECOR_APART_M[kind])
+            chosen = cove + spread(pool[~near], [], DECOR_COUNTS[kind] - len(cove), DECOR_APART_M[kind])
+        else:
+            chosen = spread(pool, [], DECOR_COUNTS[kind], DECOR_APART_M[kind])
         lo, hi = DECOR_SCALE[kind]
         for q in chosen:
             # The tideline's wrack and drifts lie along the shore; everything else turns freely.
