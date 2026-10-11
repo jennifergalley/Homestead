@@ -1,5 +1,6 @@
 #include "HomesteadWorld.h"
 #include "HomesteadWorldLog.h"
+#include "HomesteadSeaCaveScenery.h"
 #include "HomesteadWeather.h"
 #include "Simulation/HomesteadNightLight.h"
 #include "Simulation/HomesteadDaylight.h"
@@ -132,6 +133,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // it (Homestead::Overcast), the rain swells and eases (Homestead::RainAmount), at any hour.
     if (Weather) Weather->Update(State, Daylight);
     const float Cloud = Weather ? Weather->GetOvercast() : 0.0f;
+    if (SeaCave) SeaCave->SetSky(Daylight, Cloud);
     const float Shower = Weather ? Weather->GetRain() : 0.0f;
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
     const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);

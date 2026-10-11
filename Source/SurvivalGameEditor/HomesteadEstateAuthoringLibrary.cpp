@@ -345,3 +345,74 @@ FString UHomesteadEstateAuthoringLibrary::ApplyEstateWeightmaps(const FString& W
     return FString::Printf(TEXT("%s: %d layer tiles differ, %lld weights (%s )%s"), bDryRun ? TEXT("dry run") : TEXT("applied"),
         TilesChanged, VerticesChanged, *Report, bDryRun ? TEXT("") : TEXT("; let the editor tick, then save the dirty landscape proxies"));
 }
+
+FString UHomesteadEstateAuthoringLibrary::PaintEstateLandscapeHoles(const TArray<FIntPoint>& Vertices, int32 MinX, int32 MinY,
+    int32 MaxX, int32 MaxY, bool bDryRun)
+{
+    UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+    if (!World)
+        return TEXT("error: no editor world");
+    ALandscape* Landscape = nullptr;
+    for (TActorIterator<ALandscape> It(World); It && !Landscape; ++It)
+        Landscape = *It;
+    ULandscapeInfo* Info = Landscape ? Landscape->GetLandscapeInfo() : nullptr;
+    if (!Info)
+        return TEXT("error: no landscape");
+    const ULandscapeEditLayerBase* BaseLayer = Landscape->GetEditLayer(0);
+    if (!BaseLayer)
+        return TEXT("error: the landscape has no edit layer 0");
+    ULandscapeLayerInfoObject* Visibility = ALandscapeProxy::VisibilityLayer;
+    if (!Visibility)
+        return TEXT("error: the engine has no landscape visibility layer");
+
+    MinX = FMath::Clamp(MinX, 0, EstateAuthoringVerts - 2);
+    MinY = FMath::Clamp(MinY, 0, EstateAuthoringVerts - 2);
+    MaxX = FMath::Clamp(MaxX, MinX, EstateAuthoringVerts - 2);
+    MaxY = FMath::Clamp(MaxY, MinY, EstateAuthoringVerts - 2);
+    const int32 Width = MaxX - MinX + 1, Height = MaxY - MinY + 1;
+    TArray<uint8> Wanted;
+    Wanted.SetNumZeroed(Width * Height);
+    int32 Outside = 0;
+    for (const FIntPoint& Vertex : Vertices)
+    {
+        if (Vertex.X < MinX || Vertex.X > MaxX || Vertex.Y < MinY || Vertex.Y > MaxY)
+        {
+            ++Outside;
+            continue;
+        }
+        Wanted[(Vertex.Y - MinY) * Width + Vertex.X - MinX] = 255;
+    }
+    if (Outside)
+        return FString::Printf(TEXT("error: %d hole vertices lie outside the rectangle"), Outside);
+
+    UWorldPartitionEditorLoaderAdapter* Loader = nullptr;
+    if (UWorldPartition* Partition = World->GetWorldPartition())
+    {
+        const FTransform ToWorld = Landscape->LandscapeActorToWorld();
+        const FBox Region(ToWorld.TransformPosition(FVector(MinX - 1, MinY - 1, -1e5)),
+            ToWorld.TransformPosition(FVector(MaxX + 1, MaxY + 1, 1e5)));
+        Loader = Partition->CreateEditorLoaderAdapter<FLoaderAdapterShape>(World, Region, TEXT("Homestead landscape holes"));
+        Loader->GetLoaderAdapter()->Load();
+    }
+    int32 LandscapeMinX = 0, LandscapeMinY = 0, LandscapeMaxX = 0, LandscapeMaxY = 0;
+    Info->GetLandscapeExtent(LandscapeMinX, LandscapeMinY, LandscapeMaxX, LandscapeMaxY);
+    int32 Differ = 0;
+    {
+        FLandscapeEditDataInterface Edit(Info, BaseLayer->GetGuid());
+        TArray<uint8> Current;
+        Current.SetNumZeroed(Width * Height);
+        Edit.GetWeightDataFast(Visibility, MinX + LandscapeMinX, MinY + LandscapeMinY, MaxX + LandscapeMinX,
+            MaxY + LandscapeMinY, Current.GetData(), 0);
+        for (int32 Index = 0; Index < Wanted.Num(); ++Index)
+            Differ += Wanted[Index] != Current[Index];
+        if (Differ && !bDryRun)
+            Edit.SetAlphaData(Visibility, MinX + LandscapeMinX, MinY + LandscapeMinY, MaxX + LandscapeMinX,
+                MaxY + LandscapeMinY, Wanted.GetData(), 0, ELandscapeLayerPaintingRestriction::None);
+    }
+    if (Loader && bDryRun)
+        if (UWorldPartition* Partition = World->GetWorldPartition())
+            Partition->ReleaseEditorLoaderAdapter(Loader);
+    return FString::Printf(TEXT("%s: %d hole vertices, %d differ in %dx%d%s"), bDryRun ? TEXT("dry run") : TEXT("applied"),
+        Vertices.Num(), Differ, Width, Height,
+        bDryRun ? TEXT("") : TEXT("; let the editor tick, then save the dirty landscape proxies"));
+}

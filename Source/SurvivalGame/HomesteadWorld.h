@@ -398,6 +398,12 @@ private:
     bool bCoveRouteBuilt = false;
     UPROPERTY()
     FHomesteadWorldVisual CoveRouteVisual;
+    // The sea cave in the cove's west cliff (HomesteadSeaCaveScenery, HomesteadWorldSeaCave.cpp), placed once with
+    // the estate scenery; UpdateLighting feeds its fissure the sky.
+    void BuildSeaCave();
+    bool bSeaCaveBuilt = false;
+    UPROPERTY()
+    TObjectPtr<class AHomesteadSeaCave> SeaCave;
     // The village's lanes, well, benches, store clutter and cottage gardens (HomesteadWorldVillage.cpp), built
     // once with the estate scenery from HomesteadVillageDressing.inc.
     void BuildVillage();

@@ -193,6 +193,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
         const bool bScenery = BuildEstateScenery();
         BuildRoadBridge();
         BuildCoveRoute();
+        BuildSeaCave();
         BuildVillage();
         BuildWorldEdge();
         return bScenery;

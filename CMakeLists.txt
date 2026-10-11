@@ -45,6 +45,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadGardenTarget.cpp
     Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.cpp
     Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.cpp
+    Source/SurvivalGame/Simulation/HomesteadSeaCave.cpp
     Source/SurvivalGame/Simulation/HomesteadReservedLand.cpp
     Source/SurvivalGame/Simulation/HomesteadPlayableBounds.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
@@ -252,6 +253,15 @@ else()
     target_compile_options(HomesteadCoveRouteTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadCoveRouteTests COMMAND HomesteadCoveRouteTests)
+
+add_executable(HomesteadSeaCaveTests Tests/HomesteadSeaCaveTests.cpp)
+target_link_libraries(HomesteadSeaCaveTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadSeaCaveTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadSeaCaveTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadSeaCaveTests COMMAND HomesteadSeaCaveTests)
 
 add_executable(HomesteadPackRowTests Tests/HomesteadPackRowTests.cpp)
 target_link_libraries(HomesteadPackRowTests PRIVATE HomesteadSimulation)
