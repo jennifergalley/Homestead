@@ -315,6 +315,9 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython -Ski
   another worktree is building).
 - A cold start can take more than 10 minutes. Quiet is not hung; check `Saved\Logs\SurvivalGame.log`
   and table 0.1 (the `ValidatePlatforms` hang).
+- `Start-EditorMcp.ps1` itself has no `-WaitMutex` switch: a cold start simply waits out whatever
+  it's queued behind (ValidatePlatforms/QueryTargets child trees, UBT). That's expected; don't
+  retry the launch in a loop (table 0.1).
 - C++ changes: quit the editor (it locks its module DLLs), run the build (the script's build step,
   or `Scripts\Invoke-UnrealBuild.ps1` (it wraps `Build.bat SurvivalGameEditor Win64 Development "-Project=<worktree>\SurvivalGame.uproject"
   -WaitMutex -NoHotReloadFromIDE`), and relaunch with `-SkipBuild`. Live Coding is off in agent
