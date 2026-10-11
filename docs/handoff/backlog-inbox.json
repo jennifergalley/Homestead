@@ -588,6 +588,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T02:40:47.616Z"
+    },
+    {
+      "id": "jenny-mv388rpu-litwin",
+      "title": "[Balance] Lit village windows at night",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (night review, 2026-10-10). Warm amber windows in the village cottages and store after dusk, so the dark night has lamp-lit points to walk toward.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T02:51:47.154Z"
+    },
+    {
+      "id": "jenny-mv388rpv-fpdist",
+      "title": "[Balance UI] Distances on fingerposts",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §2 copy (fingerpost review, 2026-10-10). Each fingerpost arm shows a distance, e.g. \"THE VILLAGE ¼ MILE\".",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T02:51:47.155Z"
     }
   ]
 }
