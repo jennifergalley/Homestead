@@ -644,6 +644,54 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T11:11:14.506Z"
+    },
+    {
+      "id": "jenny-mv4431eo-h1ebgc",
+      "title": "Ambience should change depending on where you are",
+      "description": "By the ocean? It should be ocean waves and swells against the shore\nIn the plains? It should be the sound of the wind and the birds\nNear trees / woods? It should be the sound of the birds, but distinct from plains birds",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T17:43:07.488Z"
+    },
+    {
+      "id": "jenny-mv445w7s-8zoya4",
+      "title": "The back of the sea cave teleported me up the cliffs",
+      "description": "Walking to the very back of my sea cave unexpectedly teleported me up the cliffs, whereupon I became totally stuck on the cliff face",
+      "imageFile": "jenny-mv445w7s-8zoya4-41cf1f9f-1f01-400c-bf13-fe37ca3b19d5.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T17:45:20.728Z"
+    },
+    {
+      "id": "jenny-mv448c92-isp8wm",
+      "title": "Remove this  entirely",
+      "description": "",
+      "imageFile": "jenny-mv448c92-isp8wm-ac7618a9-ce70-4cea-a332-d834978a54af.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T17:47:14.822Z"
+    },
+    {
+      "id": "jenny-mv44r23l-qtqeud",
+      "title": "Inconsistent [E] Gather Mussels / Laver Hints",
+      "description": "When I walk up to a beach rock with either mussels or laver that are gatherable, I should always see the [E] Gather <x> where right now, it's hit or miss",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:01:48.129Z"
+    },
+    {
+      "id": "jenny-mv44sfm8-mwx8j7",
+      "title": "Rock ground texture for cliff faces",
+      "description": "Instead of literally reusing rock and boulder assets to dot the grey cliff faces with, please create a rocky ground texture that looks like rocks and use that for the cliff face walls instead.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:02:52.304Z"
+    },
+    {
+      "id": "jenny-mv44v075-kibbix",
+      "title": "Mussels and laver respawn too quickly",
+      "description": "They should probably respawn only about once a day",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T18:04:52.289Z"
     }
   ]
 }
