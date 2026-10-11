@@ -1,19 +1,19 @@
 {
   "schema": 1,
   "name": "FingerpostRoad",
-  "description": "Silvered oak fingerposts for the public road: 'To the village', 'To the manor' and a two-armed 'Village / Manor' (original; lettering in Blender's bundled DejaVu Sans). Pivot = post foot; the (upper) arm points +X, the second arm -X.",
+  "description": "Road fingerposts: 'To the village', 'To the manor' and a two-armed 'Village / Manor' (original; Victorian lettering in Abril Fatface, OFL). Pivot = post foot; the (upper) arm points +X, the second arm -X.",
   "collision": "box",
-  "triangle_budget": 16000,
+  "triangle_budget": 40000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/fingerpost_road.py",
-  "source_sha256": "2d129c51e22d49b5b3ad0a23be4a0db60b035e870b7931fcfa558f74308a2c40",
-  "provenance": "Original project-authored procedural geometry and materials. Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence, permits embedding and modification).",
+  "source_sha256": "13f872ca500e2b9ca7242f4054d0c974c9988af82f37b7ca983ace6432acad60",
+  "provenance": "Original project-authored procedural geometry and materials. Lettering: Abril Fatface, TypeTogether, SIL Open Font License 1.1 (Assets/Fonts/AbrilFatface/OFL.txt).",
   "meshes": {
     "SM_Fingerpost_ToTheVillage": {
-      "vertices": 3791,
-      "triangles": 7884,
+      "vertices": 7458,
+      "triangles": 14840,
       "size_cm": [
-        135.25,
+        90.37,
         13.08,
         252.0
       ],
@@ -53,13 +53,37 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheVillage.fbx",
-      "sha256": "973126d6ece13de4432af3fd675249cf2c23a01964e095937ca5d96e11e1b137"
+      "sha256": "10ef9f3fbfa88f4a7244c501349818ae9c0ebb53eb9dcaea28db551b540a5f7b",
+      "preview": "preview_SM_Fingerpost_ToTheVillage.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Fingerpost_ToTheVillage_hero.png",
+          "detail": "beauty_SM_Fingerpost_ToTheVillage_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "ground": "lowest",
+        "transparent": false
+      }
     },
     "SM_Fingerpost_ToTheManor": {
-      "vertices": 3354,
-      "triangles": 6884,
+      "vertices": 6498,
+      "triangles": 12936,
       "size_cm": [
-        135.25,
+        90.77,
         13.08,
         252.0
       ],
@@ -99,13 +123,37 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheManor.fbx",
-      "sha256": "a866055b67fd7cfdf66ffb0c314b16e512b39f669b95add5ec80510bc445f45a"
+      "sha256": "8c49e0f1366b826b289b0b6c8cee603dbbab9c056eccbf159abcede93106f187",
+      "preview": "preview_SM_Fingerpost_ToTheManor.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Fingerpost_ToTheManor_hero.png",
+          "detail": "beauty_SM_Fingerpost_ToTheManor_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "ground": "lowest",
+        "transparent": false
+      }
     },
     "SM_Fingerpost_VillageManor": {
-      "vertices": 4114,
-      "triangles": 8601,
+      "vertices": 8108,
+      "triangles": 16136,
       "size_cm": [
-        250.0,
+        106.58,
         13.08,
         252.0
       ],
@@ -145,7 +193,31 @@
         ]
       },
       "fbx": "SM_Fingerpost_VillageManor.fbx",
-      "sha256": "573c0db1d7ebabda50fcac4c964195d3f43ead86220df7099978169b120d7261"
+      "sha256": "2001e87898f86d5ab5cb4d396854bec95d7b5a59a75a103c4a88164df8ac7f06",
+      "preview": "preview_SM_Fingerpost_VillageManor.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Fingerpost_VillageManor_hero.png",
+          "detail": "beauty_SM_Fingerpost_VillageManor_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "ground": "lowest",
+        "transparent": false
+      }
     }
   },
   "warnings": [],
@@ -158,14 +230,14 @@
     "Manor"
   ],
   "textures": {
-    "T_Fingerpost_ToTheVillage_basecolor.png": "56e131bf148cb685ce2222f1b8d79156a9548179082ae56c341e08e069d5e22e",
-    "T_Fingerpost_ToTheVillage_roughness.png": "60b48b547d51808143fc17f5b69597ae3dcdc9a346ecda2076666dcd705357f9",
-    "T_Fingerpost_ToTheVillage_normal.png": "6f3559df33d1a7e73378af23042f16291a6057de721ccf3043ca4d0cf6b4cc3b",
-    "T_Fingerpost_ToTheManor_basecolor.png": "2e0e8c75922e942fcffd9ebd8ec88ee3433e5a0bc59800b072eeadc68a398cd1",
-    "T_Fingerpost_ToTheManor_roughness.png": "22ac732f45cf2b5f2f550efb0515e1e6004beb4a927ad547ed6a231fb975f6cb",
-    "T_Fingerpost_ToTheManor_normal.png": "ab3d02276266b20384e64302e17f5c3ac8ae589d3aa21e4d9417d31ac2fd090b",
-    "T_Fingerpost_VillageManor_basecolor.png": "764b25ac450b3db4e3786d95bf889470fe4bf2937d5480a6dc614f761f4b5b9b",
-    "T_Fingerpost_VillageManor_roughness.png": "106cef4bf41a512086398d5718b068af39a05a9fc58ad3d86b4502fd992438a6",
-    "T_Fingerpost_VillageManor_normal.png": "bc0b02454a98f5831cc61e60b2fd976271d4833ceb6a2f19bc0c7c3d7c4c8f57"
+    "T_Fingerpost_ToTheVillage_basecolor.png": "d5b6a2264708ea6324f98d72da527fc10dbd7178189056be6b797470d64d1788",
+    "T_Fingerpost_ToTheVillage_roughness.png": "94335e0d1dc0519a5fdb1a54199c47e8aaf1c378c568fba36a68f85ce5489a12",
+    "T_Fingerpost_ToTheVillage_normal.png": "61f46fab565b6ef6c41765b36230940931dedcf6e85d542918842d8345b430a1",
+    "T_Fingerpost_ToTheManor_basecolor.png": "5e74bc47173e485a996f67d37aa1e8fc56f75418841923ce5cd45b9f4801d121",
+    "T_Fingerpost_ToTheManor_roughness.png": "0063088bcc76b94953fbf13a13833f4515b244962adbc775fc904a7c4bdb3bb6",
+    "T_Fingerpost_ToTheManor_normal.png": "bced45d00bf8f70420e6518c52969a3dea9336c8828a4d54fb1f4ecfabad0ffe",
+    "T_Fingerpost_VillageManor_basecolor.png": "b64b86d6ab20436b9fa9906052cc5557dd5c28135def010296e9abc850e5b05f",
+    "T_Fingerpost_VillageManor_roughness.png": "129a080b9616cd99ca5dc186d1a30d59b90890a8d2b8002fb3afe336b7037ebf",
+    "T_Fingerpost_VillageManor_normal.png": "25ee00c94a22f618b1970e293911bc6587eebd933a30846d1323b6ec33721412"
   }
 }

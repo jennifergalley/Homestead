@@ -128,6 +128,12 @@ The title card, the Names step, the display headings and the field book's notice
 (https://github.com/google/fonts/tree/main/ofl/ebgaramond) on 2026-09-27. The font is embedded in
 the game unmodified. It isn't sold on its own.
 
+The lettering on every fingerpost (`Scripts\Blender\homestead_signage.py`) is modelled in **Abril Fatface**
+(`Assets\Fonts\AbrilFatface`), a Victorian fat face by TypeTogether, licensed under the SIL Open Font License 1.1.
+The licence text ships beside it in `Assets\Fonts\AbrilFatface\OFL.txt`. It was downloaded from the Google Fonts
+repository (https://github.com/google/fonts/tree/main/ofl/abrilfatface) on 2026-10-11. Only the extruded letter
+shapes are in the game's meshes; the font file isn't shipped.
+
 ## Music
 
 **Evening Fall (Harp)** by **Kevin MacLeod** (incompetech.com), licensed under

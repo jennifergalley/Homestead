@@ -1,19 +1,19 @@
 {
   "schema": 1,
   "name": "Fingerpost",
-  "description": "Silvered oak fingerpost with a pointed arm reading 'To the Cove' on both faces (original; lettering in Blender's bundled DejaVu Sans). Pivot = post foot; the arm points +X.",
+  "description": "Cove fingerpost 'To the cove' and the 'To the mine' arm alone (original; Victorian lettering in Abril Fatface, OFL). Pivot = post foot; the arm points +X.",
   "collision": "box",
-  "triangle_budget": 12000,
+  "triangle_budget": 30000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/fingerpost.py",
-  "source_sha256": "25248824400c7afd31fb33a427244c3599f4c7782a5104149ff90171a7c578d0",
-  "provenance": "Original project-authored procedural geometry and materials. Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence, permits embedding and modification).",
+  "source_sha256": "acdf0637345fd0c35cb95c63ef45a8a0f8db7ff6f58245b2f0feb18bd2a4ba75",
+  "provenance": "Original project-authored procedural geometry and materials. Lettering: Abril Fatface, TypeTogether, SIL Open Font License 1.1 (Assets/Fonts/AbrilFatface/OFL.txt).",
   "meshes": {
     "SM_Fingerpost_ToTheCove": {
-      "vertices": 2550,
-      "triangles": 5048,
+      "vertices": 5286,
+      "triangles": 10520,
       "size_cm": [
-        72.25,
+        81.53,
         13.08,
         252.0
       ],
@@ -53,20 +53,118 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheCove.fbx",
-      "sha256": "1cf6464299bd65059922c31786f9027463077fd0abc2902edf1aef9eda5d131e"
+      "sha256": "c73ef1f65abb6c74fb7e1a86f8a1e65e6fefe20066c1f0c45b12f08f0870ef1c",
+      "preview": "preview_SM_Fingerpost_ToTheCove.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Fingerpost_ToTheCove_hero.png",
+          "detail": "beauty_SM_Fingerpost_ToTheCove_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "ground": "lowest",
+        "transparent": false
+      }
+    },
+    "SM_Fingerpost_ToTheMineArm": {
+      "vertices": 4826,
+      "triangles": 9592,
+      "size_cm": [
+        83.87,
+        3.5,
+        21.0
+      ],
+      "materials": [
+        {
+          "name": "M_Fingerpost_ToTheMineArm",
+          "textures": {
+            "basecolor": "T_Fingerpost_ToTheMineArm_basecolor.png",
+            "roughness": "T_Fingerpost_ToTheMineArm_roughness.png",
+            "normal": "T_Fingerpost_ToTheMineArm_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Fingerpost_ToTheMineArm_basecolor.png",
+          "roughness": "T_Fingerpost_ToTheMineArm_roughness.png",
+          "normal": "T_Fingerpost_ToTheMineArm_normal.png",
+          "ao": "T_Fingerpost_ToTheMineArm_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "focus": [
+          0.35,
+          0.0,
+          1.7
+        ]
+      },
+      "fbx": "SM_Fingerpost_ToTheMineArm.fbx",
+      "sha256": "65c1c49af70cafa081d106f084802fd36a4ae5948bf232df06874e30022e8c7d",
+      "preview": "preview_SM_Fingerpost_ToTheMineArm.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Fingerpost_ToTheMineArm_hero.png",
+          "detail": "beauty_SM_Fingerpost_ToTheMineArm_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "ground": "lowest",
+        "transparent": false
+      }
     }
   },
   "warnings": [],
   "pivot": "foot of the post on the ground; the arm points along +X",
   "arm_height_m": 1.7,
-  "text": "To the Cove",
+  "text": "To the cove",
+  "mine_arm_height_m": 1.43,
   "yaws_deg": {
     "front door": 159,
     "head of the cliff steps": 153
   },
   "textures": {
-    "T_Fingerpost_ToTheCove_basecolor.png": "1a937ecb80a0d723256cada94ebba92863d34d2bc7bcf5f2e77b98753d3cc27e",
-    "T_Fingerpost_ToTheCove_roughness.png": "5ccca9ac64d4b2ec1af43789d9c94063d8d89852d6ec5d8e3e243745fcb19c7d",
-    "T_Fingerpost_ToTheCove_normal.png": "b66d488819d8eb35b90c243482710201094eb2b16f79db56d46b8388e98c77f1"
+    "T_Fingerpost_ToTheCove_basecolor.png": "950f26baf1ac37e29d950faa5f0c99e1da5b22e839bad0de1725b59fbc1d27ca",
+    "T_Fingerpost_ToTheCove_roughness.png": "8f5c9e8006aadc9904393048f820f43bff1060a09181bc3e44126c765b74e58f",
+    "T_Fingerpost_ToTheCove_normal.png": "c57cde948f3dc5195516ebadb9932974b32da4c2c2f13707eda927257bad164a",
+    "T_Fingerpost_ToTheMineArm_basecolor.png": "499660b2a8cfe974f87dba33618c43e0bde5ebf3298bbcaabdb12a86c3a2eb93",
+    "T_Fingerpost_ToTheMineArm_roughness.png": "c76f07446366387a1fa790c440b4bbdc638ad33408c797a91004fbedbe77d81b",
+    "T_Fingerpost_ToTheMineArm_normal.png": "9e2605e0e934815e591720f018bddc513daeaf600bf71fe978b4ec6c3ea334b0"
   }
 }
