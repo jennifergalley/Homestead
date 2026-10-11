@@ -41,7 +41,7 @@ hours. A typical 1–2 hour session never harvests anything it planted, which br
 
 | Item | Base → buy | Energy | Class | Coins per energy |
 | --- | --- | --- | --- | --- |
-| Cornish pasty | 80 → 100 | 40, plus Well fed for 3 h | Meal | 2.5 |
+| Pasty | 80 → 100 | 40, plus Well fed for 3 h | Meal | 2.5 |
 | Bread | 40 → 50 | 12 | Snack | 4.2 |
 | Cheese | 60 → 75 | 15 | Snack | 5.0 |
 | Twine | 20 → 25 | – | Material | |
@@ -319,7 +319,7 @@ they are; the cove and mine come much closer.
   cove, mine, pond or village.
 - **Communal land clusters on the village:** a village green and allotments (the 1851 word; not
   "community garden") within about 15–30 s of the square and a 60–100 m growth ring around the
-  village pad. The communal beach (Chapel sands) sits about 600 m from the square, because no coast
+  village pad. The communal beach (Gull Sands) sits about 600 m from the square, because no coast
   lies near the fixed village; accepted (2026-10-10) as an occasional outing reached by a river
   path, not a daily trip.
 - **Paths end naturally:** a road or path she can follow never runs into the invisible map edge; it
@@ -328,7 +328,7 @@ they are; the cove and mine come much closer.
   the clearable nodes she keeps are worth at least about 1,500 coins (§6).
 - **Reserved land looks finished today:** fields, hedges, woods and flowered verges, never bare
   ground. World edges are natural (sea, moor, dense wood, hedged land) with no visible walls. Map
-  labels use period names and Cornish surnames; player copy never says "reserved" or "future".
+  labels use invented English or Scottish names (cohesion §1); player copy never says "reserved" or "future".
 
 ### Proposed fixes to hit the targets
 
