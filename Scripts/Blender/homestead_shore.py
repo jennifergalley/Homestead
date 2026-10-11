@@ -435,6 +435,94 @@ def mussel_point(length, s, side="ventral"):
     return np.array([s * length, (yc - hh if side == "ventral" else yc + hh) * length, 0.0])
 
 
+# Side view of a closed Mytilus edulis (x / L from the umbo, y / L dorsal): pointed terminal umbo,
+# nearly straight ventral margin, dorsal angle at ~0.6 L, broadly rounded posterior; height ~0.49 L.
+WEDGE_VENTRAL = [(0.0, 0.0), (0.04, -0.045), (0.12, -0.09), (0.25, -0.125), (0.42, -0.15), (0.6, -0.158),
+                 (0.76, -0.15), (0.88, -0.118), (0.95, -0.075), (0.99, -0.02), (1.0, 0.03)]
+WEDGE_DORSAL = [(0.0, 0.0), (0.03, 0.025), (0.1, 0.075), (0.22, 0.155), (0.38, 0.255), (0.52, 0.318),
+                (0.62, 0.33), (0.74, 0.305), (0.85, 0.245), (0.93, 0.17), (0.98, 0.095), (1.0, 0.03)]
+
+
+def _wedge_margins(s):
+    vx, vy = np.array(WEDGE_VENTRAL).T
+    dx, dy = np.array(WEDGE_DORSAL).T
+    return np.interp(s, vx, vy), np.interp(s, dx, dy)
+
+
+def _wedge_width(s):
+    """Half the valve-to-valve breadth (x L): fat behind the beak, greatest at ~0.4 L."""
+    s = np.clip(s, 0.0, 1.0)
+    beak = np.minimum(s / 0.4, 1.0) ** 0.5
+    tail = np.clip(1 - (np.maximum(s - 0.4, 0.0) / 0.61) ** 2, 0, 1) ** 0.6
+    return 0.215 * beak * tail
+
+
+def mussel_wedge(name, length, material, seed=0, sides=18, rows=16):
+    """A live blue mussel (Mytilus edulis), shut, modelled as the real wedge: pointed terminal
+    umbo, straight ventral margin, dorsal angle, rounded posterior and fat, convex valves with
+    a flattened ventral (byssal) face; breadth ~0.43 L. Same frame and attributes as ``mussel``:
+    x from the umbo (0) to the posterior (L), y dorsal, z across the valves (seam at z = 0);
+    ``shell`` = (cos a, sin a, v) about the umbo, ``sh_in`` = 0. See ``mussel_wedge_point``."""
+    L = length
+    rng = np.random.default_rng(seed)
+    ss = 0.5 - 0.5 * np.cos(np.linspace(0.06, 0.985, rows) * math.pi)
+    ss = np.clip(ss, 0.006, 0.994)
+    t = np.linspace(0, 2 * math.pi, sides, endpoint=False)
+    u = np.cos(t)                                      # +1 dorsal margin, -1 ventral margin
+    across = np.sign(np.sin(t))
+    # Breadth sits low in the section: keeled dorsal edge, broad flat ventral face.
+    expo = np.where(u > 0, 0.85, 0.42)
+    bulge = np.abs(np.sin(t)) ** expo * (1.0 - 0.28 * u)
+    bulge /= bulge.max()
+    squash = 1.0 + rng.uniform(-0.05, 0.05)
+    tilt = rng.uniform(-0.04, 0.04)                    # valves a touch unequal
+    rows_pts = []
+    for s in ss:
+        yv, yd = _wedge_margins(s)
+        h = yd - yv
+        level = np.where(u > 0, u ** 1.0, -np.abs(u) ** 0.75)
+        y = yv + h * (0.5 + 0.5 * level)
+        z = _wedge_width(s) * squash * across * bulge * (1.0 + tilt * across)
+        rows_pts.append(np.c_[np.full(sides, s), y, z] * L)
+    obj = kit.loft(name, [[tuple(p) for p in r] for r in rows_pts], material=material,
+                   cap_start=(0.0, 0.0, 0.0), cap_end=(L, 0.03 * L, 0.0))
+    P = coords(obj)
+    prof = np.linspace(0.0, 1.0, 300)
+    yv, yd = _wedge_margins(prof)
+    outline = np.r_[np.c_[prof, yv], np.c_[prof[::-1], yd[::-1]]] * L
+    oa = np.arctan2(outline[1:, 1], outline[1:, 0])
+    orad = np.linalg.norm(outline[1:], axis=1)
+    order = np.argsort(oa)
+    a = np.arctan2(P[:, 1], P[:, 0])
+    rad = np.interp(a, oa[order], orad[order])
+    v = np.clip(np.linalg.norm(P[:, :2], axis=1) / np.maximum(rad, 1e-6), 0, 1)
+    set_attr(obj.data, "shell", np.c_[np.cos(a), np.sin(a), v])
+    set_attr(obj.data, "shell_p", np.c_[P[:, :2] / L, np.zeros(len(P))])
+    set_attr(obj.data, "sh_in", np.zeros(len(P)))
+    return obj
+
+
+def _wedge_reach_table(count=24, lo=-1.2, hi=1.0):
+    """Colour-ramp stops of 1 / (umbo-to-margin distance) of ``mussel_wedge``'s side outline by
+    bearing from the umbo, normalised by its maximum: (lo, hi, kmax, stops)."""
+    prof = np.linspace(0.0, 1.0, 600)
+    yv, yd = _wedge_margins(prof)
+    outline = np.r_[np.c_[prof, yv], np.c_[prof[::-1], yd[::-1]]][1:-1]
+    oa = np.arctan2(outline[:, 1], outline[:, 0])
+    orad = np.linalg.norm(outline, axis=1)
+    order = np.argsort(oa)
+    angles = np.linspace(lo, hi, count)
+    k = 1.0 / np.maximum(np.interp(angles, oa[order], orad[order]), 0.04)
+    kmax = float(k.max())
+    return lo, hi, kmax, [(i / (count - 1), (float(x / kmax),) * 3) for i, x in enumerate(k)]
+
+
+def mussel_wedge_point(length, s, side="ventral"):
+    """Point on the shut seam of ``mussel_wedge`` at s = x / L (the byssal gape is ventral, s ~0.3)."""
+    yv, yd = _wedge_margins(s)
+    return np.array([s * length, (yv if side == "ventral" else yd) * length, 0.0])
+
+
 # ------------------------------------------------------------------ settling and BVH
 
 def bvh_of(objects, offset=0.0):
@@ -471,9 +559,10 @@ def inside(tree, point):
 
 # ------------------------------------------------------------------ laver: membranes
 
-def frond(name, radius, material, seed, sectors=24, rings=7, stretch=1.0):
+def frond(name, radius, material, seed, sectors=24, rings=7, stretch=1.0, ragged=0.0):
     """A laver (Porphyra umbilicalis) frond as a flat polar membrane around its small
-    central holdfast: irregular, ruffled lobes, 0.6-1.2 of ``radius``. pcoord = flat coords."""
+    central holdfast: irregular, ruffled lobes, 0.6-1.2 of ``radius``. pcoord = flat coords.
+    ``ragged`` (0..1) frays the outer two rings into a torn, uneven margin with a few nicks."""
     rng = np.random.default_rng(seed)
     noise = _rng_noise(seed + 3)
     phi = np.linspace(0, 2 * math.pi, sectors, endpoint=False)
@@ -481,6 +570,13 @@ def frond(name, radius, material, seed, sectors=24, rings=7, stretch=1.0):
         + 0.10 * np.cos(rng.integers(2, 4) * phi + rng.uniform(0, 6)) \
         + 0.09 * noise.fbm(np.c_[np.cos(phi) * 6.0, np.sin(phi) * 6.0, np.ones(sectors)], 2)
     R = radius * np.clip(lobes, 0.45, 1.5)
+    tear = np.zeros(sectors)
+    if ragged:
+        fray = _rng_noise(seed + 29)
+        tear = 0.10 * np.abs(fray.fbm(np.c_[np.cos(phi) * 11.0, np.sin(phi) * 11.0, np.full(sectors, 3.0)], 3)) * 2.0
+        for j in np.random.default_rng(seed + 31).choice(sectors, 3, replace=False):
+            tear[j] += 0.2
+            tear[(j + 1) % sectors] += 0.08
     verts = [(0.0, 0.0, 0.0)]
     frill = 1 + 0.035 * np.sin(phi * rng.integers(9, 13) + rng.uniform(0, 6)) \
         + 0.03 * noise.fbm(np.c_[np.cos(phi) * 9.0, np.sin(phi) * 9.0, np.full(sectors, 2.0)], 2)
@@ -489,6 +585,8 @@ def frond(name, radius, material, seed, sectors=24, rings=7, stretch=1.0):
         jitter = 1 + 0.03 * rng.standard_normal(sectors) * (k / rings)
         if k == rings:
             jitter = jitter * frill
+        if ragged and k >= rings - 1:
+            jitter = jitter * (1.0 - ragged * (0.5 if k < rings else 1.0) * tear)
         for j in range(sectors):
             ang = phi[j] + (0.5 * (k % 2)) * (2 * math.pi / sectors) * 0.5
             rr = R[j] * f * jitter[j]
@@ -640,11 +738,22 @@ def _fmix(g, a, b, fac):
     return g.node("ShaderNodeMix", data_type="FLOAT", Factor=fac, A=a, B=b).outputs[0]
 
 
-def _shell_inputs(g):
+def _shell_inputs(g, exact=False):
     p = g.coord()
     sh = _vec(g, "shell")
     cx, sx, v = g.separate(sh)
     a = g.math("ARCTAN2", sx, cx)
+    if exact:
+        # ``mussel_wedge``: rebuild a and v per pixel from the shell-frame position ``shell_p``
+        # (x / L, y / L), which interpolates exactly, and a smooth table of the margin's distance
+        # from the umbo by bearing. v interpolated from the vertices kinks at every edge, and the
+        # bumped growth lines then show the triangulation as facets.
+        sp = _vec(g, "shell_p")
+        spx, spy, _ = g.separate(sp)
+        a = g.math("ARCTAN2", spy, spx)
+        lo, hi, kmax, table = _wedge_reach_table()
+        k = g.channel(g.ramp(g.remap(a, lo, hi), table, interpolation="CARDINAL"), 0)
+        v = g.math("MINIMUM", g.math("MULTIPLY", g.vmath("LENGTH", sp), g.math("MULTIPLY", k, kmax)), 1.0)
     inner = _fac(g, "sh_in")
     return p, a, v, inner
 
@@ -769,17 +878,26 @@ def limpet_mat(name, seed=0.0, algae=0.0):
     return _finish(g, color, rough, height, strength=0.75, distance=0.0012)
 
 
-def mussel_mat(name, seed=0.0, worn=0.5, barnacles=0.0, wet=0.0, brown=0.25):
+def mussel_mat(name, seed=0.0, worn=0.5, barnacles=0.0, wet=0.0, brown=0.25, bands=0.0, base=None, exact=False,
+               worn_color=None):
     """Mytilus edulis: glossy blue-black periostracum with fine growth lines and brownish
     young growth at the margin, eroded violet-grey umbo; nacreous blue-white interior with
-    a dark violet margin band. ``wet`` lowers roughness (live mussels on the rock)."""
+    a dark violet margin band. ``wet`` lowers roughness (live mussels on the rock).
+    ``bands`` (0..1) adds faint brown growth bands across the valves; ``base`` overrides the
+    (dark, light) periostracum colours and ``worn_color`` the (dark, light) eroded umbo;
+    ``exact`` reads ``mussel_wedge``'s per-pixel growth frame."""
     g = Graph(name)
-    p, a, v, inner = _shell_inputs(g)
+    p, a, v, inner = _shell_inputs(g, exact)
     ps = g.vmath("ADD", p, (seed, seed * 0.6, seed * 1.7))
     fine, major = _growth(g, v, 110.0, seed)
     tone = g.noise(ps, scale=1.0 / 0.012, detail=3.0).outputs["Fac"]
-    out = g.mix((0.018, 0.020, 0.032), (0.032, 0.036, 0.058), g.remap(tone, 0.35, 0.7))
+    dark, light = base or ((0.018, 0.020, 0.032), (0.032, 0.036, 0.058))
+    out = g.mix(dark, light, g.remap(tone, 0.35, 0.7))
     out = g.mix(out, (0.050, 0.036, 0.022), g.math("MULTIPLY", g.remap(v, 0.7, 0.98), brown))
+    if bands:
+        ring = g.noise(g.combine(g.math("MULTIPLY", v, 16.0), seed + 21.0, 0.0), scale=1.0, detail=3.0).outputs["Fac"]
+        out = g.mix(out, (0.046, 0.034, 0.022), g.math("MULTIPLY", g.remap(ring, 0.52, 0.66),
+                                                       g.math("MULTIPLY", g.remap(v, 0.25, 0.5), bands)))
     zone = g.noise(g.combine(g.math("MULTIPLY", v, 6.0), seed + 9.0, 0.0), scale=1.0, detail=2.0).outputs["Fac"]
     out = g.mix(out, (0.040, 0.030, 0.045), g.math("MULTIPLY", g.remap(zone, 0.55, 0.7), 0.6))
     out = g.mix(out, (0.012, 0.012, 0.016), g.math("MULTIPLY", g.remap(major, 0.5, 0.65), 0.6))
@@ -789,7 +907,8 @@ def mussel_mat(name, seed=0.0, worn=0.5, barnacles=0.0, wet=0.0, brown=0.25):
     erosion = g.math("MULTIPLY", g.remap(g.math("ADD", g.math("SUBTRACT", 1.0, v),
                                                 g.math("MULTIPLY", g.math("SUBTRACT", erode_n, 0.5), 0.5)),
                                          0.80, 0.9), worn)
-    worn_col = g.mix((0.10, 0.085, 0.13), (0.20, 0.19, 0.22), g.remap(erode_n, 0.4, 0.7))
+    worn_lo, worn_hi = worn_color or ((0.10, 0.085, 0.13), (0.20, 0.19, 0.22))
+    worn_col = g.mix(worn_lo, worn_hi, g.remap(erode_n, 0.4, 0.7))
     out = g.mix(out, worn_col, erosion)
     # The valve margins: a thin brown-olive periostracum lip either side of the shut seam.
     seam_d = g.math("ABSOLUTE", g.separate(p)[2])
@@ -896,19 +1015,20 @@ def winkle_mat(name, seed=0.0, worn=0.5):
     return _finish(g, color, rough, height, strength=0.35, distance=0.0004)
 
 
-def laver_mat(name, seed=0.0, wet=1.0):
+def laver_mat(name, seed=0.0, wet=1.0, relief=1.0):
     """Porphyra umbilicalis: a thin, glossy, crinkled membrane, purple-brown to olive, darker
-    and glossier wet, with pale bleached spots and thinner, lighter torn margins."""
+    and glossier wet, with pale bleached spots and thinner, lighter torn margins. ``relief``
+    scales the crinkle bump (a lifted, hanging sheet is smoother than one collapsed on rock)."""
     g = Graph(name)
     p = g.coord()
     ps = g.vmath("ADD", p, (seed, seed * 1.3, seed * 0.7))
     rim = _fac(g, "rim")
     patch = g.noise(ps, scale=1.0 / 0.05, detail=4.0, roughness=0.55).outputs["Fac"]
     fine = g.noise(ps, scale=1.0 / 0.006, detail=5.0).outputs["Fac"]
-    color = g.ramp(patch, [(0.2, (0.040, 0.014, 0.024)), (0.42, (0.062, 0.032, 0.030)),
-                           (0.6, (0.066, 0.050, 0.026)), (0.8, (0.050, 0.058, 0.022))])
-    edge_tint = g.math("MULTIPLY", rim, g.remap(fine, 0.3, 0.7, 0.3, 0.8))
-    color = g.mix(color, (0.085, 0.075, 0.032), edge_tint)
+    color = g.ramp(patch, [(0.15, (0.046, 0.012, 0.030)), (0.38, (0.070, 0.030, 0.042)),
+                           (0.6, (0.072, 0.052, 0.028)), (0.82, (0.050, 0.064, 0.022))])
+    edge_tint = g.math("MULTIPLY", rim, g.remap(fine, 0.3, 0.7, 0.35, 0.85))
+    color = g.mix(color, (0.115, 0.090, 0.035), edge_tint)
     color = g.mix(color, (0.82, 0.78, 0.80), g.remap(fine, 0.3, 0.7), blend="MULTIPLY")
     bleach = g.noise(ps, scale=1.0 / 0.02, detail=4.0).outputs["Fac"]
     color = g.mix(color, (0.17, 0.12, 0.10), g.math("MULTIPLY", g.remap(bleach, 0.7, 0.8), 0.6))
@@ -917,7 +1037,7 @@ def laver_mat(name, seed=0.0, wet=1.0):
     folds = g.noise(ps, scale=1.0 / 0.012, detail=3.0, distortion=1.2).outputs["Fac"]
     rough = g.remap(fine, 0.3, 0.7, 0.16 + 0.25 * (1 - wet), 0.30 + 0.25 * (1 - wet))
     height = g.math("ADD", g.math("MULTIPLY", crinkle, 0.6), g.math("MULTIPLY", folds, 0.8))
-    return _finish(g, color, rough, height, strength=0.6, distance=0.0015)
+    return _finish(g, color, rough, height, strength=0.6 * relief, distance=0.0015 * relief)
 
 
 def byssus_mat(name):

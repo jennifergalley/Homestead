@@ -6,7 +6,7 @@
   "triangle_budget": 8000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/shore_rock.py",
-  "source_sha256": "5ac2bc6dab7992209a053863250024d4b5881ab7f194ab44b5a2df177f0ab959",
+  "source_sha256": "6e4a9a89086e682028b179a40fb31968f8a0ca33b53b804474fe726d431f9861",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_ShoreRock": {
@@ -58,7 +58,7 @@
         ]
       },
       "fbx": "SM_ShoreRock.fbx",
-      "sha256": "0c5dc887e5322cdd79926fb44b298ec6ddba6c305ce70b7c7fd12257f6fd8c1b",
+      "sha256": "f54d88667539b83437d37b6fea1eedd9452e1cfe5d2488bbf8eaba7d03e62cb4",
       "preview": "preview_SM_ShoreRock.png",
       "beauty": {
         "views": {
@@ -69,7 +69,7 @@
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 128,
+        "samples": 256,
         "resolution": [
           3840,
           2160
@@ -133,7 +133,7 @@
         ]
       },
       "fbx": "SM_ShoreRock_LOD1.fbx",
-      "sha256": "15ef1f1002c1006aa5b9794fdb941a4ee6b147b170262c171090124e20466cd9",
+      "sha256": "766d56a1404a64d9654cec3a4913c549b8dc63ad3eb8a7c0498ac0d8bf230cd8",
       "preview": "preview_SM_ShoreRock_LOD1.png"
     },
     "SM_ShoreRock_LOD2": {
@@ -186,7 +186,7 @@
         ]
       },
       "fbx": "SM_ShoreRock_LOD2.fbx",
-      "sha256": "fa1153946619a350f98cc217052ac0484a252dac5767f66dada19dcad72ed539",
+      "sha256": "2db52134b293274871195f05bc9017897e2ea27a2a5b286b745c94165be10775",
       "preview": "preview_SM_ShoreRock_LOD2.png"
     },
     "SM_MusselClump": {
@@ -235,7 +235,7 @@
         "detail_distance": 0.35
       },
       "fbx": "SM_MusselClump.fbx",
-      "sha256": "eeb70e220f9fc2b69164c1e890d525607efda20ddcce0fa8bec32fb41878099a",
+      "sha256": "d7ad2bbf31caf18610d95eb10f8064f7564904d0fe7cad84e8cb5a8a300129f0",
       "preview": "preview_SM_MusselClump.png",
       "beauty": {
         "views": {
@@ -246,7 +246,7 @@
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 128,
+        "samples": 256,
         "resolution": [
           3840,
           2160
@@ -310,16 +310,16 @@
         ]
       },
       "fbx": "SM_MusselClump_LOD1.fbx",
-      "sha256": "64e9b35f33d1d590a9923da9a1ef5a8c9c09ceb49a852e1297a5738818613669",
+      "sha256": "8ceb5f46304c32c5bf0b800266361c4201771ce4d1c8a49030c51793a1e2a9ce",
       "preview": "preview_SM_MusselClump_LOD1.png"
     },
     "SM_LaverFronds": {
-      "vertices": 3070,
-      "triangles": 5780,
+      "vertices": 3810,
+      "triangles": 7220,
       "size_cm": [
-        47.28,
-        50.78,
-        11.86
+        44.8,
+        49.53,
+        10.69
       ],
       "materials": [
         {
@@ -359,7 +359,7 @@
         "detail_distance": 0.4
       },
       "fbx": "SM_LaverFronds.fbx",
-      "sha256": "ad849823fdb8e7c500d894007d532500e025473ef53ba76b42d29f9739babe4d",
+      "sha256": "09ad0c08254d9a11194df7d0acf0037b3b1bd26f005625c9b66bc36b6a03f848",
       "preview": "preview_SM_LaverFronds.png",
       "beauty": {
         "views": {
@@ -370,7 +370,7 @@
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 128,
+        "samples": 256,
         "resolution": [
           3840,
           2160
@@ -385,12 +385,12 @@
       }
     },
     "SM_LaverFronds_LOD1": {
-      "vertices": 1625,
-      "triangles": 2890,
+      "vertices": 2005,
+      "triangles": 3610,
       "size_cm": [
-        47.29,
-        50.78,
-        11.87
+        44.8,
+        49.53,
+        10.69
       ],
       "materials": [
         {
@@ -434,16 +434,16 @@
         ]
       },
       "fbx": "SM_LaverFronds_LOD1.fbx",
-      "sha256": "3f61f767c92e2c37f35e1a182e1f431170e7f6f9612df2885553caa16aa932f6",
+      "sha256": "e144916ef13643ed92b7f3951211ae25db3d5ec74e75e35eafba03e1592ff7bb",
       "preview": "preview_SM_LaverFronds_LOD1.png"
     },
     "SM_MusselHeld": {
-      "vertices": 1086,
-      "triangles": 1992,
+      "vertices": 1914,
+      "triangles": 3704,
       "size_cm": [
-        5.9,
-        6.92,
-        7.17
+        6.37,
+        5.83,
+        7.33
       ],
       "materials": [
         {
@@ -483,7 +483,7 @@
         "detail_distance": 0.2
       },
       "fbx": "SM_MusselHeld.fbx",
-      "sha256": "771d77fe2f590bba0978330f81fda254c202bea4df1b0f16a430f200f1a0185e",
+      "sha256": "7824b5d4b954083c3b2560f0a65c263bb8455ec9027142ba21c2fd4bced0bf44",
       "preview": "preview_SM_MusselHeld.png",
       "beauty": {
         "views": {
@@ -494,7 +494,7 @@
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 128,
+        "samples": 256,
         "resolution": [
           3840,
           2160
@@ -509,12 +509,12 @@
       }
     },
     "SM_LaverHeld": {
-      "vertices": 2700,
-      "triangles": 4760,
+      "vertices": 2662,
+      "triangles": 4640,
       "size_cm": [
-        8.58,
-        9.78,
-        14.23
+        6.88,
+        5.26,
+        14.47
       ],
       "materials": [
         {
@@ -554,7 +554,7 @@
         "detail_distance": 0.25
       },
       "fbx": "SM_LaverHeld.fbx",
-      "sha256": "afb1fcac4cd42bbef12690d0e41cbefdc6ee33b23acbdb6a5374a8a5712ce852",
+      "sha256": "b592f57d93296b70ad8db8694ab53e4fb24c7330db1709d1b95c6956bd3907d9",
       "preview": "preview_SM_LaverHeld.png",
       "beauty": {
         "views": {
@@ -565,7 +565,7 @@
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 128,
+        "samples": 256,
         "resolution": [
           3840,
           2160
@@ -610,24 +610,24 @@
     }
   },
   "held": {
-    "SM_MusselHeld": "Pivot = pinch point at the gathered byssus tuft; +Z up out of the pinch, three mussels hang in -Z (5.4-6.2 cm), tips 1-1.6 cm below the pivot.",
-    "SM_LaverHeld": "Pivot = top pinch where the fronds are gathered; +Z up out of the pinch, four folded laver sheets hang 11-15 cm in -Z."
+    "SM_MusselHeld": "Pivot = pinch point at the gathered byssus tuft; +Z up out of the pinch, a tight bunch of three mussels (5.2-6.3 cm) hangs in -Z, umbos 0.6-1.2 cm below the pivot; the frayed tuft end rises ~0.5 cm above it.",
+    "SM_LaverHeld": "Pivot = top pinch where the fronds are gathered; +Z up out of the pinch, three broad limp sheets and two strap fronds hang ~10-14 cm in -Z, wider below."
   },
   "textures": {
-    "T_ShoreRock_basecolor.png": "eba2e6ccde9046e166e9ef3e4a989c4e00a866d9ea562f5a0728b7fee2511b16",
-    "T_ShoreRock_roughness.png": "f5b9f1d4e92fb9f00ceac4b12b01c25b9f0fe623fd43c318f7d3ee4b8ad042db",
-    "T_ShoreRock_normal.png": "4e6817403fdc4790e6f48dc5b04a4b7b63c2da43d1db84eecc952ccf4538217c",
-    "T_MusselClump_basecolor.png": "1cf8a5b292b194efd2306c821193d68af2c87aa60429a2509f805b3f1c8c6227",
-    "T_MusselClump_roughness.png": "5ba8fb4db865851fe510a3cb893c89ff63951ff7f6bb6c445475b48e16e554c1",
-    "T_MusselClump_normal.png": "b47654ffc5f6e70a84e942d602524324d2cd69e9e10658f770c7d1737533f459",
-    "T_LaverFronds_basecolor.png": "653bbbd679ab8d4033b1da076212e1e18c51a7ae6066ff7eb48c88c4b2fc6ecf",
-    "T_LaverFronds_roughness.png": "5cd55e3b6c29f13482f20a29bab2f9fad767e14c2d22779e21caeebba87236f6",
-    "T_LaverFronds_normal.png": "f8500c8a0ee4a55c02db8f55617f89c89150825d1479af7930840680a34c211f",
-    "T_MusselHeld_basecolor.png": "5886e5ff80b66660e5ce1353c422beee2a7954814fd88ab2cf530cf245145378",
-    "T_MusselHeld_roughness.png": "94a9004e7bcc0f60a25b1c5dcc62e6abf85b3aa85593860922d823ba64b06a2b",
-    "T_MusselHeld_normal.png": "145917da05ed4a4146e2c05f6e79735768bd7a873e273ba782a958c3f40414a7",
-    "T_LaverHeld_basecolor.png": "ed189d180c9d8b55e1ba2f3821e9c2e6f9aa4504614419627d45d6291aa7074a",
-    "T_LaverHeld_roughness.png": "13375d4998ae2365fff52caed1f50318c3c03e5489680c704fd242cdc1ad1420",
-    "T_LaverHeld_normal.png": "0af78e6c778b6363c6238054d497055b42c4613f1a505a0c443b5275e00a0136"
+    "T_ShoreRock_basecolor.png": "9edca9579918e1a4fd774e5a27210f4aa55574ab3241e57d0dda076e0b13c134",
+    "T_ShoreRock_roughness.png": "26f7f76305f4707cb342db2fe019a5db8c897582cff529ffe8239e5b0c572496",
+    "T_ShoreRock_normal.png": "ded9e366e3035757b47aa3d5cf0bcc84f2283ffab63cb18b18457e9cfe0d484d",
+    "T_MusselClump_basecolor.png": "59deb54d75784353d602e16b65e387e5b25216f8af0386a3c510c99089b462db",
+    "T_MusselClump_roughness.png": "7e3f8a8a862e4d427d6a1f76e8fbe86a9fd708c609b7a3dd75db8c9afd14f3d9",
+    "T_MusselClump_normal.png": "92cd3be4100519195666f519270c0212bacf62228911cae9f671011b4d44caf1",
+    "T_LaverFronds_basecolor.png": "fc025b79c8d679276ad4d615a1436ff4c13ebef8f9465eb7c463887c0e4bcd3a",
+    "T_LaverFronds_roughness.png": "b4c6f6d9f396716f41ea88fa298eeeae1d272141f3a1a690276969f3d232b40c",
+    "T_LaverFronds_normal.png": "ae31f8b1bc03efd58cd001a026ffd17d6678b6dee0f6b71047b5518b0e393917",
+    "T_MusselHeld_basecolor.png": "02742e7cddb35f13255f0d4e094af38b7735d3f61143e9eba3d841f7559d7a07",
+    "T_MusselHeld_roughness.png": "cd669c9f82129f422ea66dcac9ec91427bba21fbdcdd4ccfb28b071ecc1fb19c",
+    "T_MusselHeld_normal.png": "7eed81805aa8fc18ed5faed04174887057b76576088328e76a11376bc7ad58b0",
+    "T_LaverHeld_basecolor.png": "e55e0436100a4edf905b660e7ce0beaba48274e73ad5cba7dd0219eaaf3f0487",
+    "T_LaverHeld_roughness.png": "02cc2164e17ec2a9be556df9e21616b72f475673b926e3eadd2126582303307d",
+    "T_LaverHeld_normal.png": "0130778cd0a485fb79659afdc10269a10f52a9b56aef668f6df99a6fb60edb90"
   }
 }

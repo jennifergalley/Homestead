@@ -277,8 +277,8 @@ def laver_fronds(kit, rock, tree):
         if hit[0] is None:
             bm.free()
             continue
-        frond = shore.frond(f"Laver{k}", radius, mat, seed=700 + k, sectors=34, rings=9,
-                            stretch=rng.uniform(0.75, 1.25))
+        frond = shore.frond(f"Laver{k}", radius, mat, seed=700 + k, sectors=38, rings=10,
+                            stretch=rng.uniform(0.75, 1.25), ragged=1.0)
         flat = shore.get_attr(frond.data, "pcoord", 3)
         kit.tag_coords(frond.data, [tuple(c) for c in flat + np.array([k * 0.31, k * 0.17, 0.0])])
         P, N = shore.geodesic_lay(frond, surface, hit[0], hit[1], spin=rng.uniform(0, 2 * math.pi),
@@ -293,7 +293,8 @@ def laver_fronds(kit, rock, tree):
         ridged = 1.0 - np.abs(noise.fbm(np.c_[flat[:, 0] * 10.0, flat[:, 1] * 4.5, np.full(len(P), k * 3.1)], 2)) * 2.0
         folds = np.clip(ridged, 0, 1) ** 1.2
         hold = shore.smooth(0.006, 0.035, r)
-        lift = hold * 0.0065 * folds
+        edge = shore.smooth(0.55, 1.0, r / rmax)
+        lift = hold * 0.0065 * folds * (1.0 - 0.85 * edge)       # the margin lies down on what's below
         edges = shore.mesh_edges(frond)
         count = np.bincount(edges.ravel(), minlength=len(P)).astype(float)
         for _ in range(4):
@@ -304,8 +305,10 @@ def laver_fronds(kit, rock, tree):
         rim = shore.get_attr(frond.data, "rim")
         bearing = np.arctan2(flat[:, 1], flat[:, 0])
         ruffle = 0.5 + 0.5 * np.sin(bearing * 11.0 + k)
-        lift += shore.smooth(0.6, 1.0, r / rmax) * (0.0035 * ruffle + 0.0012)
-        P = P + N * (0.0012 + 0.0006 * k + lift)[:, None]
+        lift += edge * 0.0011 * ruffle
+        # Laid on the rock and the fronds already laid (in the BVH), so one small constant clearance
+        # is enough: stacking it per layer stood the upper margins off the lower ones as cut steps.
+        P = P + N * (0.0007 + lift)[:, None]
         shore.set_coords(frond, P)
         frond.data.update()
         normals = np.array([v.normal[:] for v in frond.data.vertices])
@@ -327,102 +330,295 @@ def laver_fronds(kit, rock, tree):
 
 # ------------------------------------------------------------------ held props
 
+def _hang_frame(out, splay, roll):
+    """Basis for a mussel hanging from its byssus: x (umbo -> posterior) down and splayed out,
+    y (dorsal) outward so the flat ventral face, where the byssus leaves, faces the bunch."""
+    d = np.array([0.0, 0.0, -1.0]) * math.cos(splay) + out * math.sin(splay)
+    dorsal = out - d * (out @ d)
+    dorsal /= np.linalg.norm(dorsal)
+    side = np.cross(d, dorsal)
+    dorsal = dorsal * math.cos(roll) + side * math.sin(roll)
+    side = np.cross(d, dorsal)
+    return Matrix((tuple(d), tuple(dorsal), tuple(side))).transposed().to_4x4()
+
+
+def _bvh_world(obj):
+    from mathutils.bvhtree import BVHTree
+    return BVHTree.FromPolygons([v.co.copy() for v in obj.data.vertices], [p.vertices[:] for p in obj.data.polygons])
+
+
+def _push_out(point, trees, clearance):
+    p = Vector(point)
+    for tree in trees:
+        loc, nrm, _, _ = tree.find_nearest(p, 0.02)
+        if loc is None:
+            continue
+        depth = (p - loc).dot(nrm)
+        if depth < clearance:
+            p = loc + nrm * clearance
+    return np.array(p)
+
+
 def mussel_held(kit):
-    mat = shore.mussel_mat("M_HeldMussel", seed=7.0, worn=0.45, barnacles=0.15, wet=1.0, brown=0.2)
+    """Three live mussels pulled off the rock as one bunch, hanging by their gathered byssus:
+    umbos together just under the pinch, flat ventral faces turned in to the beard, which runs
+    up the middle of the bunch and twists into a short frayed tuft at the pinch."""
+    mat = shore.mussel_mat("M_HeldMussel", seed=7.0, worn=0.6, barnacles=0.22, wet=1.0, brown=0.35, bands=0.7, exact=True,
+                           worn_color=((0.045, 0.034, 0.060), (0.095, 0.078, 0.115)),
+                           base=((0.013, 0.014, 0.019), (0.024, 0.027, 0.040)))
     byssus_mat = shore.byssus_mat("M_HeldByssus")
-    parts, threads = [], []
-    layout = [((-0.006, -0.009, -0.012), (-0.28, -0.32), 0.058, 0.4),
-              ((0.004, 0.009, -0.011), (0.06, 0.3), 0.062, -0.5),
-              ((0.010, -0.002, -0.016), (0.34, 0.02), 0.054, 1.9)]
     rng = np.random.default_rng(77)
-    for i, (tip, (ax, ay), L, roll) in enumerate(layout):
-        d = np.array([math.sin(ax), math.sin(ay), -1.0])
-        d /= np.linalg.norm(d)
-        out = np.array([tip[0], tip[1], 0.0])
-        out = out - d * (out @ d)
-        out /= max(np.linalg.norm(out), 1e-6)
-        dorsal = out * math.cos(roll) + np.cross(d, out) * math.sin(roll)
-        side = np.cross(d, dorsal)
-        obj = shore.mussel(f"HeldMussel{i}", L, mat, seed=300 + i, sides=16, rows=12)
+    # azimuth (deg), length (m), splay (deg), roll (deg), umbo depth below the pinch (m)
+    layout = [(10.0, 0.059, 13.0, 10.0, 0.008), (132.0, 0.063, 9.0, -14.0, 0.006),
+              (248.0, 0.052, 18.0, 24.0, 0.011)]
+    parts, frames = [], []
+    for i, (az, L, splay, roll, depth) in enumerate(layout):
+        out = np.array([math.cos(math.radians(az)), math.sin(math.radians(az)), 0.0])
+        obj = shore.mussel_wedge(f"HeldMussel{i}", L, mat, seed=300 + i, sides=22, rows=18)
         pco = shore.get_attr(obj.data, "pcoord", 3)
         pco[:, :2] += rng.uniform(-0.4, 0.4, 2)
         kit.tag_coords(obj.data, [tuple(c) for c in pco])
-        basis = Matrix((tuple(d), tuple(dorsal), tuple(side))).transposed().to_4x4()
-        M = Matrix.Translation(Vector(tip)) @ basis
+        shell = shore.get_attr(obj.data, "shell", 3)
+        grit = 0.4 * shore.smooth(0.3, 0.1, shell[:, 2]) if i != 1 else np.zeros(len(shell))
+        shore.set_attr(obj.data, "sand", grit)
+        M = Matrix.Translation(Vector(out * 0.003 + np.array([0.0, 0.0, -depth]))) @ _hang_frame(
+            out, math.radians(splay), math.radians(roll))
         shore.transform(obj, M)
-        shore.set_attr(obj.data, "sand", np.zeros(len(obj.data.vertices)))
         parts.append(obj)
-        gape = np.array(M @ Vector(shore.mussel_point(L, 0.3)))
-        for k in range(7):
-            top = np.array([rng.uniform(-0.002, 0.002), rng.uniform(-0.002, 0.002), rng.uniform(-0.001, 0.002)])
-            bend = np.array([rng.uniform(-0.004, 0.004), rng.uniform(-0.004, 0.004), rng.uniform(-0.004, 0.0)])
-            pts = [gape + (top - gape) * f + bend * math.sin(math.pi * f) for f in np.linspace(0, 1, 6)]
-            threads.append(kit.tube(f"HeldByssus{i}_{k}", [tuple(q) for q in pts], radius=0.00022,
-                                    sides=4, material=byssus_mat, cap=False))
+        frames.append([out, M])
+    # Press the bunch together: start them overlapping, then ease each outward until they just touch.
+    for _ in range(80):
+        trees = [_bvh_world(o) for o in parts]
+        moved = False
+        for a in range(3):
+            for b in range(a + 1, 3):
+                if trees[a].overlap(trees[b]):
+                    for k in (a, b):
+                        step = Matrix.Translation(Vector(frames[k][0] * 0.0004))
+                        shore.transform(parts[k], step)
+                        frames[k][1] = step @ frames[k][1]
+                    moved = True
+        if not moved:
+            break
+    trees = [_bvh_world(o) for o in parts]
+    threads = []
+    top = np.array([0.0, 0.0, 0.0])
+    for i, (obj, (out, M)) in enumerate(zip(parts, frames)):
+        L = layout[i][1]
+        for k in range(4):
+            s = rng.uniform(0.2, 0.36)
+            gape = np.array(M @ Vector(shore.mussel_wedge_point(L, s) + np.array([0.0, 0.0012, 0.0])))
+            phi = rng.uniform(0, 2 * math.pi)
+            twist = rng.uniform(1.6, 2.4) * math.pi
+            entry_z = gape[2] * rng.uniform(0.45, 0.6)
+            end = top + np.array([rng.uniform(-0.0015, 0.0015), rng.uniform(-0.0015, 0.0015),
+                                  rng.uniform(0.002, 0.006)])
+            pts = []
+            wander = rng.uniform(0, 2 * math.pi, 3)
+            for f in np.linspace(0.0, 1.0, 13):
+                if f < 0.3:
+                    w = shore.smooth(0.0, 0.3, f)
+                    axis = np.array([0.0012 * math.cos(phi), 0.0012 * math.sin(phi), entry_z])
+                    p = gape + (axis - gape) * w
+                    p[2] = gape[2] + (entry_z - gape[2]) * f / 0.3
+                else:
+                    g = (f - 0.3) / 0.7
+                    r = 0.0013 * (1 - g) + 0.0006 * g
+                    ang = phi + twist * g
+                    z = entry_z + (end[2] - entry_z) * g
+                    p = np.array([r * math.cos(ang), r * math.sin(ang), z])
+                    if g > 0.8:                          # the frayed tuft end splays a little
+                        fray = shore.smooth(0.8, 1.0, g)
+                        p[:2] += (end[:2] - p[:2]) * fray + 0.0012 * fray * np.array([math.cos(wander[2]), math.sin(wander[2])])
+                # Smooth wander (a soft, slightly kinked thread), not per-point jitter.
+                p = p + 0.0004 * math.sin(math.pi * f) * np.array([math.sin(7.0 * f + wander[0]),
+                                                                   math.sin(9.0 * f + wander[1]),
+                                                                   0.5 * math.sin(5.0 * f + wander[2])])
+                pts.append(_push_out(p, trees, 0.0005))
+            threads.append(kit.tube(f"HeldByssus{i}_{k}", [tuple(q) for q in pts],
+                                    radius=lambda t: 0.00024 - 0.00008 * t, sides=4, material=byssus_mat, cap=False))
+    # A few stray threads looping out of the tuft and back to a shell: the tangle.
+    for k in range(2):
+        i = k % 3
+        out, M = frames[i]
+        L = layout[i][1]
+        a = np.array([0.0, 0.0, rng.uniform(-0.006, -0.003)])
+        b = np.array(M @ Vector(shore.mussel_wedge_point(L, rng.uniform(0.15, 0.25)) + np.array([0, 0.0012, 0])))
+        bow = np.cross(out, [0, 0, 1.0]) * rng.choice([-1, 1]) * rng.uniform(0.004, 0.007) + out * 0.003
+        pts = [_push_out(a + (b - a) * f + bow * math.sin(math.pi * f), trees, 0.0005) for f in np.linspace(0, 1, 12)]
+        threads.append(kit.tube(f"HeldByssusStray{k}", [tuple(q) for q in pts], radius=0.00022, sides=4,
+                                material=byssus_mat, cap=False))
     held = kit.join(parts + threads, "SM_MusselHeld", pivot=None, unwrap=False, reshade=True, smooth_angle=70)
     kit.pack_uvs(held, margin=0.004)
-    REPORT["held"]["SM_MusselHeld"] = ("Pivot = pinch point at the gathered byssus tuft; +Z up out of the pinch, three "
-                                       "mussels hang in -Z (5.4-6.2 cm), tips 1-1.6 cm below the pivot.")
+    REPORT["held"]["SM_MusselHeld"] = ("Pivot = pinch point at the gathered byssus tuft; +Z up out of the pinch, a "
+                                       "tight bunch of three mussels (5.2-6.3 cm) hangs in -Z, umbos 0.6-1.2 cm "
+                                       "below the pivot; the frayed tuft end rises ~0.5 cm above it.")
     return held
 
 
+# Laver handful, front (-Y) to back: (kind, x offset m, layer y m, length m, top width m,
+# bottom width m, flop (rad at the bottom, - forward / + back), x of a hanging fold line (m) or None)
+LAVER_HELD = [("sheet", 0.000, -0.0070, 0.104, 0.020, 0.092, -0.7, 0.016),
+              ("ribbon", 0.014, -0.0035, 0.150, 0.010, 0.030, -0.25, None),
+              ("sheet", 0.004, 0.0000, 0.112, 0.018, 0.084, 0.05, None),
+              ("ribbon", -0.016, 0.0035, 0.142, 0.009, 0.026, 0.3, None),
+              ("sheet", -0.003, 0.0070, 0.098, 0.020, 0.082, 0.6, None)]
+LAVER_SIM_FRAMES = 60          # 24 fps: gather over frames 1-18, then let it hang and settle
+LAVER_GATHER_FRAMES = 18
+LAVER_FOLD_RADIUS = 0.003
+
+
+def _laver_sheet(k, spec, rng, noise):
+    """One laver frond as a quad grid hanging from the pinch: the start shape (a gently curved
+    layer parallel to the others, so nothing starts interpenetrated, its lower part flopped
+    forward or back and, for one, a side folded over its own face along a hanging line, as wet
+    laver sticks to itself), where its top row is gathered to, and margin weights."""
+    kind, x0, y0, length, top_w, bottom_w, flop, fold = spec
+    nu, nv = (17, 21) if kind == "sheet" else (5, 26)
+    tip = 1.0 + 0.10 * noise.fbm(np.c_[np.linspace(0, 2.5, nu), np.full(nu, k * 3.0), np.zeros(nu)], 3)
+    if kind == "sheet":                                  # a torn notch in the lower margin
+        tear = rng.integers(3, nu - 3)
+        tip[tear] -= 0.22
+        tip[tear - 1] -= 0.08
+        tip[tear + 1] -= 0.1
+    else:                                                # strap fronds narrow to a ragged end
+        tip += np.array([0.0, 0.06, 0.1, 0.03, -0.04])[:nu]
+    left = 1.0 + 0.16 * noise.fbm(np.c_[np.linspace(0, 3, nv), np.full(nv, k * 3.0 + 1.0), np.ones(nv)], 3)
+    right = 1.0 + 0.16 * noise.fbm(np.c_[np.linspace(0, 3, nv), np.full(nv, k * 3.0 + 2.0), np.ones(nv)], 3)
+    start, gather, rim, pco, frill = [], [], [], [], []
+    r = LAVER_FOLD_RADIUS
+    for j in range(nv):
+        v = j / (nv - 1)
+        taper = shore.smooth(0.0, 0.85, v) ** 0.8 if kind == "sheet" else math.sin(math.pi * min(v * 1.25, 1.0)) ** 0.5
+        half = 0.5 * (top_w + (bottom_w - top_w) * taper)
+        if kind == "ribbon":
+            half = max(half, 0.5 * top_w) * (1.0 - 0.45 * shore.smooth(0.8, 1.0, v))
+        for i in range(nu):
+            u = i / (nu - 1) * 2 - 1
+            side = left[j] if u < 0 else right[j]
+            x = u * half * (1 + (side - 1) * abs(u))
+            drop = length * v * (1 + (tip[i] - 1) * v ** 2)
+            pco.append((x + k * 0.37, -drop + k * 0.21, 0.0))
+            rim.append(max(shore.smooth(0.7, 1.0, abs(u)), shore.smooth(0.88, 1.0, v)) if j > 0 else 0.0)
+            frill.append(max(shore.smooth(0.35, 1.0, abs(u)), shore.smooth(0.7, 1.0, v)) * shore.smooth(0.1, 0.35, v))
+            across, lift = x, 0.0
+            if fold is not None and x > fold:            # folded over its own face along a hanging line
+                e = x - fold
+                if e < math.pi * r:
+                    across, lift = fold + r * math.sin(e / r), r * (1 - math.cos(e / r))
+                else:
+                    across, lift = fold - (e - math.pi * r), 2 * r
+            fl = flop * shore.smooth(0.15, 1.0, v)
+            down = (math.sin(fl), -math.cos(fl))
+            front = (-math.cos(fl), -math.sin(fl))
+            twist = 1.2 * shore.smooth(0.4, 1.0, v) if kind == "ribbon" else 0.0
+            ax, ay = across * math.cos(twist), across * math.sin(twist) + 3.0 * across * across
+            if kind == "ribbon":                         # strap fronds swing out clear of the sheets
+                ax += math.copysign(0.3, x0) * drop * shore.smooth(0.15, 1.0, v)
+            start.append((x0 + ax, y0 + ay + drop * down[0] + lift * front[0],
+                          -0.002 + drop * down[1] + lift * front[1]))
+            gather.append((x0 * 0.15 + x * 0.12, y0 * 0.35, -0.001))
+    faces = [(j * nu + i, (j + 1) * nu + i, (j + 1) * nu + i + 1, j * nu + i + 1)
+             for j in range(nv - 1) for i in range(nu - 1)]
+    return start, gather, faces, rim, pco, frill, list(range(nu)), nu
+
+
 def laver_held(kit):
-    """A handful of laver lifted by its gathered holdfasts: five limp membranes hang from the
-    pinch, narrow where they are bunched and widening below, each collapsed into soft
-    lengthwise folds and crumpled, curling a little round the bunch, with lobed, torn tips."""
-    mat = shore.laver_mat("M_HeldLaver", seed=5.0, wet=1.0)
+    """A handful of laver lifted from the rock by its gathered holdfasts: three broad, limp
+    membranes and two strap-like torn fronds, simulated as cloth whose top rows are drawn
+    together into the pinch, so they pleat, drape, fold over one another and hang wider below;
+    their margins grow longer than the blade (as laver's do) and ruffle."""
+    import bpy
+    mat = shore.laver_mat("M_HeldLaver", seed=5.0, wet=1.0, relief=0.5)
     noise = rocks.Noise(91)
     rng = np.random.default_rng(91)
-    sheets = []
-    nu, nw = 15, 18
-    for k in range(5):
-        length = rng.uniform(0.10, 0.145)
-        spread = rng.uniform(0.05, 0.08)
-        folds = rng.uniform(1.6, 2.6)
-        phase = rng.uniform(0, 6.28)
-        curl = rng.uniform(-0.9, 0.9)
-        verts, pco = [], []
-        tip = 1 + 0.12 * noise.fbm(np.c_[np.linspace(0, 3, nu), np.full(nu, k * 2.0), np.zeros(nu)], 3) \
-            + 0.05 * np.sin(np.linspace(0, 1, nu) * rng.uniform(9, 14) + phase)
-        for j in range(nw):
-            w = j / (nw - 1)
-            width = 0.005 + spread * w ** 0.7
-            for i in range(nu):
-                u = i / (nu - 1)
-                drop = length * w * tip[i]
-                ang = (u - 0.5) * width / 0.03 * curl          # curl round the bunch
-                x = (u - 0.5) * width * math.cos(ang * 0.5)
-                y = (0.002 + 0.012 * w ** 0.8) * math.sin(2 * math.pi * folds * u + phase + 1.5 * w) \
-                    + 0.012 * w * (1 - math.cos(ang))
-                z = -0.003 - drop
-                verts.append((x, y, z))
-                pco.append((u * width + k * 0.37, w * length + k * 0.21, 0.0))
-        faces = [(j * nu + i, j * nu + i + 1, (j + 1) * nu + i + 1, (j + 1) * nu + i)
-                 for j in range(nw - 1) for i in range(nu - 1)]
-        sheet = kit.mesh(f"HeldLaver{k}", verts, faces, material=mat)
-        kit.tag_coords(sheet.data, pco)
-        P = shore.coords(sheet)
-        hang = shore.smooth(0.0, 0.04, -P[:, 2])
-        flat = np.array(pco)
-        crumple = np.c_[noise.fbm(flat * 70 + k, 3), noise.fbm(flat * 70 + 7 + k, 3), noise.fbm(flat * 70 + 13 + k, 3)]
-        P += crumple * np.array([0.004, 0.007, 0.004]) * hang[:, None]
-        sway = noise.fbm(np.c_[np.zeros(len(P)), -P[:, 2] * 8.0, np.full(len(P), k * 1.7)], 2)
-        P[:, 0] += 0.012 * sway * hang
-        rim = np.zeros(len(P))
-        rim[-nu:] = 1.0
-        rim[::nu] = np.maximum(rim[::nu], 0.6)
-        rim[nu - 1::nu] = np.maximum(rim[nu - 1::nu], 0.6)
-        shore.set_attr(sheet.data, "rim", rim)
-        shore.set_coords(sheet, P)
-        spin = Matrix.Rotation(k * 2 * math.pi / 5 + rng.uniform(-0.35, 0.35), 4, "Z")
-        tilt = Matrix.Rotation(rng.uniform(0.08, 0.22), 4, "X")
-        shore.transform(sheet, spin @ tilt @ Matrix.Translation((0.0, 0.004, 0.0)))
-        shore.two_sided(sheet, gap=0.0003)
-        sheets.append(sheet)
-    held = kit.join(sheets, "SM_LaverHeld", pivot=None, unwrap=False, reshade=True, smooth_angle=80)
+    start, gather, faces, rim, pco, frill, pinned, selfcol = [], [], [], [], [], [], [], []
+    for k, spec in enumerate(LAVER_HELD):
+        s, g, f, m, c, fr, p, nu = _laver_sheet(k, spec, rng, noise)
+        base = len(start)
+        start += s
+        gather += g
+        faces += [tuple(base + q for q in face) for face in f]
+        rim += m
+        frill += fr
+        pco += c
+        pinned += [base + q for q in p]
+        selfcol += [base + q for q in range(2 * nu, len(s))]
+    obj = kit.mesh("HeldLaver", start, faces, material=mat)
+    kit.tag_coords(obj.data, pco)
+    shore.set_attr(obj.data, "rim", np.array(rim))
+    obj.shape_key_add(name="Basis")
+    key = obj.shape_key_add(name="Gather", from_mix=False)
+    for i in pinned:
+        key.data[i].co = gather[i]
+    key.value = 0.0
+    key.keyframe_insert("value", frame=1)
+    key.value = 1.0
+    key.keyframe_insert("value", frame=LAVER_GATHER_FRAMES)
+    obj.vertex_groups.new(name="Pin").add(pinned, 1.0, "REPLACE")
+    obj.vertex_groups.new(name="SelfCollide").add(selfcol, 1.0, "REPLACE")
+    ruffle = obj.vertex_groups.new(name="Ruffle")
+    for i, w in enumerate(rim):
+        if w > 0.01:
+            ruffle.add([i], float(w), "REPLACE")
+    mod = obj.modifiers.new("Cloth", "CLOTH")
+    cs = mod.settings
+    cs.quality = 12
+    cs.mass = 0.004
+    cs.air_damping = 1.5
+    cs.tension_stiffness = 15.0
+    cs.compression_stiffness = 4.0        # soft: the membrane gives at the pinch rather than balloons
+    cs.shear_stiffness = 2.0
+    cs.bending_stiffness = 0.05
+    cs.vertex_group_mass = "Pin"
+    cs.vertex_group_shrink = "Ruffle"
+    cs.shrink_min = 0.0
+    cs.shrink_max = -0.3                  # the margin's springs 30 % longer: it ruffles
+    cc = mod.collision_settings
+    cc.use_collision = False
+    cc.use_self_collision = True
+    cc.self_distance_min = 0.0011
+    cc.self_friction = 8.0
+    cc.vertex_group_self_collisions = "SelfCollide"
+    cc.collision_quality = 4
+    scene = bpy.context.scene
+    mod.point_cache.frame_start = scene.frame_start = 1
+    mod.point_cache.frame_end = LAVER_SIM_FRAMES
+    for frame in range(1, LAVER_SIM_FRAMES + 1):
+        scene.frame_set(frame)
+    kit.apply_modifiers(obj)
+    if obj.data.shape_keys:
+        obj.shape_key_clear()
+    obj.vertex_groups.clear()
+    obj.animation_data_clear()
+    P = shore.coords(obj)
+    P[pinned] = np.array(gather)[pinned]
+    # Relax the sharpest cloth kinks (the fine crinkle lives in the normal map).
+    edges = shore.mesh_edges(obj)
+    count = np.bincount(edges.ravel(), minlength=len(P)).astype(float)[:, None]
+    free = np.ones(len(P), dtype=bool)
+    free[pinned] = False
+    for _ in range(4):
+        acc = np.zeros_like(P)
+        np.add.at(acc, edges[:, 0], P[edges[:, 1]])
+        np.add.at(acc, edges[:, 1], P[edges[:, 0]])
+        P[free] = 0.6 * P[free] + 0.4 * (acc / np.maximum(count, 1))[free]
+    shore.set_coords(obj, P)
+    # Ruffle the margin: laver's edge grows longer than its blade, so it waves in and out.
+    obj.data.update()
+    normals = np.array([vert.normal[:] for vert in obj.data.vertices])
+    flat = np.array(pco)
+    wave = np.sin((flat[:, 0] * 1.3 + flat[:, 1]) * 2 * math.pi / 0.034) \
+        + 0.45 * np.sin((flat[:, 0] - flat[:, 1] * 0.7) * 2 * math.pi / 0.021)
+    P += normals * (0.0032 * np.array(frill) ** 1.5 * wave)[:, None]
+    shore.set_coords(obj, P)
+    scene.frame_set(1)
+    shore.two_sided(obj, gap=0.0003)
+    obj.name = "HeldLaverSheets"
+    held = kit.join([obj], "SM_LaverHeld", pivot=None, unwrap=False, reshade=True, smooth_angle=80)
     kit.pack_uvs(held, margin=0.004)
-    REPORT["held"]["SM_LaverHeld"] = ("Pivot = top pinch where the fronds are gathered; +Z up out of the pinch, four "
-                                      "folded laver sheets hang 11-15 cm in -Z.")
+    REPORT["held"]["SM_LaverHeld"] = ("Pivot = top pinch where the fronds are gathered; +Z up out of the pinch, three "
+                                      "broad limp sheets and two strap fronds hang ~10-14 cm in -Z, wider below.")
     return held
 
 
