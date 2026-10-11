@@ -18,6 +18,9 @@
 
 namespace HomesteadWorldLighting
 {
+// The fixed moon's heading (degrees yaw); its altitude is Homestead::NightLightTuning::moonAltitudeDegrees.
+constexpr float MoonYawDegrees = 20.0f;
+const float MoonAltitudeDegrees = static_cast<float>(Homestead::NightLightTuning().moonAltitudeDegrees);
 TAutoConsoleVariable<int32> CVarRayTracedSun(TEXT("homestead.RayTracedSun"), 1,
     TEXT("1 = ray-traced sun/moon shadows with continuous sun movement (default when hardware ray "
          "tracing is on). 0 = Virtual Shadow Maps with the sun stepped by 0.5 degrees."));
@@ -39,6 +42,8 @@ using HomesteadWorldLighting::CVarNightMoonLux;
 using HomesteadWorldLighting::CVarNightSky;
 using HomesteadWorldLighting::CVarNightMinExposure;
 using HomesteadWorldLighting::CVarIndoorDaySky;
+using HomesteadWorldLighting::MoonYawDegrees;
+using HomesteadWorldLighting::MoonAltitudeDegrees;
 
 void AHomesteadWorld::BuildLighting()
 {
@@ -97,6 +102,10 @@ void AHomesteadWorld::BuildLighting()
     Moon->AtmosphereSunLightIndex = 1;
     Moon->SetLightColor(FLinearColor(0.53f, 0.66f, 1.0f));
     Moon->SetIntensity(0.5f);
+    // The moon doesn't travel (Homestead::NightLightAt): fixed and high, so it never rises, reddens or
+    // glares at the horizon. No visible disc either, so nothing in the sky reads as a second sun.
+    Moon->SetRelativeRotation(FRotator(-MoonAltitudeDegrees, MoonYawDegrees, 0.0f));
+    Moon->SetAtmosphereSunDiskColorScale(FLinearColor::Black);
     Moon->RegisterComponent();
 
     Sky = NewObject<USkyLightComponent>(this, TEXT("MeadowSkyLight"));
@@ -134,7 +143,6 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float Cloud = Weather ? Weather->GetOvercast() : 0.0f;
     const float Shower = Weather ? Weather->GetRain() : 0.0f;
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
-    const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);
     // With ray-traced sun shadows, follow the sun every refresh (about 0.025 degrees at normal game
     // speed, so no visible shadow step). Virtual Shadow Maps re-render every cached page when a
     // directional light rotates, so on that fallback step by 0.5 degrees, a few real seconds of
@@ -150,9 +158,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     if (!bLightRotationApplied || !SunRotation.Equals(AppliedSunRotation, LightRotationStepDegrees))
     {
         Sun->SetRelativeRotation(SunRotation);
-        Moon->SetRelativeRotation(MoonRotation);
         AppliedSunRotation = SunRotation;
-        AppliedMoonRotation = MoonRotation;
         bLightRotationApplied = true;
     }
     // Under cloud the sun is a dim, broad glow: little direct light and soft, faint shadows; the sky
@@ -168,9 +174,9 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // extra tint so dawn stays golden instead of saturating to orange.
     Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.8f),
         FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
-    // Night (Jenny, 2026-09-29: "around 9 PM it brightens and the moon lights like the sun"): the moonlit
-    // ground holds level from dusk to dawn instead of brightening threefold as the moon climbs, and the
-    // exposure floor keeps auto-exposure from adapting moonlight up to a daylight grey
+    // Night (Jenny, 2026-09-29: "around 9 PM it brightens and the moon lights like the sun"; 2026-10-10: "cut
+    // the moonrise out entirely"): one fixed, high moon at a level moonlit ground from dusk to dawn, and
+    // the exposure floor keeps auto-exposure from adapting moonlight up to a daylight grey
     // (Homestead::NightLightAt, native-tested).
     Homestead::NightLightTuning NightTuning;
     NightTuning.moonGroundLux = CVarNightMoonLux.GetValueOnGameThread();
