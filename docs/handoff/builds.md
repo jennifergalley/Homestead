@@ -20,7 +20,7 @@ slot, then go idle; they do not pick up unflagged queue items.
 - A sea cave in the cove's west cliff, with a pool lit through a roof fissure (first-pass art).
 - Shells, driftwood, pebbles, mussels and laver to gather daily (back at 6:00), three beach meals, and store sales.
 - A beach campfire she lights with 3 driftwood; it burns orange for 4 hours.
-- Neutral names: Larkhollow, Aldridge's General Store and Mr. Callum Aldridge, Ashgrove, Brackenburn, Thornley, Hollin Wood, Gull Sands, Marlbury; the town is called the village.
+- Larkhollow, Aldridge's General Store (Mr. Callum Aldridge), Ashgrove, Brackenburn, Thornley, Hollin Wood, Gull Sands and Marlbury replace the Cornish names; the town is called the village.
 - Darker, moonlit nights with no second sun.
 - Wooden fingerposts replace the teleporting village and manor signs.
 - Hoeing clears the derelict farm's rows and sticks; half as many meadow herbs.
