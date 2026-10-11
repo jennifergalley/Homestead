@@ -1101,6 +1101,315 @@
       "fbx": "SM_GrilledPerchPortion.fbx",
       "frozen_geometry_uv_sha256": "1e5513dc16409b0ec80ca09dd320389ce2fca24ddadc50f89084a1b4d46299d8",
       "sha256": "06b3c765398c037a339eefa20bd5924d08c71abbd9055bfe9a332e0ca4357948"
+    },
+    "SM_SteamedMussels": {
+      "vertices": 37750,
+      "triangles": 75384,
+      "size_cm": [
+        19.67,
+        19.67,
+        8.32
+      ],
+      "materials": [
+        {
+          "name": "M_SteamedMussels",
+          "textures": {
+            "basecolor": "T_SteamedMussels_basecolor.png",
+            "roughness": "T_SteamedMussels_roughness.png",
+            "normal": "T_SteamedMussels_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SteamedMussels_basecolor.png",
+          "roughness": "T_SteamedMussels_roughness.png",
+          "normal": "T_SteamedMussels_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          -0.012,
+          -0.04,
+          0.03985489148821216
+        ],
+        "detail_distance": 0.34,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_SteamedMussels.fbx",
+      "frozen_geometry_uv_sha256": "7f11a69b88c593cf55b6db80a251512d032d95caeff74ba8456115424c46aeaf",
+      "export_geometry_uv_sha256": "7f11a69b88c593cf55b6db80a251512d032d95caeff74ba8456115424c46aeaf",
+      "derivative": {},
+      "sha256": "23443ddf8cd7243e586c7c29e483438fb2799c53cc07cd56fdf2cf8435564ec7"
+    },
+    "SM_SteamedMusselsPortion": {
+      "vertices": 3506,
+      "triangles": 7000,
+      "size_cm": [
+        6.24,
+        6.75,
+        1.84
+      ],
+      "materials": [
+        {
+          "name": "M_SteamedMusselsPortion",
+          "textures": {
+            "basecolor": "T_SteamedMusselsPortion_basecolor.png",
+            "roughness": "T_SteamedMusselsPortion_roughness.png",
+            "normal": "T_SteamedMusselsPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SteamedMusselsPortion_basecolor.png",
+          "roughness": "T_SteamedMusselsPortion_roughness.png",
+          "normal": "T_SteamedMusselsPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.008,
+          0.02179957263916731
+        ],
+        "detail_distance": 0.26,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_SteamedMusselsPortion.fbx",
+      "frozen_geometry_uv_sha256": "604e15daff45144390760639a3b8e25cc372b34c43cb4ba30e59dc54bc1ee12f",
+      "export_geometry_uv_sha256": "604e15daff45144390760639a3b8e25cc372b34c43cb4ba30e59dc54bc1ee12f",
+      "derivative": {},
+      "sha256": "9d0499b9b575adfefb3d1a1b8e7759be216cb0b2870735091e948d12af7dedda"
+    },
+    "SM_MusselPotatoBroth": {
+      "vertices": 29104,
+      "triangles": 58104,
+      "size_cm": [
+        15.94,
+        15.94,
+        7.47
+      ],
+      "materials": [
+        {
+          "name": "M_MusselPotatoBroth",
+          "textures": {
+            "basecolor": "T_MusselPotatoBroth_basecolor.png",
+            "roughness": "T_MusselPotatoBroth_roughness.png",
+            "normal": "T_MusselPotatoBroth_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MusselPotatoBroth_basecolor.png",
+          "roughness": "T_MusselPotatoBroth_roughness.png",
+          "normal": "T_MusselPotatoBroth_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.018,
+          0.04787844033603324
+        ],
+        "detail_distance": 0.32,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_MusselPotatoBroth.fbx",
+      "frozen_geometry_uv_sha256": "25dc6cfa3a6ae3d4a20b0b821978d16e4c66a4caf3366484647e7466ea147034",
+      "export_geometry_uv_sha256": "25dc6cfa3a6ae3d4a20b0b821978d16e4c66a4caf3366484647e7466ea147034",
+      "derivative": {},
+      "sha256": "f367487a809af4069a51d98238d3654b60814f945a7bc704cb7528a83d9d4243"
+    },
+    "SM_MusselPotatoBrothPortion": {
+      "vertices": 2684,
+      "triangles": 5352,
+      "size_cm": [
+        2.32,
+        4.55,
+        1.29
+      ],
+      "materials": [
+        {
+          "name": "M_MusselPotatoBrothPortion",
+          "textures": {
+            "basecolor": "T_MusselPotatoBrothPortion_basecolor.png",
+            "roughness": "T_MusselPotatoBrothPortion_roughness.png",
+            "normal": "T_MusselPotatoBrothPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MusselPotatoBrothPortion_basecolor.png",
+          "roughness": "T_MusselPotatoBrothPortion_roughness.png",
+          "normal": "T_MusselPotatoBrothPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.05492307993769646,
+          0.007478022007271648
+        ],
+        "detail_distance": 0.25,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_MusselPotatoBrothPortion.fbx",
+      "frozen_geometry_uv_sha256": "8f7a0b390e13da869b9b21b0a04f24830d44e2ebd68df7b6a4d640fa9a7b0bd2",
+      "export_geometry_uv_sha256": "832b402ff578a1a95b0ef0ff6a7f7a2a81f11e37111fa4cf69dc2ace771fc70c",
+      "derivative": {
+        "kind": "frozen-edible-components-only",
+        "excluded_material": "M_MusselBrothMapleSpoon",
+        "original_geometry_added": false,
+        "pivot_translation_m": [
+          2.3283064365386963e-09,
+          -0.05931318551301956,
+          0.0015510956291109324
+        ]
+      },
+      "sha256": "c47b799ab9170ec3634dd30a4946c7df35f68babdc884bfa4ff7b26c645588d9"
+    },
+    "SM_FriedLaver": {
+      "vertices": 35874,
+      "triangles": 71680,
+      "size_cm": [
+        18.02,
+        18.02,
+        3.16
+      ],
+      "materials": [
+        {
+          "name": "M_FriedLaver",
+          "textures": {
+            "basecolor": "T_FriedLaver_basecolor.png",
+            "roughness": "T_FriedLaver_roughness.png",
+            "normal": "T_FriedLaver_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FriedLaver_basecolor.png",
+          "roughness": "T_FriedLaver_roughness.png",
+          "normal": "T_FriedLaver_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.02,
+          0.02191114365548128
+        ],
+        "detail_distance": 0.3,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_FriedLaver.fbx",
+      "frozen_geometry_uv_sha256": "53889e3e9eb7139361a877e4eb21703100695c9ffd26d7b597dab6a6d79ced95",
+      "export_geometry_uv_sha256": "53889e3e9eb7139361a877e4eb21703100695c9ffd26d7b597dab6a6d79ced95",
+      "derivative": {},
+      "sha256": "6c80f39721c27aa1a7cf0ae9fa5e46f79548bd53bf713a57ea006f6459a28f39"
+    },
+    "SM_FriedLaverPortion": {
+      "vertices": 2306,
+      "triangles": 4608,
+      "size_cm": [
+        4.99,
+        3.55,
+        0.74
+      ],
+      "materials": [
+        {
+          "name": "M_FriedLaverPortion",
+          "textures": {
+            "basecolor": "T_FriedLaverPortion_basecolor.png",
+            "roughness": "T_FriedLaverPortion_roughness.png",
+            "normal": "T_FriedLaverPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FriedLaverPortion_basecolor.png",
+          "roughness": "T_FriedLaverPortion_roughness.png",
+          "normal": "T_FriedLaverPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          -0.0015868199989199638,
+          -0.0037611438892781734,
+          0.010744385369122028
+        ],
+        "detail_distance": 0.22,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_FriedLaverPortion.fbx",
+      "frozen_geometry_uv_sha256": "2a1e8d4302ebd65a1dd1bce9d902e6a3edc0592a28614acd579ea3c98c81107c",
+      "export_geometry_uv_sha256": "2a1e8d4302ebd65a1dd1bce9d902e6a3edc0592a28614acd579ea3c98c81107c",
+      "derivative": {},
+      "sha256": "c308b507e944c55b04cb83001cc260d95476943a451b612bc9912071687b3b15"
     }
   },
   "sources": {
@@ -1195,6 +1504,35 @@
         "LakePerch": 1,
         "Kindling": 1
       }
+    },
+    "SteamedMussels": {
+      "blend": "Assets/Props/PreparedFood/SteamedMusselsSourceProof/SteamedMusselsSource.blend",
+      "sha256": "08d285ed487b9d03e0de3d3346b22099f020d5c3568622138866cbcbcf4070ba",
+      "ingredients": {
+        "Mussels": 3,
+        "Kindling": 1
+      },
+      "added_after_freeze": true
+    },
+    "MusselPotatoBroth": {
+      "blend": "Assets/Props/PreparedFood/MusselPotatoBrothSourceProof/MusselPotatoBrothSource.blend",
+      "sha256": "e7dd887332fafff0b204850779edab0691b308bdc9d24009c3c7924bcdcf9b67",
+      "ingredients": {
+        "Mussels": 3,
+        "Potato": 1,
+        "Laver": 1,
+        "Kindling": 1
+      },
+      "added_after_freeze": true
+    },
+    "FriedLaver": {
+      "blend": "Assets/Props/PreparedFood/FriedLaverSourceProof/FriedLaverSource.blend",
+      "sha256": "f9681033c4203508d7744dcc74e53bda0d87ddb98031b8afdc993cfeabe750d5",
+      "ingredients": {
+        "Laver": 2,
+        "Kindling": 1
+      },
+      "added_after_freeze": true
     }
   },
   "warnings": [
@@ -1253,6 +1591,18 @@
     "GrilledPerch": {
       "serving": "SM_GrilledPerch",
       "portion": "SM_GrilledPerchPortion"
+    },
+    "SteamedMussels": {
+      "serving": "SM_SteamedMussels",
+      "portion": "SM_SteamedMusselsPortion"
+    },
+    "MusselPotatoBroth": {
+      "serving": "SM_MusselPotatoBroth",
+      "portion": "SM_MusselPotatoBrothPortion"
+    },
+    "FriedLaver": {
+      "serving": "SM_FriedLaver",
+      "portion": "SM_FriedLaverPortion"
     }
   }
 }

@@ -50,9 +50,12 @@ def sampled_spoon_hollow(obj: bpy.types.Object, prefix: str, length_m: float) ->
 
 
 def check_source_mesh(name: str, item: str, limits: tuple, components: int,
-                      triangle_limits: tuple, material_scales: dict) -> bpy.types.Object:
-    shader_hash = hashlib.sha256((PIPELINE / "homestead_food_materials.py").read_bytes()).hexdigest()
-    geometry_hash = hashlib.sha256((PIPELINE / "homestead_food_geometry.py").read_bytes()).hexdigest()
+                      triangle_limits: tuple, material_scales: dict,
+                      shader_module: str | tuple = "homestead_food_materials.py",
+                      geometry_module: str = "homestead_food_geometry.py") -> bpy.types.Object:
+    modules = (shader_module,) if isinstance(shader_module, str) else shader_module
+    shader_hashes = {hashlib.sha256((PIPELINE / module).read_bytes()).hexdigest() for module in modules}
+    geometry_hash = hashlib.sha256((PIPELINE / geometry_module).read_bytes()).hexdigest()
     obj = bpy.data.objects.get(name)
     assert obj is not None and obj["food_original"] and obj["food_source_only"]
     assert obj["food_item"] == item
@@ -109,7 +112,7 @@ def check_source_mesh(name: str, item: str, limits: tuple, components: int,
         mesh.free()
     for slot in obj.material_slots:
         material = slot.material
-        assert material.get("food_shader_source_sha256") == shader_hash
+        assert material.get("food_shader_source_sha256") in shader_hashes, material.name
         assert not any(node.type == "TEX_IMAGE" for node in material.node_tree.nodes)
         matches = [scales for prefix, scales in material_scales.items() if material.name.startswith(prefix)]
         assert len(matches) == 1, "Unclassified original food material: " + material.name

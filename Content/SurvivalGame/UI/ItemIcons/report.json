@@ -1,7 +1,7 @@
 {
   "source_freeze_commit": "843324c17b85b5432785fc7a6b9e333702dc26ec",
   "provisional_appearance": true,
-  "source": "Original existing hero images; no reused game artwork or new render.",
+  "source": "Original existing hero images and committed original beach-prop icons; no reused game artwork or new render.",
   "size_px": 256,
   "images": {
     "baked-potatoes": {
@@ -70,6 +70,24 @@
       "source_sha256": "298b2cd3036fd9b488c397993c2905602901ffdc1c65a4b7249726bb0f93115a",
       "sha256": "c89639b90afb9859e578b08b3fa5c0c14489f1dd7f377a6541e8428b63493a64"
     },
+    "steamed-mussels": {
+      "item": "SteamedMussels",
+      "source": "Assets/Props/PreparedFood/SteamedMusselsSourceProof/beauty_SM_SteamedMussels_hero.png",
+      "source_sha256": "f39fdfbc19e5efd9d27c49e6f95746f4c23ca50b8e46b6475cb5d456ff4671b5",
+      "sha256": "89ddeef8e87830f8c164ef17651b904623b523e7e440f751e6594e4337f3d5fa"
+    },
+    "mussel-potato-broth": {
+      "item": "MusselPotatoBroth",
+      "source": "Assets/Props/PreparedFood/MusselPotatoBrothSourceProof/beauty_SM_MusselPotatoBroth_hero.png",
+      "source_sha256": "eab4166744ed4818c8ebbe6b1d0c94813355ec87af005fc5627840c9061292f4",
+      "sha256": "82037eb9f14342236314c279e0f533cc53f1f90f7faea78faa2e7ed58b2e8335"
+    },
+    "fried-laver": {
+      "item": "FriedLaver",
+      "source": "Assets/Props/PreparedFood/FriedLaverSourceProof/beauty_SM_FriedLaver_hero.png",
+      "source_sha256": "f319fff40433190651212257af81037142fa62b2df4bef8af691d6e3423bd630",
+      "sha256": "10879ae48db9b3abd3a8fb753642a82f9a61b3cf4d1cf200a4b0b9c3f639213f"
+    },
     "river-trout": {
       "item": "RiverTrout",
       "source": "Assets/Props/CaughtFish/beauty_SM_RiverTrout_hero.png",
@@ -111,6 +129,34 @@
       "source": "Assets/Props/FishingPole/beauty_SM_FishingPole_hero.png",
       "source_sha256": "78141b28bf8a41b78098da964ec131d87b693c139b1759cf47eb1418371d3f6e",
       "sha256": "7127dd191fa4c62c77d26c5f230f4efd86be4ae507db400bca50afa5c7331156"
+    },
+    "seashell": {
+      "item": "Seashell",
+      "source": "Assets/Props/BeachShells/icon_seashell_256.png",
+      "copied": true,
+      "source_sha256": "ebdff8ee3efe0c1cd0937efedc4f90bf2bb086367a27b7c7e50157c5673fb08d",
+      "sha256": "ebdff8ee3efe0c1cd0937efedc4f90bf2bb086367a27b7c7e50157c5673fb08d"
+    },
+    "driftwood": {
+      "item": "Driftwood",
+      "source": "Assets/Props/Driftwood/icon_driftwood_256.png",
+      "copied": true,
+      "source_sha256": "18c709845e1788fbb9b881bf247c21fb57a1a2b84ebbc9dd0d8469f4de38e12f",
+      "sha256": "18c709845e1788fbb9b881bf247c21fb57a1a2b84ebbc9dd0d8469f4de38e12f"
+    },
+    "mussels": {
+      "item": "Mussels",
+      "source": "Assets/Props/ShoreRock/icon_mussels_256.png",
+      "copied": true,
+      "source_sha256": "5906065bd2cbc552d9a8668181c9507066be3c3b85b441490c95d1a819c93566",
+      "sha256": "5906065bd2cbc552d9a8668181c9507066be3c3b85b441490c95d1a819c93566"
+    },
+    "laver": {
+      "item": "Laver",
+      "source": "Assets/Props/ShoreRock/icon_laver_256.png",
+      "copied": true,
+      "source_sha256": "9a8ec271c48330bf62f4173e638f6e769c696e6545c30ffead2cb9e85e865f6c",
+      "sha256": "9a8ec271c48330bf62f4173e638f6e769c696e6545c30ffead2cb9e85e865f6c"
     }
   }
 }

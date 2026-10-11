@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "name": "SteamedMusselsSource",
+  "description": "Held original steamed mussels in liquor and one open mussel to eat.",
+  "collision": "none",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/steamed_mussels.py",
+  "source_sha256": "bd5eba423f41241abcbcd1d195400cdaf65c8c4d3f80db6423ef160c93142da6",
+  "provenance": "Original solidified mussel valves, valve-moulded meats, slipware bowl and liquor; procedural PBR.",
+  "meshes": {
+    "SM_SteamedMussels": {
+      "vertices": 37750,
+      "triangles": 75384,
+      "size_cm": [
+        19.67,
+        19.67,
+        8.32
+      ],
+      "materials": [
+        {
+          "name": "M_SteamedMusselsSlipware",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SteamedMusselsLiquor",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.07
+        },
+        {
+          "name": "M_SteamedMusselShell",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SteamedMusselNacre",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SteamedMusselMeat",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SteamedMusselMeatPale",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          -0.012,
+          -0.04,
+          0.03985489148821216
+        ],
+        "detail_distance": 0.34,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_SteamedMussels.fbx",
+      "sha256": "30a1fa57501f6fc829ede3f89ca204269babdea18aa88176a652c15b724d2fd7",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SteamedMussels_hero.png",
+          "detail": "beauty_SM_SteamedMussels_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_SteamedMusselsPortion": {
+      "vertices": 3506,
+      "triangles": 7000,
+      "size_cm": [
+        6.24,
+        6.75,
+        1.84
+      ],
+      "materials": [
+        {
+          "name": "M_SteamedMusselPortionShell",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SteamedMusselPortionNacre",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SteamedMusselPortionMeat",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.008,
+          0.02179957263916731
+        ],
+        "detail_distance": 0.26,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_SteamedMusselsPortion.fbx",
+      "sha256": "1615dbde991ccab66121d2d97abf20549fe961981af6128d37580b07fcdc1c86",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SteamedMusselsPortion_hero.png",
+          "detail": "beauty_SM_SteamedMusselsPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "SteamedMussels",
+  "ingredients": {
+    "Mussels": 3,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "92ae2a308f7ee89a013ebd60e0bb56eb2e3995b8ff0464432fda03eb40def896",
+  "food_material_source_sha256": "92ae2a308f7ee89a013ebd60e0bb56eb2e3995b8ff0464432fda03eb40def896",
+  "shared_food_geometry_sha256": "cdd7e0a8e6a2b4aa4ae40d7469e3140f2cedaa30d249f6221fdb8524b0f26c53"
+}

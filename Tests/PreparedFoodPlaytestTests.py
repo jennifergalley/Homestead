@@ -1,4 +1,4 @@
-"""Validate the frozen original runtime manifest, images and mappings without UE.
+"""Validate the frozen original runtime manifest, the later beach meals, images and mappings without UE.
 
 Usage: python Tests\\PreparedFoodPlaytestTests.py
 """
@@ -12,13 +12,16 @@ from PIL import Image, ImageStat
 
 ROOT = Path(__file__).resolve().parents[1]
 FREEZE = "843324c17b85b5432785fc7a6b9e333702dc26ec"
-ADMITTED = {
+FROZEN = {
     "BakedPotatoes", "RoastedTurnips", "StewedCarrots", "HerbedBroadBeans",
     "CabbagePotatoStew", "BerryCompote", "StrawberryCompote", "RootVegetableHotpot",
     "RawFishSlices", "GrilledTrout", "GrilledPerch",
 }
+BEACH = {"SteamedMussels", "MusselPotatoBroth", "FriedLaver"}
+ADMITTED = FROZEN | BEACH
 DEFERRED = {"GrilledMackerel", "FishSoup", "FishAndPotatoes", "HerbedCarp", "MackerelChowder"}
-SPOON_DISHES = {"CabbagePotatoStew", "BerryCompote", "StrawberryCompote", "RootVegetableHotpot"}
+SPOON_DISHES = {"CabbagePotatoStew", "BerryCompote", "StrawberryCompote", "RootVegetableHotpot",
+                "MusselPotatoBroth"}
 
 
 def digest(path: Path) -> str:
@@ -58,17 +61,21 @@ def main() -> None:
         if name.endswith("Portion") and item in SPOON_DISHES:
             assert mesh["derivative"]["kind"] == "frozen-edible-components-only"
             assert mesh["size_cm"][1] < 6, name
-    assert len(maps) == 66
+    assert len(maps) == 6 * len(ADMITTED)
     assert {path.name for path in (food / "Textures").glob("*.png")} == maps
-    for source in report["sources"].values():
+    for item, source in report["sources"].items():
         blend = ROOT / source["blend"]
+        if item in BEACH:
+            # Authored after the freeze: pinned by its own content hash, not the frozen LFS pointer.
+            assert source["added_after_freeze"] and digest(blend) == source["sha256"], item
+            continue
         pointer = subprocess.check_output(["git", "show", FREEZE + ":" + blend.relative_to(ROOT).as_posix()],
                                           cwd=ROOT, text=True)
         oid = next(line.removeprefix("oid sha256:") for line in pointer.splitlines() if line.startswith("oid sha256:"))
         assert digest(blend) == source["sha256"] == oid
     header = (ROOT / "Source" / "SurvivalGame" / "HomesteadOriginalItemArt.h").read_text()
     entries = re.findall(r'\{Homestead::Item::(\w+), "([^"]+)", "([^"]+)", "([^"]+)", ("[^"]+"|nullptr), (true|false)\}', header)
-    assert len(entries) == 18
+    assert len(entries) == 25
     assert {item for item, _, _, _, portion, _ in entries if portion != "nullptr"} == ADMITTED
     assert not ({entry[0] for entry in entries} & DEFERRED)
     icons = ROOT / "Content" / "SurvivalGame" / "UI" / "ItemIcons"
@@ -78,12 +85,14 @@ def main() -> None:
         path = icons / (key + ".png")
         assert digest(path) == image["sha256"]
         assert digest(ROOT / image["source"]) == image["source_sha256"]
+        if image.get("copied"):
+            assert image["sha256"] == image["source_sha256"], key
         with Image.open(path) as thumbnail:
             assert thumbnail.size == (256, 256) and thumbnail.mode == "RGBA"
             assert thumbnail.getextrema()[3][1] == 255
     config = (ROOT / "Config" / "DefaultGame.ini").read_text()
     assert '+DirectoriesToAlwaysStageAsUFS=(Path="SurvivalGame/UI/ItemIcons")' in config
-    print("Frozen playtest art: 11 original meals, 22 meshes, 66 maps, 18 images; zero deferred runtime assets.")
+    print("Playtest art: 11 frozen + 3 beach meals, 28 meshes, 84 maps, 25 images (4 copied beach icons); zero deferred runtime assets.")
 
 
 if __name__ == "__main__":
