@@ -653,6 +653,34 @@ int main()
         }
     }
 
+    // Meadow herbs were thinned to about half (Jenny: "twice as many as I need"): the retired ids are gone, the
+    // survivors keep their ids, and a herb is still on the estate to pick.
+    {
+        std::vector<int> herbIds;
+        for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
+            if (placement.kind == ResourceKind::Flowers) herbIds.push_back(placement.id);
+        Check(herbIds.size() >= 15 && herbIds.size() <= 25, "meadow herbs are about half of the old 38", static_cast<double>(herbIds.size()));
+        const auto hasHerb = [&](int id) { return std::find(herbIds.begin(), herbIds.end(), id) != herbIds.end(); };
+        Check(hasHerb(500005) && hasHerb(500355) && hasHerb(581034), "surviving meadow herbs keep their ids");
+        Check(!hasHerb(500356) && !hasHerb(500389), "thinned meadow herbs are retired");
+    }
+
+    // Jenny: "what is the berry bush doing in the middle of my house?" The standing room (the footprint's
+    // carved-out corner, 6 m square) holds no forage, weed or bramble, and the stray bush's id is retired, never
+    // reused. The ruin's clearable debris elsewhere in the footprint is deliberate.
+    {
+        const double roomMinX = -25900.0, roomMaxX = -25300.0, roomMinY = -64100.0, roomMaxY = -63500.0;
+        int inRoom = 0;
+        bool strayBerry = false;
+        for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
+        {
+            if (placement.id == 585200) strayBerry = true;
+            if (placement.position.x > roomMinX && placement.position.x < roomMaxX && placement.position.y > roomMinY && placement.position.y < roomMaxY)
+                ++inRoom;
+        }
+        Check(inRoom == 0, "no placement sits inside the manor's standing room", static_cast<double>(inRoom));
+        Check(!strayBerry, "the berry bush that stood in the standing room (585200) is retired");
+    }
     // shrink-estate-map: the village is close. The walk from the manor to the store is at most 288 m (60 s of
     // sprint at 4.8 m/s; balance.md section 9), well inside the 75 s cap, and the roadside sights bake is valid.
     {

@@ -732,60 +732,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Leave the shop and return to Settings, as before the shop check"),
         [this]() { Controller->CloseShopScreen(); Controller->OpenBook(4); },
         [this]() { return !Controller->ShopScreen.IsValid() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
-    // Road signs: a one-way sign she can't walk from here says why and changes nothing (no book, no
-    // pause); the two-way Gateway sign opens the centred confirm over the Map page. The sign is focused
-    // directly (disclosed); wherever the fixture stands her, one of the one-way signs is refused.
-    // With the book shut the clock runs, so "changes nothing" is her place, pack, purse and energy,
-    // and no walk's worth of time (a refused walk passes none).
-    const auto BeforeSign = MakeShared<Homestead::State>();
-    const auto SignSpot = MakeShared<Homestead::Point>();
-    const auto SignRefusal = MakeShared<FString>();
-    Add(TEXT("A road sign whose one way is refused says why and leaves the book shut"),
-        [this, BeforeSign, SignRefusal, SignSpot]()
-        {
-            Controller->CloseBook();
-            const auto& Signs = Homestead::EstatePublicRoad().signs;
-            int32 Refused = INDEX_NONE;
-            for (int32 Index = 0; Index < static_cast<int32>(Signs.size()) && Refused == INDEX_NONE; ++Index)
-            {
-                const auto Ways = Homestead::RoadSignDestinations(Signs[Index].name);
-                if (Ways.size() != 1) continue;
-                if (!Controller->CanSetOut()) { Refused = Index; *SignRefusal = TEXT("You can't set out just now."); }
-                else if (const auto Plan = Controller->MenuPlanTravel(Ways[0]); !Plan.ok)
-                { Refused = Index; *SignRefusal = UTF8_TO_TCHAR(Plan.error.c_str()); }
-            }
-            if (Refused == INDEX_NONE) { Finish(false, TEXT("No one-way road sign is refused from the fixture's spot.")); return; }
-            Results.Add(TEXT("SIGN_REFUSAL ") + *SignRefusal);
-            *BeforeSign = Controller->State();
-            *SignSpot = Controller->PlayerPoint();
-            Controller->Focus = AHomesteadController::EFocus::RoadSign;
-            Controller->FocusId = Refused;
-            Controller->InteractWithRoadSign();
-        },
-        [this, BeforeSign, SignRefusal, SignSpot]()
-        {
-            const auto& Now = Controller->State();
-            return !Controller->IsBookOpen() && Controller->ToastIsError() && Controller->Toast() == *SignRefusal
-                && Now.inventory == BeforeSign->inventory && Now.money == BeforeSign->money
-                && Now.energy <= BeforeSign->energy && Now.hour - BeforeSign->hour < 0.05
-                && std::hypot(Controller->PlayerPoint().x - SignSpot->x, Controller->PlayerPoint().y - SignSpot->y) < 50.0;
-        });
-    Add(TEXT("The two-way Gateway sign opens the centred confirm over the Map page"),
-        [this]()
-        {
-            const auto& Signs = Homestead::EstatePublicRoad().signs;
-            for (int32 Index = 0; Index < static_cast<int32>(Signs.size()); ++Index)
-                if (Homestead::RoadSignDestinations(Signs[Index].name).size() > 1)
-                {
-                    Controller->Focus = AHomesteadController::EFocus::RoadSign;
-                    Controller->FocusId = Index;
-                    Controller->InteractWithRoadSign();
-                    return;
-                }
-            Finish(false, TEXT("No two-way road sign."));
-        },
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 7 && Controller->NativeMenu->IsTravelPromptOpen(); });
-    Add(TEXT("Stay here, and back to Settings as before"),
+    Add(TEXT("Back to Settings"),
         [this]() { Controller->CloseBook(); Controller->OpenBook(4); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 4 && !Controller->NativeMenu->IsTravelPromptOpen(); });
     Add(TEXT("The retired Guidebook has no G / H shortcut"),

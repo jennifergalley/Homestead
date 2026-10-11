@@ -280,6 +280,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         ResourceLayoutSignature = MoveTemp(Layout);
     }
     if (State.fixedEstate) ClearEstateSceneryUnderPieces(Simulation, LayoutKey);
+    if (State.fixedEstate) ClearDerelictFarmUnderPlots(State);
     UpdateSceneryTreeStages(Simulation);
     UpdateEstateGrass(State);
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),

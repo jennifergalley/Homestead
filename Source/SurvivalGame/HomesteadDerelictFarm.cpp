@@ -41,6 +41,8 @@ constexpr float GateSpan = 310.0f;
 constexpr float RidgeStepU = 560.0f;
 constexpr float RidgeStepV = 360.0f;
 constexpr float RidgeFlatten = 0.55f;  // decades of grazing and frost have slumped the ridges
+// A hoed garden square is 100 cm across: old ridges, stalks and bean poles within this of its middle go.
+constexpr float TilledSquareReachCm = 45.0f;
 
 enum class EPost : uint8 { Upright, Leaning, Snapped, Gone, Gateway };
 
@@ -107,13 +109,58 @@ UInstancedStaticMeshComponent* AHomesteadDerelictFarm::Batch(const TCHAR* Folder
     return Part;
 }
 
-bool AHomesteadDerelictFarm::Add(const TCHAR* Folder, const TCHAR* Name, const FTransform& World, bool bBlocks)
+bool AHomesteadDerelictFarm::Add(const TCHAR* Folder, const TCHAR* Name, const FTransform& World, bool bBlocks, bool bClearable)
 {
     UInstancedStaticMeshComponent* Part = Batch(Folder, Name, bBlocks);
     if (!Part) return false;
-    Part->AddInstance(World, /*bWorldSpace=*/true);
+    const int32 Index = Part->AddInstance(World, /*bWorldSpace=*/true);
     ++Placed;
+    if (bClearable && Index >= 0)
+    {
+        FClearable& Entry = Clearables.AddDefaulted_GetRef();
+        Entry.Part = Part;
+        Entry.Index = Index;
+        Entry.Home = World;
+        const FBox Raw = Part->GetStaticMesh()->GetBounds().GetBox();
+        const FVector Scale = World.GetScale3D();
+        Entry.LocalBounds = FBox(Raw.Min * Scale, Raw.Max * Scale);
+    }
     return true;
+}
+
+void AHomesteadDerelictFarm::ClearForPlots(const TArray<FVector2D>& PlotCentres)
+{
+    if (PlotCentres == TilledCentres) return;
+    TilledCentres = PlotCentres;
+    ApplyClearing();
+}
+
+void AHomesteadDerelictFarm::ApplyClearing()
+{
+    TSet<UInstancedStaticMeshComponent*> Touched;
+    for (FClearable& Entry : Clearables)
+    {
+        UInstancedStaticMeshComponent* Part = Entry.Part.Get();
+        if (!Part) continue;
+        bool bTilled = false;
+        for (const FVector2D& Centre : TilledCentres)
+        {
+            const FVector Local = Entry.Home.InverseTransformPositionNoScale(FVector(Centre.X, Centre.Y, Entry.Home.GetLocation().Z));
+            if (Local.X >= Entry.LocalBounds.Min.X - TilledSquareReachCm && Local.X <= Entry.LocalBounds.Max.X + TilledSquareReachCm
+                && Local.Y >= Entry.LocalBounds.Min.Y - TilledSquareReachCm && Local.Y <= Entry.LocalBounds.Max.Y + TilledSquareReachCm)
+            {
+                bTilled = true;
+                break;
+            }
+        }
+        if (bTilled == Entry.bHidden) continue;
+        Entry.bHidden = bTilled;
+        FTransform Shown = Entry.Home;
+        if (bTilled) Shown.SetScale3D(FVector(0.0001f));
+        Part->UpdateInstanceTransform(Entry.Index, Shown, true, false, true);
+        Touched.Add(Part);
+    }
+    for (UInstancedStaticMeshComponent* Part : Touched) Part->MarkRenderStateDirty();
 }
 
 float AHomesteadDerelictFarm::Ground(double X, double Y) const
@@ -261,6 +308,7 @@ int32 AHomesteadDerelictFarm::Rebuild()
     Parts.Reset();
     Batches.Reset();
     Placed = 0;
+    Clearables.Reset();
     FallbackZ = GetActorLocation().Z;
     if (!HomesteadEstateTerrain::Activate()) return 0;
     const Homestead::DerelictFarmPlan Farm = Homestead::EstateDerelictFarm();
@@ -306,7 +354,7 @@ int32 AHomesteadDerelictFarm::Rebuild()
                     const FVector2D At = World(UU, VV);
                     FTransform Ridge = OnGround(At.X, At.Y, 0.0f, 1.0f, 500.0);
                     Ridge.SetScale3D(Ridge.GetScale3D() * FVector(1.0, 1.0, RidgeFlatten));
-                    Add(TEXT("FarmField"), TEXT("SM_FarmFurrows"), Ridge, false);
+                    Add(TEXT("FarmField"), TEXT("SM_FarmFurrows"), Ridge, false, true);
                     ++Key;
                     // Dead bolted stalks stand here and there along the ridges.
                     if (FarmHash01(Key, 3, 51) < 0.45f)
@@ -314,7 +362,7 @@ int32 AHomesteadDerelictFarm::Rebuild()
                         const FVector2D Stalk = World(UU + FMath::Lerp(-250.0, 250.0, FarmHash01(Key, 3, 52)),
                             VV + 90.0 * FMath::RoundToInt(FMath::Lerp(-1.5f, 1.5f, FarmHash01(Key, 3, 53))));
                         Add(TEXT("FarmField"), TEXT("SM_FarmDeadStalks"),
-                            OnGround(Stalk.X, Stalk.Y, 360.0f * FarmHash01(Key, 3, 54), FMath::Lerp(0.85f, 1.2f, FarmHash01(Key, 3, 55)), 120.0), false);
+                            OnGround(Stalk.X, Stalk.Y, 360.0f * FarmHash01(Key, 3, 54), FMath::Lerp(0.85f, 1.2f, FarmHash01(Key, 3, 55)), 120.0), false, true);
                     }
                 }
         }
@@ -325,7 +373,7 @@ int32 AHomesteadDerelictFarm::Rebuild()
             for (int32 I = 0; I < 4; ++I)
             {
                 const FVector2D At = World(FMath::Lerp(Block[0], Block[2], 0.18 + 0.2 * I), FMath::Lerp(Block[1], Block[3], 0.25 + 0.5 * FarmHash01(I, 5, 61)));
-                Add(TEXT("FarmField"), TEXT("SM_FarmStakes"), OnGround(At.X, At.Y, FMath::Lerp(-8.0f, 8.0f, FarmHash01(I, 5, 62)) + (I % 2) * 180.0f, 1.0f, 200.0), false);
+                Add(TEXT("FarmField"), TEXT("SM_FarmStakes"), OnGround(At.X, At.Y, FMath::Lerp(-8.0f, 8.0f, FarmHash01(I, 5, 62)) + (I % 2) * 180.0f, 1.0f, 200.0), false, true);
             }
         }
         // The plough, left tipped over in mid-furrow, its nose uphill.
@@ -341,5 +389,6 @@ int32 AHomesteadDerelictFarm::Rebuild()
 #undef FENCE
     for (const TPair<int32, TArray<FVector2D>>& Run : Runs)
         Fence(Run.Value, 0.12f, 100 + Run.Key, false, false);
+    ApplyClearing();
     return Placed;
 }

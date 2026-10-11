@@ -323,13 +323,6 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             return true;
         };
     };
-    const auto SignIndex = [](const TCHAR* Name) -> int32
-    {
-        const auto& Signs = Homestead::EstatePublicRoad().signs;
-        for (int32 Index = 0; Index < static_cast<int32>(Signs.size()); ++Index)
-            if (Signs[Index].name == TCHAR_TO_UTF8(Name)) return Index;
-        return INDEX_NONE;
-    };
     const auto Eat = [](double Energy)
     {
         return [Energy](AHomesteadController& PC)
@@ -566,30 +559,6 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Hud, 14, nullptr, Knapsack(150.0f), 1.5f);
     Add(TEXT("shop-quantity"), TEXT("Buy tab, choosing bread: the how-many dialog."), ECover::Shop, 3, Counter, Shop(1, -1, TEXT("Bread")));
 
-    // Road signs.
-    Add(TEXT("sign-confirm"), TEXT("The Gateway road sign: the centred 'Village / Manor' confirm over the Map page."), ECover::Dialog, 7,
-        Sign(TEXT("GatewayRoadSign"), 180.0), [SignIndex](AHomesteadController& PC)
-        {
-            PC.Focus = AHomesteadController::EFocus::RoadSign;
-            PC.FocusId = SignIndex(TEXT("GatewayRoadSign"));
-            PC.InteractWithRoadSign();
-        });
-    // At the manor's stop, the town sign's one way (to the manor) is refused: she's already there.
-    Add(TEXT("sign-refused"), TEXT("A one-way road sign she can't walk from here: only a rust-edged notice saying why ('You're already at the manor.'), no book."),
-        ECover::Dialog, 8, [](AHomesteadController&, FStage& Out, FString& Why)
-        {
-            const auto* Manor = Homestead::EstatePublicRoad().FindStop("Manor");
-            if (!Manor) { Why = TEXT("No manor stop on the public road."); return false; }
-            Out.bMove = true;
-            Out.Stand = Manor->position;
-            Out.Face = {Manor->position.x + 500.0, Manor->position.y};
-            return true;
-        }, [SignIndex](AHomesteadController& PC)
-        {
-            PC.Focus = AHomesteadController::EFocus::RoadSign;
-            PC.FocusId = SignIndex(TEXT("TownRoadSign"));
-            PC.InteractWithRoadSign();
-        });
     // World notices.
     Add(TEXT("toast-success"), TEXT("World notice: a parchment slip at the top centre in the book's serif."),
         ECover::Notice, Toast, nullptr, Notify(TEXT("Summer has come"), false));

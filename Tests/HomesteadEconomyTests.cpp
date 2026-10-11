@@ -797,29 +797,26 @@ void NoWalkToTownFromTown()
     CHECK(!refused.ok && refused.message == "You're already at the general store." && sim.Serialize() == before);
 }
 
-void RoadSignsOfferTheWalk()
+void RoadSignsOnlyPointTheWay()
 {
     const PublicRoad& road = EstatePublicRoad();
     CHECK(road.signs.size() == 3);
-    CHECK(RoadSignDestinations("ManorRoadSign") == std::vector<TravelDestination>{TravelDestination::Town});
-    CHECK(RoadSignDestinations("TownRoadSign") == std::vector<TravelDestination>{TravelDestination::Manor});
-    CHECK(RoadSignDestinations("GatewayRoadSign").size() == 2 && RoadSignDestinations("Milestone").empty());
     CHECK(RoadSignLabel("ManorRoadSign") == "To the village" && RoadSignLabel("TownRoadSign") == "To the manor"
-        && RoadSignLabel("GatewayRoadSign") == "Village / Manor");
+        && RoadSignLabel("GatewayRoadSign") == "Village / Manor" && RoadSignLabel("Milestone").empty());
     Store store = OpenStore();
     Simulation& sim = store.sim;
     sim.SkipToHourOfDay(9.0);
     for (const PublicRoadSign& sign : road.signs)
     {
-        // She reads the sign she stands beside, and only within reach.
-        CHECK(RoadSignNear(sign.position) == &sign);
-        CHECK(RoadSignNear({sign.position.x + RoadSignReachCm + 50.0, sign.position.y}) == nullptr);
-        // Every walk it offers plans from the verge where it stands.
-        for (const TravelDestination destination : RoadSignDestinations(sign.name))
-        {
-            const TravelPlan plan = PlanTravel(sim.GetState(), sign.position, destination);
-            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < 30.0);
-        }
+        // The upper arm points along the road: toward the village (further from the manor) for the manor and
+        // gateway signs, toward the manor for the village's; stepping the other way goes the opposite direction.
+        const double yaw = RoadSignArmYaw(sign) * 3.14159265358979323846 / 180.0;
+        const double step = 300.0;
+        const Point along{sign.position.x + std::cos(yaw) * step, sign.position.y + std::sin(yaw) * step};
+        const Point back{sign.position.x - std::cos(yaw) * step, sign.position.y - std::sin(yaw) * step};
+        const bool towardVillage = sign.name != "TownRoadSign";
+        CHECK((road.NearestTo(along).chainage > sign.chainage) == towardVillage);
+        CHECK((road.NearestTo(back).chainage > sign.chainage) == !towardVillage);
     }
     // The relocated sign does not move the walk-home arrival, which still lands beside the manor front door.
     const PublicRoadSign* manorSign = road.FindSign("ManorRoadSign");
@@ -836,11 +833,6 @@ void RoadSignsOfferTheWalk()
         CHECK(std::hypot(placement.position.x - manorStop->arrival.x, placement.position.y - manorStop->arrival.y) > 200.0);
         CHECK(std::hypot(placement.position.x - manorSign->position.x, placement.position.y - manorSign->position.y) > 200.0);
     }
-    // The walk from the manor's sign is the Map tab's walk: one transaction, time passes, she's in town.
-    const double before = sim.GetState().hour;
-    const TravelPlan plan = PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Town);
-    OK(sim.WalkRoad(TravelDestination::Town, manorSign->position));
-    CHECK(std::abs(sim.GetState().hour - (before + plan.gameHours)) < 1e-6);
 }
 
 void WalkTheRoad()
@@ -1267,7 +1259,7 @@ int main(int argc, char** argv)
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("shops close on Sundays", ShopsCloseOnSundays);
     Run("walk the road to town and back", WalkTheRoad);
-    Run("the road signs offer the same walk", RoadSignsOfferTheWalk);
+    Run("the road signs only point the way", RoadSignsOnlyPointTheWay);
     Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
     Run("pickup lines follow her actual stacks", PickupGainsFollowActualStacks);
     Run("pail water shows on the pail", PailWaterPresentation);

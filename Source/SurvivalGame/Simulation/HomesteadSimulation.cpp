@@ -3246,7 +3246,7 @@ Result Simulation::Deserialize(const std::string& data)
     if (version != SimulationSaveVersion && version != PositionalStockSaveVersion && version != FreeBuildingSaveVersion
         && version != GardenSquareSaveVersion && version != LegacySimulationSaveVersion
         && version != GardenSquareSaveVersion - 1) return {false,
-        "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",
+        "This test save uses an incompatible version. Start a new game with this build; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
     const int storedItems = version == LegacySimulationSaveVersion ? static_cast<int>(Item::Machete)
         : version < ClothingSaveVersion ? static_cast<int>(Item::Fur) : ItemCount;

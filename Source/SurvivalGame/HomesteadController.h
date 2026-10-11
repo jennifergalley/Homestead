@@ -423,17 +423,13 @@ private:
     // The UI gallery (Development builds) sets up isolated states for each UI surface.
     friend struct FHomesteadUIGallery;
     friend class UHomesteadMapComponent;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, RoadSign, SceneryTree, SceneryStump };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, SceneryTree, SceneryStump };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
-    // The fingerposts on the public road (HomesteadControllerRoadSigns.cpp); FocusId indexes the road's signs.
+    // The fingerposts on the public road (HomesteadControllerRoadSigns.cpp); they only point the way.
     UPROPERTY() TArray<TObjectPtr<AHomesteadRoadSign>> RoadSigns;
     void TickRoadSigns();
-    void ConsiderRoadSignFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
-    FString RoadSignTitle() const;
-    FString RoadSignActions() const;
-    void InteractWithRoadSign();
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
     FMealGain MealGain;

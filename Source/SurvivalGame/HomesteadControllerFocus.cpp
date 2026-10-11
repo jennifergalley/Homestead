@@ -82,7 +82,6 @@ void AHomesteadController::UpdateFocus()
         }
     }
     ConsiderStoreFocus(Consider);
-    ConsiderRoadSignFocus(Consider);
     const EFocus BeforeHeldTool = Focus;
     const int BeforeHeldId = FocusId;
     FocusHeldToolTarget(Position);
@@ -237,7 +236,6 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::SceneryStump: return TEXT("Stump");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
-    case EFocus::RoadSign: return RoadSignTitle();
     default: break;
     }
     if (Focus == EFocus::None && SelectedCarriedTool() == Homestead::Item::OilLamp)
@@ -344,7 +342,6 @@ FString AHomesteadController::FocusActions() const
     case EFocus::SceneryStump: return Use + TEXT(" Clear stump");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
-    case EFocus::RoadSign: return RoadSignActions();
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");

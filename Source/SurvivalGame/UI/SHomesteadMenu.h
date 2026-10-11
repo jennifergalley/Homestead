@@ -122,9 +122,6 @@ public:
     // The notice card that floats over the book for the latest toast (never takes layout space).
     bool IsNoticeShowing() const;
     bool IsNoticeAtTop() const { return bNoticeTop; }
-    // A road sign's offer (AHomesteadController::InteractWithRoadSign): the Map tab's walk confirm, one
-    // "Walk to ..." per way the sign points, centred over the book.
-    void OpenSignTravelPrompt(const FString& SignWords, const TArray<Homestead::TravelDestination>& Destinations);
     bool IsTravelPromptOpen() const { return Dialog == EDialog::Context && bTravelPrompt; }
     FString GetNoticeText() const { return IsNoticeShowing() ? NoticeText : FString(); }
     bool IsDyeChooserOpen() const { return bDyeChooser && Dialog == EDialog::Context; }

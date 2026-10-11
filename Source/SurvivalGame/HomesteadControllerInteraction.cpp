@@ -215,7 +215,6 @@ void AHomesteadController::Interact()
     case EFocus::SceneryStump: StartSceneryStumpClear(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
-    case EFocus::RoadSign: InteractWithRoadSign(); break;
     default: EatSelectedFoodInstead(); break;
     }
 
