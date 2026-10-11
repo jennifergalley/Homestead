@@ -620,6 +620,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T07:51:20.316Z"
+    },
+    {
+      "id": "jenny-mv3lucwr-gobgld",
+      "title": "[Balance] Glowing moss in the sea cave",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (sea-cave review, 2026-10-11). A faint gold-green glowing moss (goblin's gold) near the cave mouth; needs a new asset.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T09:12:29.403Z"
+    },
+    {
+      "id": "jenny-mv3oddmp-cvpols",
+      "title": "Sea cave polish",
+      "description": "Left over from the 2026-10-11 sea-cave review (Orchestrator on Jenny's behalf, Balance): the daytime pool still reads as opaque teal (needs a visible sand bottom, a slight green tint, and a visible light-shaft cone or dust motes); the slope between the west-wall outcrops is still smooth landscape (darker, rougher triplanar granite on steep faces); thrift and ferns don't read up close; the slope doesn't run over the top of the mouth crag.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T10:23:16.033Z"
     }
   ]
 }

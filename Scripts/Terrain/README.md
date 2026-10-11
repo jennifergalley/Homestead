@@ -312,6 +312,12 @@ risk a stale npy. Convert a raw r16 sample into the npy's frame/orientation with
 `z = ((r16 - 32768) / 128)[:, ::-1].T`, matching the index relationship `npy[2H-col, row] =
 r16[row, col]` established in `coast_mix.py`. `beach_detritus.py` already reads the r16 this way.
 
+**Landscape seams can go stale after a large `ApplyEstateHeightfield`** even when the dry run
+reports 0 diff: shared component-edge vertices can keep their old heights (round 4, Map lane; gave
+a 200 m stretched wall at x=-378). Fix by applying a perturbed r16 first (seam vertices offset by
+±1 raw unit), then the real r16, with tile size 37 or 41. About 107 scattered stale vertices (≤2.7 m)
+survived even that two-pass apply — a known residual issue, not yet fixed.
+
 ### Compact map (stage 2 of `shrink-estate-map`)
 
 Run once, in this order, from the pre-compact artifacts (`f9cfadaf6`): `compact_map.py` (layout polygons,
