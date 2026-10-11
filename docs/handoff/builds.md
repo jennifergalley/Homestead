@@ -155,7 +155,15 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 ## Next build
 
-- Move away from Cornish names: neutral invented names for the estate, neighbours, map places and the clerk.
+- A coast of mixed cliffs and gentle slopes, with a gentler path to the cove.
+- Map-edge cliffs, no inescapable drops, a smooth river mouth, and fixed cliff, grass, path, stair-edge, beach-corner and boulder artifacts.
+- A sea cave in the beach cliffs with a pool inside.
+- Beach shells, stones, driftwood and mussels to gather daily, cook and sell.
+- Wooden directional signs replace the teleporting village and manor signs.
+- Tilling clears the derelict farm's rows and sticks; half as many meadow herbs, now sellable.
+- Neutral, non-Cornish names; the town is called the village.
+- Darker, moonlit nights without a second sun.
+- The title screen says Start a new game.
 
 ## Build after next
 

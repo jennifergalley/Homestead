@@ -45,3 +45,16 @@ Gameplay and Wardrobe both add General Store stock; they coordinate the append-o
 | Balance Agent | `ceb1109b-f156-451c-b890-ca91fa92f1c1` | Claude Opus 5.5 / high | — | review only (replaces archived `81a547cd`) |
 | Integration Agent | `09ae4063-4f60-475e-bb88-7c6d6a7bbc7c` | Claude Sonnet 5 / medium | reserved slot | unchanged |
  Map Agent stops for Jenny's approval of a top-down layout before any rebake.
+
+## Map feedback build (started 2026-10-10 evening)
+
+| Name | Session | Model | MCP port | Scope |
+| --- | --- | --- | --- | --- |
+| Map Agent | `94e0bd8e-ab39-402c-8aa3-0b9365489bc9` | Claude Opus 5.5 / high | 8776 | Jenny's terrain feedback: cliff/slope coast mix, map-edge cliffs, no inescapable areas, river mouth, cliff and grass artifacts, flush paths, cove stair edge, beach corner, boulder, cliff rock face, village street grade, river source |
+| Beach Agent | `8c44fafc-9777-4063-86f9-071f7722293f` | Claude Opus 5.5 / high | 8777 | beach shells, stones, driftwood and mussels: decor, daily gathers, dishes, store sales |
+| Gameplay Agent | `5b555e6e-49a2-4592-9abb-1a857ebd5a67` | Claude Sonnet 5.5 / high | 8778 | Start a new game label; derelict farm artifacts clear on till; half the meadow herbs, sellable; directional signs replace teleport signs |
+| Names Agent | `72b7d774-d285-4f3d-93a5-d62f61927853` | Claude Sonnet 5.5 / high | 8779 | move away from Cornish names; town becomes the village in toasts/labels |
+| Lighting Agent | `0816ef4d-8f71-4df4-bb26-62e659d21fdb` | Claude Sonnet 5.5 / high | 8780 | realistic night lighting |
+| Cave Agent | `d6ef3d58-ed8a-4297-9f27-e3a51528c59d` | Claude Opus 5.5 / high | 8781 | beach sea cave with a pool |
+| Balance Agent | `ceb1109b-f156-451c-b890-ca91fa92f1c1` | Claude Opus 5.5 / high | — | review only |
+| Integration Agent | `09ae4063-4f60-475e-bb88-7c6d6a7bbc7c` | Claude Sonnet 5 / medium | reserved slot | merge, package, promote |
