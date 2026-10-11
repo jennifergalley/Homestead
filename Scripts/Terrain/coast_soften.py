@@ -73,8 +73,7 @@ def write_ledges(z, layout):
 def main():
     layout = json.load(open(LAYOUT))
     if layout.get("coastSoften"):
-        print("coast soften: already done; ledges re-emitted")
-        write_ledges((np.fromfile(R16, "<u2").reshape(SIZE, SIZE).astype(np.float64) - 32768.0) / 128.0, layout)
+        print("coast soften: already done")
         return
     raw = np.fromfile(R16, "<u2").reshape(SIZE, SIZE)
     z = (raw.astype(np.float64) - 32768.0) / 128.0
@@ -106,7 +105,6 @@ def main():
         json.dump(layout, fh, indent=1)
     (a, b), (c, e) = moved.min(0), moved.max(0)
     print(f"coast soften: {len(moved)} vertices; ApplyEstateHeightfield rows {a}-{c}, cols {b}-{e}")
-    write_ledges(z, layout)
 
 
 if __name__ == "__main__":
