@@ -191,6 +191,35 @@ double Simulation::MineCost(int nodeId) const
     return Mine::InfoFor(spot->kind).energy * TierEnergyFactor(GetToolTier(ToolKind::Pickaxe));
 }
 
+int Simulation::FindAimedMine(Point player, double playerZ, Point facing) const
+{
+    const double length = std::hypot(facing.x, facing.y);
+    if (!std::isfinite(player.x) || !std::isfinite(player.y) || !std::isfinite(playerZ)
+        || !std::isfinite(length) || length < 1e-6) return -1;
+    const Point forward{facing.x / length, facing.y / length};
+    const double cosine = std::cos(Overgrowth::AimHalfAngleDegrees * 3.14159265358979323846 / 180.0);
+    int aimed = -1;
+    double best = Overgrowth::Reach;
+    for (const auto& node : state_.resources)
+    {
+        const auto* spot = Mine::IsMineNodeKind(node.kind) ? Mine::FindNode(node.id) : nullptr;
+        if (!spot || std::abs(playerZ - spot->z) > Mine::ReachZCm) continue;
+        const Point offset{node.position.x - player.x, node.position.y - player.y};
+        const double distance = std::hypot(offset.x, offset.y);
+        if (distance > best || (distance == best && aimed != -1)) continue;
+        if (distance > Overgrowth::AimAnyDirection && (offset.x * forward.x + offset.y * forward.y) / distance < cosine) continue;
+        aimed = node.id;
+        best = distance;
+    }
+    return aimed;
+}
+
+bool Simulation::MineDepleted(int nodeId) const
+{
+    const auto* node = MineFindResource(state_.resources, nodeId);
+    return node && node->readyAtHour > state_.hour;
+}
+
 Result Simulation::MineNode(int nodeId, Item tool, Point player, double playerZ)
 {
     const auto ready = CheckMine(nodeId, tool, player, playerZ);

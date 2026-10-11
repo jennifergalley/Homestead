@@ -360,6 +360,25 @@ void SaveRoundTripKeepsMinedNodes()
     CHECK(loaded.Count(Item::Coal) == sim.Count(Item::Coal));
     CHECK(loaded.Serialize() == saved);
 }
+
+void AimedMineNodeFollowsFacingAndLevel()
+{
+    Mined mined = NewMine();
+    Simulation& sim = mined.sim;
+    const int rock = NodeOfKind(Mine::NodeKind::Rock);
+    const Mine::Node* spot = Mine::FindNode(rock);
+    // Standing in the gallery one metre off the wall, facing it.
+    const Point player{spot->x + spot->normalX * 100.0, spot->y + spot->normalY * 100.0};
+    const Point toward{-spot->normalX, -spot->normalY};
+    CHECK(sim.FindAimedMine(player, spot->z, toward) == rock);
+    CHECK(sim.FindAimedMine(player, spot->z, {-toward.x, -toward.y}) != rock);
+    // The surface level above the tunnels never aims at a node below.
+    CHECK(sim.FindAimedMine(player, spot->z + 4000.0, toward) == -1);
+    CHECK(!sim.MineDepleted(rock));
+    Light(sim);
+    CHECK(Swing(sim, rock).ok);
+    CHECK(sim.MineDepleted(rock) && sim.FindAimedMine(player, spot->z, toward) == rock);
+}
 }
 
 int main()
@@ -377,6 +396,7 @@ int main()
     StuckRuleKeepsHerUnderground();
     ExhaustionUndergroundWakesAtTheMineHouse();
     SaveRoundTripKeepsMinedNodes();
+    AimedMineNodeFollowsFacingAndLevel();
     std::cout << "Mine tests passed (" << MineChecks << " checks)\n";
     return 0;
 }

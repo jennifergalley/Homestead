@@ -813,6 +813,12 @@ public:
     // Swings her pickaxe tier needs to work the node (the last one commits), and the Energy that costs.
     int MineSwings(int nodeId) const;
     double MineCost(int nodeId) const;
+    // The mine node she's aimed at: within reach in the plane and at her level, inside the aim cone
+    // (Overgrowth::AimHalfAngleDegrees), nearest first; -1 for none. Bare nodes still count so the
+    // prompt can say they're bare.
+    int FindAimedMine(Point player, double playerZ, Point facing) const;
+    // Whether the node is bare until its refill morning.
+    bool MineDepleted(int nodeId) const;
     // Works the node once: spends Energy, grants its yield (overflow is left on the ground) and leaves
     // it bare until its refill morning.
     Result MineNode(int nodeId, Item tool, Point player, double playerZ);

@@ -22,7 +22,7 @@ struct TravelPlace
 constexpr std::array<TravelPlace, TravelDestinationCount> TravelPlaces{{
     {Anchor::StandingRoomSpawn, "The manor", "the manor", TravelArrivedCm},
     {Anchor::TownSquare, "The village", "the village", TravelTownReachCm},
-    {Anchor::MineEntrance, "Mine ruin", "the mine ruin", 1500.0},
+    {Anchor::MineEntrance, "The mine", "the mine", 1500.0},
     {Anchor::CoveBeach, "The cove", "the cove", 2000.0},
     {Anchor::MillSite, "Mill site", "the mill site", 1500.0},
     {Anchor::EstateGateway, "Estate gateway", "the estate gateway", 1500.0},
