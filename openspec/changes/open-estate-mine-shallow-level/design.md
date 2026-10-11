@@ -38,8 +38,8 @@ alongside, and the mine reuses it.
 ## 3. The shallow level's layout
 
 A fixed, hand-built network about the size of the manor grounds. The ladder chamber opens onto a
-main gallery that loops back on itself, with three or four short side drifts, timber props, rails,
-an old ore cart and a dripping sump. Walking from the ladder to the far end takes about 30-45 s.
+main gallery that loops back on itself, with three or four short side drifts, timber sets spaced
+well apart, no rails or ore carts (ore was hauled out by hand, as in Poldark; Jenny 2026-10-11) and a dripping sump. Walking from the ladder to the far end takes about 30-45 s.
 There are no dead ends that hide the way back, and the floors are flat enough that she can never
 fall somewhere she can't climb out of. Ambient sound: drips, creaking timber and a low draught.
 
@@ -204,7 +204,7 @@ Two heavy lanes, spawned together in dependency order, use the two heavy-job slo
 
 1. **Mine Art Agent** (Claude Opus 5.5, Blender + Unreal). Owns the mine house (exterior, the
    furnished ground-floor room, the trapdoor and ladder shaft) and a modular tunnel kit: walls, timber
-   sets, rails, cart, sump, and rock face, coal, copper and gem node meshes in the sea cave's granite.
+   sets, sump, and rock face, coal, copper and gem node meshes in the sea cave's granite.
    It assembles the shallow level and places it under the mine site. Files: `Scripts/Blender/Recipes/mine_*.py`,
    `Content/SurvivalGame/Mine/**`, the level's placement script.
 2. **Mine Gameplay Agent** (Claude Sonnet 5.5). Owns the simulation: item and resource-kind appends,
