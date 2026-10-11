@@ -35,25 +35,33 @@ int main()
     Check(std::abs(noon.skyScale - 1.0) < 1e-9, "noon sky", noon.skyScale);
     Check(noon.minExposureEV == 0.0, "noon exposure floor", noon.minExposureEV);
 
-    // Moonrise (18:23-18:50) may firm the moonlit ground up by less than a stop; from 18:50 to midnight the
-    // moonlit ground and the displayed ground key never rise (the old moon at a fixed 2 lux brightened
-    // threefold between 18:30 and 21:00 as it climbed, and the camera adapted it to daylight).
-    const double duskKey = NightGroundKey(NightLightAt(18.0 + 23.0 / 60.0));
-    Check(NightGroundKey(NightLightAt(18.9)) < duskKey * 2.0, "moonrise brightens a stop or more", NightGroundKey(NightLightAt(18.9)));
-    double lastGround = 1e9, lastKey = 1e9, lastExposure = 1e9;
-    for (int minute = 18 * 60 + 50; minute <= 24 * 60; ++minute)
+    // The moon never rises: one fixed altitude, and from the end of dusk to the start of dawn the moonlit
+    // ground, the displayed ground key and the exposure floor are exactly level (Jenny, 2026-10-10).
+    const double fixedAltitude = NightLightAt(0.0).moonAltitude;
+    const NightLight deepNight = NightLightAt(0.0);
+    for (int minute = 0; minute < 24 * 60; ++minute)
     {
         const NightLight light = NightLightAt(minute / 60.0);
-        Check(light.moonGroundLux <= lastGround + 1e-9, "moonlit ground rises after dusk", minute);
-        Check(NightGroundKey(light) <= lastKey + 1e-9, "night brightens after dusk", minute);
-        Check(light.minExposureEV <= lastExposure + 1e-9, "exposure floor rises after dusk", minute);
-        lastGround = light.moonGroundLux;
-        lastKey = NightGroundKey(light);
-        lastExposure = light.minExposureEV;
+        Check(std::abs(light.moonAltitude - fixedAltitude) < 1e-12, "moon moves", minute);
+        Check(light.moonAltitude > 0.7 && light.moonAltitude < 0.8, "moon not high and fixed", light.moonAltitude);
+        if (light.daylight < 1e-9)
+        {
+            Check(std::abs(light.moonGroundLux - deepNight.moonGroundLux) < 1e-9, "night moonlight not level", minute);
+            Check(std::abs(NightGroundKey(light) - NightGroundKey(deepNight)) < 1e-9, "night key not level", minute);
+            Check(std::abs(light.minExposureEV - deepNight.minExposureEV) < 1e-9, "exposure floor not level", minute);
+        }
+        // Dusk and dawn blend with the sun: the moon never brightens while the sun's daylight rises, and
+        // is never above its full-night level.
+        Check(light.moonGroundLux <= deepNight.moonGroundLux + 1e-9, "moon above night level", minute);
+        Check(std::abs(light.moonGroundLux - deepNight.moonGroundLux * (1.0 - light.daylight)) < 1e-9, "moon not tied to night", minute);
     }
+    // 18:00 is just past sunset and 6:00 is dawn: dusk and dawn are the same blend, mirrored.
+    Check(NightLightAt(18.2).moonGroundLux > 0.0 && NightLightAt(18.2).moonGroundLux < deepNight.moonGroundLux, "dusk blend", NightLightAt(18.2).moonGroundLux);
+    Check(NightLightAt(5.8).moonGroundLux > 0.0 && NightLightAt(5.8).moonGroundLux < deepNight.moonGroundLux, "dawn blend", NightLightAt(5.8).moonGroundLux);
 
-    // Night reads as night but isn't black: moonlit ground about 1.5-3.5 stops under an adapted grey.
-    for (const double hour : {21.0, 0.0, 3.0})
+    // Night reads as night but isn't black: moonlit ground about 1.5-3.5 stops under an adapted grey, at
+    // dusk, midnight and pre-dawn alike.
+    for (const double hour : {21.0, 0.0, 3.0, 4.5})
     {
         const NightLight light = NightLightAt(hour);
         const double key = NightGroundKey(light);
@@ -62,15 +70,13 @@ int main()
         Check(light.moonGroundLux > 0.1 && light.moonGroundLux < 0.3, "full-moon ground lux", light.moonGroundLux);
     }
 
-    // The moon never glares at the horizon, and everything is continuous (no pops) minute to minute.
+    // The moon never glares, and everything is continuous (no pops) minute to minute.
     double previousMoon = NightLightAt(0.0).moonLux;
     for (int minute = 1; minute <= 24 * 60; ++minute)
     {
         const NightLight light = NightLightAt(minute / 60.0);
-        Check(light.moonLux <= 1.01, "moon glare", light.moonLux);
-        // A game minute is about a second at the default day length, so the moon's 5-minute rise over
-        // the horizon (at most 0.25 lux a minute) is a fade of several seconds, not a pop.
-        Check(std::abs(light.moonLux - previousMoon) < 0.25, "moon pops", minute);
+        Check(light.moonLux <= 0.35, "moon glare", light.moonLux);
+        Check(std::abs(light.moonLux - previousMoon) < 0.02, "moon pops", minute);
         previousMoon = light.moonLux;
     }
 
@@ -111,10 +117,13 @@ int main()
     }
 
     // The old schedule's failure, reproduced: fixed 2 lux, EV -2 floor, and the scene adapts to a daylight
-    // grey by 21:00. The new schedule keeps 21:00 darker than 18:45.
-    const NightLightTuning old{2.0 * 0.72, 0.6, -2.0, 1.0};
+    // grey by 21:00. The new schedule keeps 21:00 no brighter than any later night hour.
+    NightLightTuning old;
+    old.moonGroundLux = 2.0 * 0.72;
+    old.nightSky = 0.6;
+    old.nightMinExposureEV = -2.0;
     Check(NightGroundKey(NightLightAt(21.0, old)) > 0.99, "the old schedule adapted to daylight at 21:00");
-    Check(NightGroundKey(NightLightAt(21.0)) <= NightGroundKey(NightLightAt(18.75)) + 1e-9, "21:00 no brighter than 18:45");
+    Check(NightGroundKey(NightLightAt(21.0)) <= NightGroundKey(NightLightAt(0.0)) + 1e-9, "21:00 brighter than midnight");
 
     std::printf("21:00 moon %.3f lux, ground %.3f lux, key %.3f (%.1f stops), floor EV %.2f, sky %.2f\n",
         NightLightAt(21.0).moonLux, NightLightAt(21.0).moonGroundLux, NightGroundKey(NightLightAt(21.0)),

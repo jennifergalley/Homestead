@@ -380,7 +380,6 @@ private:
     // Last rotations pushed to the lights. Rotating a directional light invalidates every cached
     // Virtual Shadow Map page, so small time-of-day changes are applied in coarse steps.
     FRotator AppliedSunRotation = FRotator::ZeroRotator;
-    FRotator AppliedMoonRotation = FRotator::ZeroRotator;
     bool bLightRotationApplied = false;
     // True while showing a fixed-estate game on the Estate level's Landscape.
     bool bFixedEstate = false;
