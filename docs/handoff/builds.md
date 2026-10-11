@@ -14,17 +14,17 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Status: delivered
 - Configuration: Development
 - Ships:
-- Cornish place/business names across signage and dialogue (the general store is now
-  "Aldridge's General Store").
-- Reworked night lighting (moonlit exposure/sky pass).
-- The sea cave: cave actor, tide pool, fissure shaft, cove cliff rock face, landscape hole at the
-  cave mouth, a "Sea cave" map label and two cave ambience sounds.
-- Gameplay polish: "Start a new game" labels; tilling now clears derelict furrows/sticks; 19
-  meadow herbs retired (500355-500389); teleport signs replaced by fingerposts; the empty
-  manor-room berry node retired with a footprint exclusion.
-- Beach gathering: new items/recipes/ResourceKinds, 41 beach placements (586000-586040, finds plus
-  a campfire), 7 new EstateSceneryKinds (49-55, ~3,550 decor records), 11 prop sets, 3 meals, 25
-  icons.
+- Existing saves load in this build.
+- A coast of mixed cliffs and gentle slopes, with a natural cove path (two short stone flights, about 80 s from the manor), flush paths, cliffs at the map edge, and no drops she can't climb back out of.
+- The river runs over the sand into the surf; streaky cliffs, grass squares and lines, the angled beach corner and the shadowed boulder are fixed.
+- A sea cave in the cove's west cliff, with a pool lit through a roof fissure (first-pass art).
+- Shells, driftwood, pebbles, mussels and laver to gather daily (back at 6:00), three beach meals, and store sales.
+- A beach campfire she lights with 3 driftwood; it burns orange for 4 hours.
+- Neutral names: Larkhollow, Aldridge's General Store and Mr. Callum Aldridge, Ashgrove, Brackenburn, Thornley, Hollin Wood, Gull Sands, Marlbury; the town is called the village.
+- Darker, moonlit nights with no second sun.
+- Wooden fingerposts replace the teleporting village and manor signs.
+- Hoeing clears the derelict farm's rows and sticks; half as many meadow herbs.
+- The title screen says Start a new game, and the berry bush is gone from the manor's standing room.
 - Admitted: Names `8bfc59aa4`, Lighting `e9815ce4a`, Map `e0405d8f4` (coast mix, flush paths, edge
   cliffs, no inescapable pockets, river mouth, triplanar granite, grass fixes, village street
   grade, fix-estate-river-source), Cave `a47b099c6`, Gameplay `5152f9f58`, Beach `aff198307`, plus
