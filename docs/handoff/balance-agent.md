@@ -51,7 +51,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   unchanged); suggested village lit windows as later polish.
 - 2026-10-10: Map Agent (94e0bd8e) mixed-coast plan: I proposed a 90 s cove cap for a step-free
   1-in-4 path; the Orchestrator reverted it to Jenny's call (options: 1-in-4 ~90 s, a lower cove
-  site, or a slope plus one short flight). Cap stays 60 s until she picks; then update §9.
+  site, or a slope plus one short flight). Jenny picked the slope plus one or two short stone
+  flights: about 350 m, cap 75 s (§9 updated). Awaiting its timed sprint and viewpoint shot.
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
