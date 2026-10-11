@@ -5,6 +5,7 @@
 #include "HomesteadOvergrowth.h"
 #include "HomesteadShops.h"
 #include "HomesteadSimulation.h"
+#include "HomesteadTravel.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -131,6 +132,33 @@ void CatalogueAndShop()
         CHECK(ItemFromKey(ItemKey(items[i])) == items[i]);
         CHECK(std::string(ItemName(items[i])) == names[i]);
     }
+}
+
+void GeneralStorePaysForTheOres()
+{
+    Simulation sim;
+    CHECK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()).ok);
+    const Shop* shop = sim.FindShop(ShopKind::GeneralStore);
+    CHECK(shop != nullptr);
+    const int shopId = shop->id;
+    const Point counter = ProvisionalEstateLayout().PointOr(Anchor::GeneralStoreCounter, {});
+    const Point customer{counter.x, counter.y - 150.0};
+    CHECK(sim.DiscoverTravel(TravelDestination::Town, counter).ok);
+    sim.SkipToHourOfDay(9.0);
+
+    struct Row { Item item; int quantity; Coins each; };
+    const Row rows[] = {{Item::Coal, 3, 10}, {Item::CopperOre, 2, 25}, {Item::Quartz, 2, 35}, {Item::Amethyst, 1, 150}};
+    for (const Row& row : rows) CHECK(sim.GrantItems(row.item, row.quantity).ok);
+    for (const Row& row : rows)
+    {
+        const Coins before = sim.GetState().money;
+        const Result sold = sim.Sell(shopId, row.item, row.quantity, customer);
+        CHECK(sold.ok);
+        CHECK(sim.GetState().money == before + row.quantity * row.each);
+        CHECK(sim.Count(row.item) == 0);
+    }
+    // 3 coal + 2 copper + 2 quartz + 1 amethyst.
+    CHECK(sim.GetState().money == StartingMoney + 30 + 50 + 70 + 150);
 }
 
 void MiningRefusals()
@@ -395,6 +423,7 @@ int main()
     LayoutHasTheClaimedNodes();
     EstatePlacementsCarryTheMine();
     CatalogueAndShop();
+    GeneralStorePaysForTheOres();
     MiningRefusals();
     SwingsAndEnergyFollowTheTable();
     YieldsAndRefills();
