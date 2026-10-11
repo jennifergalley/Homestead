@@ -112,7 +112,8 @@ int main()
         if (PointInPolygon(cave.footprint, prop.position))
             Check(prop.z > cave.roofMaxZ, "a cliff rock over the cave sits above its roof", prop.z - cave.roofMaxZ);
         const Point inCave = cave.ToLocal(prop.position);
-        Check(!(inCave.x > -600.0 && inCave.x < 1300.0 && std::fabs(inCave.y) < 1300.0), "no cliff rock in the cave's mouth",
+        // The walk-in corridor (cove_cliff_rocks.py MOUTH_BOX, 7 m either side); blocks may flank the crag outside it.
+        Check(!(inCave.x > -600.0 && inCave.x < 1300.0 && std::fabs(inCave.y) < 700.0), "no cliff rock in the cave's mouth",
             inCave.x);
         Check(prop.z > 0.0, "cliff rocks stand above the beach", prop.z);
     }

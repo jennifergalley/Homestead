@@ -18,6 +18,8 @@ inline constexpr Measurement Measurements[] = {
     {"Audio/Ambience/CreekLoop.wav", -27.5, -24.4, -26.2},
     {"Audio/Ambience/HearthCrackle.wav", -29.4, -25.6, -27.9},
     {"Audio/Ambience/RainLoop.wav", -19.1, -17.2, -18.3},
+    {"Audio/Ambience/SeaCaveDrips.wav", -23.6, -17.3, -22.4},
+    {"Audio/Ambience/SeaCaveSurf.wav", -23.8, -14.8, -17.7},
     {"Audio/Effects/CaneCutA.wav", -26.0, -22.6, -31.4},
     {"Audio/Effects/CaneCutB.wav", -26.6, -23.1, -31.8},
     {"Audio/Effects/CaneCutC.wav", -25.4, -22.3, -31.0},

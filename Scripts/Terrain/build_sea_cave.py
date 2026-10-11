@@ -6,8 +6,8 @@
    parent with the GraniteDetail layer, complex-as-simple collision on LOD2.
 2. M_SeaCaveSky: the strip of sky closing the roof fissure (unlit, two-sided; Color x Intensity, set at runtime
    by AHomesteadSeaCave::SetSky).
-3. MI_SeaCavePool: the cave pool's still water, an instance of the estate pond's water, clearer and greener
-   (seep water over pale sand), with no wind ripple.
+3. M_SeaCavePoolStill + MI_SeaCavePoolStill: the pool's still, dark green water (translucent; the runtime puts it on
+   lighting channel 1 so only the fissure's shaft lights it).
 4. SeaCaveDrips and SeaCaveSurf from Assets/Audio/Ambience (Scripts/generate_sea_cave_audio.py), looping.
 5. The cove cliff's dressing: SM_ThriftClump (Recipes/thrift.py) and darker MI_<Granite>_Cliff instances.
 Then saves. The landscape hole is build_landscape_holes.py.
@@ -21,11 +21,9 @@ import unreal
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.normpath(os.path.join(HERE, "..", ".."))
 FOLDER = "/Game/SurvivalGame/Environment/SeaCave"
-POND = "/Game/SurvivalGame/Materials/M_EstatePond"
 AUDIO = "/Game/SurvivalGame/Audio/Ambience"
-POOL_LOOK = {"RippleScale": (0.02, 0.02, 1.0), "Specular": 0.9, "Roughness": 0.015,
-             "Absorption": (0.05, 0.035, 0.04), "Scattering": (0.00005, 0.0001, 0.0001),
-             "ShallowFoam": 0.0, "DeepFoam": 0.0}
+POOL_COLOR = (0.006, 0.016, 0.012)     # dark green, clear seep water over sand in a dim chamber
+POOL_OPACITY = (0.72, 0.95)            # looking straight down .. at a glancing angle
 
 LIB = unreal.EditorAssetLibrary
 MEL = unreal.MaterialEditingLibrary
@@ -99,15 +97,44 @@ def sky_material():
 
 
 def pool_material():
-    path = f"{FOLDER}/MI_SeaCavePool"
-    mi = LIB.load_asset(path) if LIB.does_asset_exist(path) else TOOLS.create_asset(
-        "MI_SeaCavePool", FOLDER, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
-    MEL.set_material_instance_parent(mi, unreal.load_asset(POND))
-    for name, value in POOL_LOOK.items():
-        if isinstance(value, tuple):
-            MEL.set_material_instance_vector_parameter_value(mi, name, unreal.LinearColor(*value, 0.0))
-        else:
-            MEL.set_material_instance_scalar_parameter_value(mi, name, value)
+    """M_SeaCavePoolStill + MI_SeaCavePoolStill: still, dark green water. Translucent, surface-lit (not Single Layer
+    Water, which glowed white under the cave's unoccluded sky); see-through looking down onto the bed, a mirror at
+    a glancing angle. Tuned in RT-on PIE."""
+    path = f"{FOLDER}/M_SeaCavePoolStill"
+    m = LIB.load_asset(path) if LIB.does_asset_exist(path) else TOOLS.create_asset(
+        "M_SeaCavePoolStill", FOLDER, unreal.Material, unreal.MaterialFactoryNew())
+    MEL.delete_all_material_expressions(m)
+    for e in list(MEL.get_material_expressions(m) if hasattr(MEL, "get_material_expressions") else []):
+        MEL.delete_material_expression(m, e)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    m.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_SURFACE_PER_PIXEL_LIGHTING)
+
+    def vec(name, v, x, y):
+        e = MEL.create_material_expression(m, unreal.MaterialExpressionVectorParameter, x, y)
+        e.set_editor_property("parameter_name", name)
+        e.set_editor_property("default_value", unreal.LinearColor(*v, 1.0))
+        return e
+
+    def sc(name, v, x, y):
+        e = MEL.create_material_expression(m, unreal.MaterialExpressionScalarParameter, x, y)
+        e.set_editor_property("parameter_name", name)
+        e.set_editor_property("default_value", v)
+        return e
+    MEL.connect_material_property(vec("WaterColor", POOL_COLOR, -500, 0), "", unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.connect_material_property(sc("Roughness", 0.03, -500, 150), "", unreal.MaterialProperty.MP_ROUGHNESS)
+    MEL.connect_material_property(sc("Specular", 0.5, -500, 250), "", unreal.MaterialProperty.MP_SPECULAR)
+    fresnel = MEL.create_material_expression(m, unreal.MaterialExpressionFresnel, -700, 400)
+    lerp = MEL.create_material_expression(m, unreal.MaterialExpressionLinearInterpolate, -400, 450)
+    MEL.connect_material_expressions(sc("OpacityDown", POOL_OPACITY[0], -700, 550), "", lerp, "A")
+    MEL.connect_material_expressions(sc("OpacityGlancing", POOL_OPACITY[1], -700, 650), "", lerp, "B")
+    MEL.connect_material_expressions(fresnel, "", lerp, "Alpha")
+    MEL.connect_material_property(lerp, "", unreal.MaterialProperty.MP_OPACITY)
+    MEL.recompile_material(m)
+    LIB.save_loaded_asset(m, False)
+    ipath = f"{FOLDER}/MI_SeaCavePoolStill"
+    mi = LIB.load_asset(ipath) if LIB.does_asset_exist(ipath) else TOOLS.create_asset(
+        "MI_SeaCavePoolStill", FOLDER, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    MEL.set_material_instance_parent(mi, m)
     LIB.save_loaded_asset(mi, False)
 
 

@@ -36,23 +36,33 @@ REGION = dict(x=(-612.0, -462.0), y=(-760.0, -600.0))
 STEEP = 0.75                  # rise per metre: steeper than this is cliff
 MIN_Z, MAX_Z = 3.0, 62.0      # rock centres between these heights (m above the sea)
 BERM_Z = 2.4                  # every rock's footprint stays above this (the dry sand is at ~1.7 m)
-MOUTH_BOX = dict(x=(-549.0, -511.0), y=(-697.0, -658.0))   # the cave's own crag and its approach
+MOUTH_BOX = dict(x=(-537.0, -523.0), y=(-697.0, -655.0))   # the walk into the mouth (rock may flank the crag)
 MOUTH_TOP_Z = 15.0            # ... up to its top (world m); above, the face over the crag is rocked too
 CAVE_MARGIN_M = 5.0           # no rock within this of the cave's footprint (the hillside is its roof)
 PATH_CLEAR_M = 10.0           # nor this near the cove path
-TILT = 1.0                    # how far a rock leans from upright toward the slope's normal
-# (mesh, footprint radius m at scale 1, height m, plan scales, height scale (of the plan scale), share). The house-
-# sized outcrops are laid along the slope as broad, low slabs: granite sheet joints parallel to the face, a rock
-# skin over the hill; the jointed boulders stand out of it as blocks.
+TILT = 0.85                   # how far a rock leans from upright toward the slope's normal
+# (mesh, footprint radius m at scale 1, height m, plan scales, height scale (of the plan scale), unused). Angular
+# blocks only (the rounded dome read as glued-on pebbles): the split boulder leads each outcrop as a broad slab,
+# jointed blocks and erratics crowd round it.
 ROCKS = [
-    ("GraniteDome/SM_GraniteDome", 4.6, 4.8, (2.6, 4.2), (0.35, 0.5), 0.36),
-    ("GraniteSplitBoulder/SM_GraniteSplitBoulder", 3.6, 4.2, (2.6, 4.0), (0.4, 0.55), 0.32),
-    ("GraniteErratic/SM_GraniteErratic", 1.4, 2.0, (1.6, 2.8), (0.8, 1.0), 0.16),
-    ("GraniteBoulderJointed/SM_GraniteBoulderJointed", 1.5, 1.9, (1.6, 2.8), (0.8, 1.0), 0.16),
+    ("GraniteSplitBoulder/SM_GraniteSplitBoulder", 3.6, 4.2, (1.2, 2.6), (0.45, 0.8), 0),
+    ("GraniteBoulderJointed/SM_GraniteBoulderJointed", 1.5, 1.9, (0.8, 3.2), (0.7, 1.1), 0),
+    ("GraniteSplitBoulder/SM_GraniteSplitBoulder", 3.6, 4.2, (0.6, 1.4), (0.6, 1.0), 0),
+    ("GraniteErratic/SM_GraniteErratic", 1.4, 2.0, (0.9, 2.6), (0.7, 1.0), 0),
 ]
+LEAD_SCALE = (4.0, 6.0)       # each cluster's lead slab
+CLUSTERS = 18
+CLUSTER_SPACING_M = 15.0
+COMPANIONS = (5, 11)
+EMBED = (0.0, 0.18)           # extra share of a block's height sunk below its rim (its mesh already sits sunk)
 ROOF_CLEAR_M = 2.5            # over the cave, rock only where the ground stands this far above its highest roof
-SPACING = 0.5                 # of the sum of two footprint radii: rocks overlap a little, as a crag's blocks do
-TARGET_ROCKS = 220
+SPACING = 0.35                # of the sum of two footprint radii: blocks in a cluster crowd and overlap
+# Blocks banked against the cave crag's sides and shoulders (world m, plan scale): the crag spans about x -538..-522
+# at the cliff foot (y -676) up to y -688.
+CRAG_FLANKS = [(-541.0, -681.0, 2.4), (-543.5, -686.5, 2.8), (-519.0, -681.0, 2.4), (-516.5, -686.0, 2.8),
+               (-536.0, -690.5, 2.6), (-524.0, -691.0, 2.6), (-530.0, -693.0, 3.0)]
+CORE = 0.55                   # of a block's footprint radius: the part that must clear the sand, mouth and paths
+CRACK_THRIFT = 0.5            # chance of a thrift tuft in the crack at a block's downhill foot
 THRIFT = "Thrift/SM_ThriftClump"
 THRIFT_DRIFTS = 26            # drifts of 3-7 cushions on ledges and the cliff foot
 
@@ -144,20 +154,49 @@ def main():
     rng.shuffle(cand)
     print(f"cove cliff: {len(cand)} m2 of steep face to dress")
 
-    kinds = rng.choice(len(ROCKS), size=len(cand), p=[r[5] for r in ROCKS])
+    # Outcrops in clusters (orchestrator/Balance review: rows of same-size boulders read as props): a few cluster
+    # sites spread over the face, each a big angular lead block with companions strung along the contour (the
+    # sheet joints run along the face, so ledges do), of mixed size, tilt and embed depth.
+    sites = []
+    for i in cand:
+        if len(sites) >= CLUSTERS:
+            break
+        if all(math.hypot(px[i] - sx, py[i] - sy) > CLUSTER_SPACING_M for sx, sy, _ in sites):
+            sites.append((px[i], py[i], i))
+    trials = []
+    for sx, sy, si in sites:
+        ncl = n[si]
+        along = np.array([-ncl[1], ncl[0]])
+        along /= max(np.linalg.norm(along), 1e-6)
+        downhill = np.array([ncl[0], ncl[1]]) / max(np.hypot(ncl[0], ncl[1]), 1e-6)
+        trials.append((0, sx, sy, LEAD_SCALE))
+        for _ in range(rng.integers(*COMPANIONS)):
+            t = rng.normal(0, 7.0)
+            d = rng.normal(0, 2.5)
+            trials.append((rng.integers(1, len(ROCKS)), sx + along[0] * t + downhill[0] * d,
+                           sy + along[1] * t + downhill[1] * d, None))
+    # Bury the mouth's crag in the wall: blocks banked against its sides and over its shoulders, so the slope runs
+    # on round it instead of meeting it at a seam.
+    for x, y, sc in CRAG_FLANKS:
+        trials.insert(0, (1, x, y, (sc, sc * 1.15)))
     placed = []           # (x, y, radius)
     rocks = []
-    for i, k in zip(cand, kinds):
-        if len(rocks) >= TARGET_ROCKS:
-            break
+    for k, x, y, lead in trials:
         mesh, r1, h1, scales, flat, _ = ROCKS[k]
-        s = rng.uniform(*scales)
+        s = rng.uniform(*(lead or scales))
         sz = s * rng.uniform(*flat)
         r = r1 * s
-        x, y = px[i], py[i]
+        x, y = float(x), float(y)
         if any(math.hypot(x - qx, y - qy) < SPACING * (r + qr) for qx, qy, qr in placed):
             continue
-        fp = footprint_points(x, y, r)
+        h0 = float(height(z, x, y))
+        nn = normal(z, np.array([x]), np.array([y]))[0]
+        if np.hypot(nn[0], nn[1]) / nn[2] < STEEP * 0.6 or not (MIN_Z < h0 < MAX_Z):
+            continue
+        if in_box(MOUTH_BOX, np.array([x]), np.array([y]))[0] and h0 < MOUTH_TOP_Z:
+            continue
+        # The block's solid core (its rounded rim is mostly sunk) must stay off the sand and out of the mouth.
+        fp = footprint_points(x, y, r * CORE)
         fz = height(z, fp[:, 0], fp[:, 1])
         if fz.min() < BERM_Z or (in_box(MOUTH_BOX, fp[:, 0], fp[:, 1], pad=1.0) & (fz < MOUTH_TOP_Z)).any():
             continue
@@ -166,15 +205,18 @@ def main():
             continue
         if any((polyline_distance(line, fp) < PATH_CLEAR_M).any() for line in paths):
             continue
-        up = np.array([0.0, 0.0, 1.0]) * (1 - TILT) + n[i] * TILT
+        # Lean with the slope, then off it a little, each block its own way.
+        up = np.array([0.0, 0.0, 1.0]) * (1 - TILT) + nn * TILT + rng.normal(0, 0.18, 3)
+        up[2] = max(up[2], 0.35)
         up /= np.linalg.norm(up)
         # Lower the rock along its up axis until its base plane is at or under the ground all round (no edge
-        # floats), plus a little; its uphill side is simply buried deeper.
-        base = np.array([x, y, pz[i]])
+        # floats), then sink it a varied share of its height (some barely bedded, some mostly buried).
+        base = np.array([x, y, h0])
         offs = np.c_[fp - [x, y], np.zeros(len(fp))]
         offs[:, 2] = -(offs[:, 0] * up[0] + offs[:, 1] * up[1]) / up[2]      # stay in the plane normal to up
         rim = base + offs
-        drop = max(0.0, float((rim[:, 2] - height(z, rim[:, 0], rim[:, 1])).max())) + 0.15 + 0.2 * h1 * sz
+        drop = max(0.0, float((rim[:, 2] - height(z, rim[:, 0], rim[:, 1])).max())) + 0.15 \
+            + rng.uniform(*EMBED) * h1 * sz
         pivot = base - up * drop / up[2]
         yaw = rng.uniform(0, 360)
         rocks.append((mesh, pivot, yaw, up, s, sz))
@@ -187,6 +229,21 @@ def main():
 
     # Thrift: drifts on the face's gentler ledges and along the cliff foot, never on the walking line.
     flowers = []
+    # ... and tufts in the cracks at the outcrops' downhill feet.
+    for (mesh, p, _, up, s, sz), (qx, qy, qr) in zip(rocks, placed):
+        if rng.random() > CRACK_THRIFT:
+            continue
+        nn = normal(z, np.array([qx]), np.array([qy]))[0]
+        down = np.array([nn[0], nn[1]]) / max(np.hypot(nn[0], nn[1]), 1e-6)
+        for _ in range(rng.integers(1, 4)):
+            a = rng.normal(0, 0.7)
+            d = np.array([down[0] * math.cos(a) - down[1] * math.sin(a), down[0] * math.sin(a) + down[1] * math.cos(a)])
+            x, y = qx + d[0] * qr * 0.92, qy + d[1] * qr * 0.92
+            fz = float(height(z, x, y))
+            if fz < 2.0 or ring_distance(cave, np.array([[x, y]]))[0] < 1.0 or in_box(MOUTH_BOX, x, y) and fz < 3.0:
+                continue
+            ts = rng.uniform(0.8, 1.2)
+            flowers.append((THRIFT, np.array([x, y, fz - 0.03]), rng.uniform(0, 360), np.array([0.0, 0.0, 1.0]), ts, ts))
     ledge = np.flatnonzero((slope > 0.35) & (slope < 1.2) & (pz > 2.0) & (pz < 45.0) & ~in_box(MOUTH_BOX, px, py, -4.0))
     seeds = rng.choice(ledge, size=min(THRIFT_DRIFTS, len(ledge)), replace=False)
     for i in seeds:

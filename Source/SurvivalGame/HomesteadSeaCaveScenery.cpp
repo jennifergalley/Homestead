@@ -14,6 +14,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "ProceduralMeshComponent.h"
 #include "Misc/Paths.h"
 #include "Sound/SoundWave.h"
 
@@ -23,7 +24,7 @@ namespace HomesteadSeaCaveLook
 {
 const TCHAR* const RockMesh = TEXT("/Game/SurvivalGame/Environment/Props/SeaCave/SM_SeaCave.SM_SeaCave");
 const TCHAR* const SkyMaterial = TEXT("/Game/SurvivalGame/Environment/SeaCave/M_SeaCaveSky.M_SeaCaveSky");
-const TCHAR* const PoolMaterial = TEXT("/Game/SurvivalGame/Environment/SeaCave/MI_SeaCavePool.MI_SeaCavePool");
+const TCHAR* const PoolMaterial = TEXT("/Game/SurvivalGame/Environment/SeaCave/MI_SeaCavePoolStill.MI_SeaCavePoolStill");
 const TCHAR* const PoolFallback = TEXT("/Game/SurvivalGame/Materials/MI_EstatePond.MI_EstatePond");
 const TCHAR* const PlaneMesh = TEXT("/Engine/BasicShapes/Plane.Plane");
 const TCHAR* const DripsSound = TEXT("/Game/SurvivalGame/Audio/Ambience/SeaCaveDrips.SeaCaveDrips");
@@ -39,11 +40,11 @@ constexpr float CardBelowTopCm = 15.0f;
 // The thread of sky through it, as a narrow spot light down onto the pool (lumens). Daylight sky through a
 // slot this size, against eye adaptation in a dim chamber; at night a faint blue moonlight (Balance: night is
 // never pitch black in the estate, and her lamp lights the rest).
-constexpr float ShaftDayLumens = 3500.0f;   // tuned in RT-on PIE against the cave's dimmed sky fill
+constexpr float ShaftDayLumens = 1800.0f;   // tuned in RT-on PIE against the cave's dimmed sky fill
 constexpr float ShaftNightLumens = 450.0f;
 constexpr float ShaftOvercastScale = 0.45f;
-constexpr float ShaftInnerConeDeg = 10.0f;
-constexpr float ShaftOuterConeDeg = 24.0f;
+constexpr float ShaftInnerConeDeg = 5.0f;
+constexpr float ShaftOuterConeDeg = 16.0f;
 constexpr float ShaftReachCm = 1600.0f;
 const FLinearColor DaySky(0.93f, 0.97f, 1.0f);
 const FLinearColor NightSky(0.45f, 0.58f, 1.0f);
@@ -56,8 +57,8 @@ constexpr float PoolShelfSlope = 0.2f;
 // Drips fill the chamber and fade before the mouth; the sea is heard from the mouth, muffled, deep inside.
 constexpr float DripsFalloffCm = 2600.0f;
 constexpr float SurfFalloffCm = 4200.0f;
-constexpr float DripsGain = 0.55f;
-constexpr float SurfGain = 0.5f;
+constexpr float DripsGain = 0.2f;     // HomesteadAudioLevels.h SeaCaveDripsGain (measured: about the creek)
+constexpr float SurfGain = 0.17f;     // HomesteadAudioLevels.h SeaCaveSurfGain
 constexpr float SurfLowPassHz = 900.0f;
 
 bool IsGroundCover(const FString& Path)
@@ -128,6 +129,10 @@ bool AHomesteadSeaCave::Build()
             TArray<FVector2D> Shore;
             for (const Homestead::Point& Point : Cave.shore) Shore.Add(FVector2D(Point.x, Point.y));
             Pool->SetShore(Shore, static_cast<float>(Cave.waterZ));
+            // The sun reaches the water through the rock above it (the procedural surface gets no shadow from the
+            // cave mesh in RT), so the water takes only its own channel: the fissure's shaft (and her lamp's glow
+            // through the bed under it), never the sun.
+            Pool->Surface->SetLightingChannels(false, true, false);
         }
     }
 
@@ -164,6 +169,7 @@ bool AHomesteadSeaCave::Build()
     Shaft->SetSourceRadius(FissureWidthCm * 0.5f);
     Shaft->SetVolumetricScatteringIntensity(3.0f);
     Shaft->SetCastShadows(true);
+    Shaft->SetLightingChannels(true, true, false);
     Shaft->RegisterComponent();
 
     // Reused rocks, ferns and flowers.
