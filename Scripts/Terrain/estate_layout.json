@@ -9806,5 +9806,6 @@
   "crownFall": 0.0333,
   "averageGrade": 0.0805,
   "maxGrade": 0.184
- }
+ },
+ "coastSoften": true
 }

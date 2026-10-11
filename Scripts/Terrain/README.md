@@ -338,7 +338,8 @@ into the sea are pushed into cliff faces, and `bake_outer_land.py` drops its rin
 the path instead of a trench or bank. The village street leaves the road at 350 m (`town_layout.py`), and
 `village_junction.py` takes the old street's grade back out first.
 
-Run once, in this order, with `HOMESTEAD_TERRAIN_WORK` set: `coast_mix.py`, `cove_route.py`, `estate_footpaths.py`,
+Run once, in this order, with `HOMESTEAD_TERRAIN_WORK` set: `coast_mix.py`, `cove_route.py`, `coast_soften.py` (rounds the west
+cliff's end against the hillside and strews granite ledges on the coast's cliff faces), `estate_footpaths.py`,
 `compact_map.py` (CoveBeach), `village_junction.py`, `town_layout.py`, `town_path.py`, `town_layout.py`,
 `coast_mix_placements.py` (retires displaced ids into `HomesteadEstateCoastMixRetired.inc`, never moving one),
 `public_road.py`, `weightmaps.py`, `route_sights.py --top-up`, `village_dress.py`, `cove_heath.py`, `bake_ocean.py`,
@@ -346,6 +347,12 @@ Run once, in this order, with `HOMESTEAD_TERRAIN_WORK` set: `coast_mix.py`, `cov
 `Invoke-UnrealBuild.ps1`. In the editor: `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over the whole map,
 `build_ocean.py`, `build_outer_land.py`, `place_water.py`, `build_ground.py`, `build_landscape_material.py` (the
 CliffRock layer is triplanar) and `ImportEstateMap`.
+
+After a large `ApplyEstateHeightfield`, check the landscape component seams (every 126 vertices): vertices shared by
+two components can keep a stale height in one of them (a 200 m tall sheet of stretched texture at x = -378 m after the
+coast mix). The dry run reports no difference because it reads the other copy. Compare `EditorGroundHeight` with the
+r16 along each seam line; to fix, apply an r16 with those seam vertices nudged by one unit, then the real r16 again,
+with a tile size (for example 37) that doesn't line up with the seams.
 ### Beach belt (`beach_belt.py`)
 
 A dry sand belt along the foot of the estate's south cliffs, from the west boundary (y = -1150 m) to the
