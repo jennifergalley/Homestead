@@ -183,6 +183,12 @@ namespace
         case Homestead::ResourceKind::RottenPlanks: return TEXT("RottenPlanks");
         case Homestead::ResourceKind::SlateHeap: return TEXT("SlateHeap");
         case Homestead::ResourceKind::RuinTimbers: return TEXT("RuinTimbers");
+        case Homestead::ResourceKind::Seashells: return TEXT("Seashells");
+        case Homestead::ResourceKind::Driftwood: return TEXT("Driftwood");
+        case Homestead::ResourceKind::BeachPebbles: return TEXT("BeachPebbles");
+        case Homestead::ResourceKind::MusselBed: return TEXT("MusselBed");
+        case Homestead::ResourceKind::LaverRocks: return TEXT("LaverRocks");
+        case Homestead::ResourceKind::BeachCampfire: return TEXT("BeachCampfire");
         default: return TEXT("Unknown");
         }
     }

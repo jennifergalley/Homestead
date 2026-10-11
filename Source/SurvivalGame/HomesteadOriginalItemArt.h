@@ -34,6 +34,10 @@ inline constexpr Entry Entries[] = {
     {Homestead::Item::SeaMackerel, "sea-mackerel", "CaughtFish", "SM_SeaMackerel", nullptr, true},
     {Homestead::Item::SeaBass, "sea-bass", "CaughtFish", "SM_SeaBass", nullptr, true},
     {Homestead::Item::FishingPole, "fishing-pole", "FishingPole", "SM_FishingPole", nullptr, false},
+    // add-beach-gathering.
+    {Homestead::Item::SteamedMussels, "steamed-mussels", "PreparedFood", "SM_SteamedMussels", "SM_SteamedMusselsPortion", false},
+    {Homestead::Item::MusselPotatoBroth, "mussel-potato-broth", "PreparedFood", "SM_MusselPotatoBroth", "SM_MusselPotatoBrothPortion", false},
+    {Homestead::Item::FriedLaver, "fried-laver", "PreparedFood", "SM_FriedLaver", "SM_FriedLaverPortion", false},
 };
 
 inline const Entry* Find(Homestead::Item item)

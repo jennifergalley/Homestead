@@ -98,6 +98,16 @@ constexpr FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/SurvivalGame/Environment/Props/RedCampion/SM_RedCampionClump.SM_RedCampionClump"), false, 5500, false, 2, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/Foxglove/SM_Foxglove.SM_Foxglove"), false, 6500, false, 2, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/CowParsley/SM_CowParsley.SM_CowParsley"), false, 6000, false, 2, 0},
+    // 49-55: the beach's decor (Scripts/Terrain/beach_detritus.py; add-beach-gathering): tideline shell and pebble
+    // drifts, wrack, driftwood sticks, bleached logs (solid, seen from afar) and thrift and sea campion where the sand
+    // meets the grass. Ground-hugging scatters sink a couple of centimetres so slopes show no gap.
+    {TEXT("/Game/SurvivalGame/Environment/Props/BeachShellDrift/SM_BeachShellDrift.SM_BeachShellDrift"), false, 4500, false, 1, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/BeachPebbleDrift/SM_BeachPebbleDrift.SM_BeachPebbleDrift"), false, 6000, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/BeachWrack/SM_BeachWrack.SM_BeachWrack"), false, 6000, false, 1, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/DriftwoodSticks/SM_DriftwoodSticks.SM_DriftwoodSticks"), false, 6000, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/DriftwoodLog/SM_DriftwoodLog.SM_DriftwoodLog"), true, 24000, false, 6, 120, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/Thrift/SM_ThriftClump.SM_ThriftClump"), false, 5000, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/SeaCampion/SM_SeaCampionClump.SM_SeaCampionClump"), false, 5000, false, 2, 0},
 };
 // The kind byte indexes this table directly, so kinds are append-only: a row inserted mid-table re-meshes every
 // later kind across the estate. Sentinels pin a few indices to their assets (scatter.py, mvp_woodland.py,
@@ -113,11 +123,12 @@ constexpr bool EstateKindIs(int32 Kind, const TCHAR* Name)
         if (Path[PathLength - NameLength + Index] != Name[Index]) return false;
     return true;
 }
-static_assert(UE_ARRAY_COUNT(EstateSceneryKinds) == 49, "EstateSceneryKinds is append-only: claim the next kind on the round page");
+static_assert(UE_ARRAY_COUNT(EstateSceneryKinds) == 56, "EstateSceneryKinds is append-only: claim the next kind on the round page");
 static_assert(EstateKindIs(5, TEXT("SM_GraniteBlockTalus")) && EstateKindIs(13, TEXT("SM_Oak"))
     && EstateKindIs(19, TEXT("SM_Jacaranda")) && EstateKindIs(30, TEXT("SM_Fern02_c")) && EstateKindIs(31, TEXT("SM_Fern02_d"))
     && EstateKindIs(33, TEXT("SM_GrassMedium01_tiny_a")) && EstateKindIs(41, TEXT("SM_GraniteSplitBoulder"))
-    && EstateKindIs(42, TEXT("SM_BluebellClump")) && EstateKindIs(48, TEXT("SM_CowParsley")),
+    && EstateKindIs(42, TEXT("SM_BluebellClump")) && EstateKindIs(48, TEXT("SM_CowParsley"))
+    && EstateKindIs(49, TEXT("SM_BeachShellDrift")) && EstateKindIs(55, TEXT("SM_SeaCampionClump")),
     "EstateSceneryKinds moved: a kind's index no longer matches the bytes in EstateScenery.bin");
 
 #pragma pack(push, 1)
@@ -285,7 +296,7 @@ bool AHomesteadWorld::BuildEstateScenery()
         EstateSceneryClearRadius.Add(Info.bTree || Info.bCollision ? 0.0f : FMath::Max(Extent.X, Extent.Y) * 0.7f);
         EstateSceneryTrunkRadius.Add(Info.bTree ? Info.Footprint : 0.0f);
         const FVector PivotReach = MeshBounds.Origin.GetAbs() + Extent;
-        EstateSceneryFlowerRadius.Add(Kind >= 42 && Kind <= 48
+        EstateSceneryFlowerRadius.Add((Kind >= 42 && Kind <= 48) || Kind == 54 || Kind == 55
             ? static_cast<float>(FMath::Sqrt(PivotReach.X * PivotReach.X + PivotReach.Y * PivotReach.Y)) : 0.0f);
         EstateSceneryHidden.Add(TBitArray<>(false, Transforms[BatchIndex].Num()));
         EstateSceneryTransforms.Add(MoveTemp(Transforms[BatchIndex]));

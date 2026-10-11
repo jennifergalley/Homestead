@@ -299,6 +299,19 @@ bool AHomesteadCharacter::PlayPullWeeds(Homestead::Point Target, UStaticMesh* Ha
     return PlayKneelGather(EHomesteadKneelGather::PullWeeds, FVector2D(Target.x, Target.y));
 }
 
+void AHomesteadCharacter::UseStickProps(UStaticMesh* First, UStaticMesh* Second, float Scale)
+{
+    const bool bDefault = !First || !Second;
+    StickPropScale = bDefault ? CarriedStickScale : Scale;
+    for (int32 Index = 0; Index < CarriedSticks.Num(); ++Index)
+    {
+        UStaticMesh* StickMesh = bDefault ? (DefaultStickMeshes.IsValidIndex(Index) ? DefaultStickMeshes[Index].Get() : nullptr)
+            : Index == 0 ? First : Second;
+        if (CarriedSticks[Index] && StickMesh && CarriedSticks[Index]->GetStaticMesh() != StickMesh)
+            CarriedSticks[Index]->SetStaticMesh(StickMesh);
+    }
+}
+
 float AHomesteadCharacter::PullWeedsPhase() const
 {
     const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
@@ -548,7 +561,7 @@ void AHomesteadCharacter::UpdateCarriedSticks()
         }
         // Branch meshes run along their local Y.
         Put(Prop, Hand + Fingers * 6.0f + Palm * 3.0f, FRotationMatrix::MakeFromYZ(Across, Palm).Rotator(),
-            FVector(CarriedStickScale), TEXT("hand_r"), true);
+            FVector(StickPropScale), TEXT("hand_r"), true);
     };
     // Stack: sticks lie level on the left forearm across her body, like carried firewood hugged
     // against the belly; stones nest in the crook of the arm, side by side along the forearm.
@@ -569,7 +582,7 @@ void AHomesteadCharacter::UpdateCarriedSticks()
         const float Height = Index == 0 ? 5.0f : 9.0f, Twist = Index == 0 ? -8.0f : 10.0f;
         const FVector Along = GetActorRightVector().GetSafeNormal2D().RotateAngleAxis(Twist, FVector::UpVector);
         const FVector Centre = FMath::Lerp(Elbow, Wrist, 0.55f) + FVector(0, 0, Height) + GetActorForwardVector() * 3.0f;
-        Put(Prop, Centre, FRotationMatrix::MakeFromYZ(Along, FVector::UpVector).Rotator(), FVector(CarriedStickScale),
+        Put(Prop, Centre, FRotationMatrix::MakeFromYZ(Along, FVector::UpVector).Rotator(), FVector(StickPropScale),
             TEXT("lowerarm_l"), true);
     };
     if (Stage == 0)

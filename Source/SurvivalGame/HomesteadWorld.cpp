@@ -33,6 +33,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateFallingTree(DeltaSeconds);
     UpdateHearthFlicker(DeltaSeconds);
+    UpdateBeachCampfires(DeltaSeconds);
     LampDropFlickerTime += DeltaSeconds;
     HomesteadLampLook::SetLit(LampDropFlame.Get(), LampDropLight.Get(), bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
     HomesteadLampLook::UpdatePlacedShadows(LampDropLight.Get(), this);

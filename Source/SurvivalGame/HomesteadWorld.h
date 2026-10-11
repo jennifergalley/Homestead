@@ -283,6 +283,20 @@ private:
     TArray<TWeakObjectPtr<class UPointLightComponent>> HearthLights;
     float HearthFlickerTime = 0.0f;
     void UpdateHearthFlicker(float DeltaSeconds);
+    // add-beach-gathering: a burning beach campfire's charred stack, embers, flames and orange light
+    // (HomesteadWorldBeachFire.cpp). Built when Refresh sees one lit, removed when it burns out.
+    struct FBeachCampfireFire
+    {
+        TArray<TWeakObjectPtr<USceneComponent>> Parts;
+        TArray<TWeakObjectPtr<UStaticMeshComponent>> Flames;
+        TArray<FVector> FlameScales;
+        TWeakObjectPtr<class UPointLightComponent> Light;
+        float Phase = 0.0f;
+    };
+    TMap<int32, FBeachCampfireFire> BeachCampfires;
+    float BeachCampfireTime = 0.0f;
+    void RefreshBeachCampfires(const Homestead::State& State);
+    void UpdateBeachCampfires(float DeltaSeconds);
     // A cleared obstacle swells a touch and shrinks away while chips of it (leaf, wood or stone) fly
     // out (add-coral-island-clearout). Cosmetic only: the components are the actor's until destroyed.
     struct FClearPop

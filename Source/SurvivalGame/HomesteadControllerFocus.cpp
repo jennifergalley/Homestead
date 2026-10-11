@@ -5,6 +5,7 @@
 #include "HomesteadControllerText.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadBed.h"
+#include "Simulation/HomesteadBeach.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadItems.h"
@@ -197,6 +198,8 @@ FString AHomesteadController::FocusTitle() const
                         Status = TEXT("  (") + Text(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str()).ToLower() + TEXT(")");
                 }
                 if (Node.kind == Homestead::ResourceKind::DeerRemains) return TEXT("Deer bones");
+                if (Node.kind == Homestead::ResourceKind::BeachCampfire && Homestead::Beach::CampfireLit(Node, State().hour))
+                    return TEXT("Beach campfire (burning)");
                 return Text(Homestead::ResourceName(Node.kind)) + Status;
             }
         break;
@@ -265,6 +268,9 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
             {
+                // A burning beach campfire cooks like a cookfire; an unlit one is lit with driftwood.
+                if (Node.kind == Homestead::ResourceKind::BeachCampfire)
+                    return Homestead::Beach::CampfireLit(Node, State().hour) ? A + TEXT(" Cook") : A + TEXT(" Light the fire");
                 if (Node.readyAtHour > State().hour) return FString();
                 // Trees are felled with the axe on the tool button; nothing else is offered on them.
                 if (Node.kind == Homestead::ResourceKind::ForestTree)
@@ -294,6 +300,12 @@ FString AHomesteadController::FocusActions() const
                 // Foraging hints (Jenny, 2026-10-04): berries are picked, roots dug.
                 if (Node.kind == Homestead::ResourceKind::BerryBush) return A + TEXT(" Pick Berries");
                 if (Node.kind == Homestead::ResourceKind::Roots) return A + TEXT(" Dig Roots");
+                // Beach finds (add-beach-gathering).
+                if (Node.kind == Homestead::ResourceKind::Seashells) return A + TEXT(" Pick up shells");
+                if (Node.kind == Homestead::ResourceKind::Driftwood) return A + TEXT(" Pick up driftwood");
+                if (Node.kind == Homestead::ResourceKind::BeachPebbles) return A + TEXT(" Pick up");
+                if (Node.kind == Homestead::ResourceKind::MusselBed) return A + TEXT(" Gather mussels");
+                if (Node.kind == Homestead::ResourceKind::LaverRocks) return A + TEXT(" Gather laver");
                 return A + TEXT(" Gather");
             }
         return A + TEXT(" Gather");
