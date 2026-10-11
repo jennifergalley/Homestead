@@ -46,7 +46,10 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Review: Balance OK on every `[ready]` (stage-2 travel targets, layout review, final OK, cove heath
   fix). Jenny approved stage-2 media and native 26/26 + beach 6/6 before this delivery.
 - Known issues: none carried forward; the Well Fed HUD chip clipping from the prior build is fixed.
-- Accounting: per-build report not generated this round (see Later section).
+- Accounting: `docs\handoff\accounting\reports\20261010-next-01.json` (1426 calls, 11520274750000
+  recorded nano-AIU; status incomplete — fully recorded/rated, no final capture yet). Segments:
+  Map Agent (claude-opus-5.5/high), Balance Agent 2c8 (claude-opus-5.5/high), Integration/self
+  (mixed claude-opus-5 and claude-sonnet-5).
 
 ## 2026-10-04 — 7:27 PM
 

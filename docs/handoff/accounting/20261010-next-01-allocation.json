@@ -1,0 +1,52 @@
+{
+  "buildId": "20261010-next-01",
+  "authorizedAt": "2026-10-10T16:55:00.000Z",
+  "allocationPolicy": "Covers map-shrink stage 2 (execution, review and delivery) plus the stage-2 Balance docs segment and Integration's merge/review/package/test/promote/closure work for build 20261010-next-01. Excludes the earlier five-lane batch (Upkeep, Gameplay, Fishing, Village, Wardrobe) and its own Balance docs, already allocated and reported in 20261009-next-01.json.",
+  "limits": [
+    "Recorded nano-AIU is not billing-reconciled AI credits.",
+    "Some calls have no recorded reasoning effort; preserve unknown in the export, not an inferred high value.",
+    "authorizedAt is a single global floor applied across every session in this allocation; per-segment since values are evidence, not independent filters.",
+    "The old/archived Balance Agent session (branch jennifergalley-balance-agent) is intentionally excluded: its docs-only commits for this build window were already accounted for in 20261009-next-01.json."
+  ],
+  "segments": [
+    {
+      "sessionId": "4ff1041f-c7af-45f9-a5e6-a5d18ad40da0",
+      "projectSessionId": "4ff1041f-c7af-45f9-a5e6-a5d18ad40da0",
+      "task": "shrink-estate-map-stage-2",
+      "tasks": ["shrink-estate-map-stage-2"],
+      "category": "implementation",
+      "since": "2026-10-10T16:55:00.000Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Map Agent session for the stage-2 compact map (new coast/cove, cliff steps, mine relocation, PlayableBounds crop, village/commons outlines, placement retire/add). Delivered as jennifergalley-map-agent-49e @ 1f8fdf647."
+    },
+    {
+      "sessionId": "ceb1109b-f156-451c-b890-ca91fa92f1c1",
+      "projectSessionId": "ceb1109b-f156-451c-b890-ca91fa92f1c1",
+      "task": "balance-docs-stage-2",
+      "tasks": ["balance-docs-stage-2"],
+      "category": "docs",
+      "since": "2026-10-10T16:55:17Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Balance Agent session (branch jennifergalley-balance-agent-2c8), created 2026-10-10T16:55:17Z. Stage-2 travel targets, layout review and final Balance OK commits (b3beabaff, 5a9e312c2, 9397e1fb0, 7460bc1c2)."
+    },
+    {
+      "sessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
+      "projectSessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
+      "task": "integration-round4",
+      "tasks": ["integration-round4"],
+      "category": "integration",
+      "since": "2026-10-10T16:55:00.000Z",
+      "model": "claude-sonnet-5",
+      "reasoningEffort": "medium",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Integration Agent session (branch jennifergalley-integration-agent-round4). Merge/review of all lanes, the single batch pass (native, compile, package, EstateSmoke/ToolRepeat/F5F9), the map-shrink save-safety review, install/promote, and this delivery's accounting closure. Mixed models across calls (claude-sonnet-5 medium dominant, claude-opus-5 for risky review passes); segment label reflects the dominant model, actual per-call model/effort is preserved in the exported records."
+    }
+  ]
+}
