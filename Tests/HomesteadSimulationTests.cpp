@@ -522,20 +522,20 @@ void StructuredRecipeAssessment()
         {Item::Turnip, 2}, {Item::Carrot, 2}, {Item::Potato, 2}, {Item::Cabbage, 1},
         {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2},
         {Item::RiverTrout, 1}, {Item::RiverSalmon, 1}, {Item::LakePerch, 1}, {Item::LakeCarp, 1},
-        {Item::SeaMackerel, 1}, {Item::SeaBass, 1}});
+        {Item::SeaMackerel, 1}, {Item::SeaBass, 1}, {Item::Mussels, 6}, {Item::Laver, 3}});
     const Item Outputs[] = {Item::Hatchet, Item::DiggingStick, Item::Scythe, Item::Billhook, Item::Pickaxe,
         Item::RoastedRoots, Item::HerbedRoots, Item::Firewood, Item::RoastedTurnips, Item::StewedCarrots,
         Item::BakedPotatoes, Item::HerbedBroadBeans, Item::CabbagePotatoStew, Item::BerryCompote,
         Item::StrawberryCompote, Item::RootVegetableHotpot, Item::RawFishSlices, Item::GrilledTrout,
         Item::GrilledPerch, Item::GrilledMackerel, Item::FishSoup, Item::FishAndPotatoes,
-        Item::HerbedCarp, Item::MackerelChowder};
-    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+        Item::HerbedCarp, Item::MackerelChowder, Item::SteamedMussels, Item::MusselPotatoBroth, Item::FriedLaver};
+    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     static_assert(sizeof(Outputs) / sizeof(Outputs[0]) == static_cast<int>(Recipe::Count), "Every recipe is assessed.");
     for (int index = 0; index < static_cast<int>(Recipe::Count); ++index)
     {
         const auto recipe = static_cast<Recipe>(index);
         const Point position = index == static_cast<int>(Recipe::RoastedRoots)
-            || index == static_cast<int>(Recipe::HerbedRoots) || FindCropMeal(recipe) || FindFishMeal(recipe) ? completeFire : Home;
+            || index == static_cast<int>(Recipe::HerbedRoots) || FindMeal(recipe) ? completeFire : Home;
         const auto before = complete.Serialize();
         const auto revision = complete.GetRevision();
         const auto assessment = complete.AssessRecipe(recipe, position);

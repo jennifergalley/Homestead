@@ -173,6 +173,22 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Food, "deferred-meal", 35, NoBuyers, 33.0, 33.0, "Deferred from this playtest", false, nullptr, FoodClass::Meal},
     {Item::MackerelChowder, "mackerel-chowder", "Mackerel and bean chowder", "Mackerel, potato and broad beans in a warming pot of chowder.",
         ItemCategory::Food, "deferred-meal", 63, NoBuyers, 50.0, 50.0, "Deferred from this playtest", false, nullptr, FoodClass::Meal},
+    // add-beach-gathering (Balance 2026-10-10): found along the beach every morning, sold at the store, and
+    // cooked. Meal energy follows round(12 + 0.6 x coins forgone), kindling included.
+    {Item::Seashell, "seashell", "Seashell", "A pretty shell from the tideline. Shell-work boxes are all the fashion.",
+        ItemCategory::Forage, "seashell", 5, StoreBuys, 0.0, 0.0, "Shells along the beach", false, "seashells"},
+    {Item::Driftwood, "driftwood", "Driftwood", "Sea-bleached wood left by the tide. Dry enough to burn.",
+        ItemCategory::Material, "driftwood", 3, StoreBuys, 0.0, 0.0, "Driftwood along the beach"},
+    {Item::Mussels, "mussels", "Mussel", "Blue mussels prised from the rocks. Cook them before eating.",
+        ItemCategory::Food, "mussels", 6, StoreBuys, 0.0, 0.0, "Mussel beds on the rocks at the waterline", false, "mussels"},
+    {Item::Laver, "laver", "Laver", "A fine purple seaweed from the rocks. Good fried or in a broth.",
+        ItemCategory::Forage, "laver", 4, StoreBuys, 0.0, 0.0, "Laver on the rocks along the beach"},
+    {Item::SteamedMussels, "steamed-mussels", "Steamed mussels", "Mussels steamed open over the fire in their own juices.",
+        ItemCategory::Food, "steamed-mussels", 21, NoBuyers, 25.0, 25.0, "Cookfire", false, "bowls of steamed mussels", FoodClass::Meal},
+    {Item::MusselPotatoBroth, "mussel-potato-broth", "Mussel and potato broth", "Mussels, potato and laver simmered into a briny broth.",
+        ItemCategory::Food, "mussel-potato-broth", 39, NoBuyers, 35.0, 35.0, "Cookfire", false, "bowls of mussel and potato broth", FoodClass::Meal},
+    {Item::FriedLaver, "fried-laver", "Fried laver", "Laver crisped in the pan until it smells of the sea.",
+        ItemCategory::Food, "fried-laver", 11, NoBuyers, 19.0, 19.0, "Cookfire", false, nullptr, FoodClass::Meal},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 

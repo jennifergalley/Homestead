@@ -50,9 +50,7 @@ FString RecipeDescription(Homestead::Recipe Recipe)
     case Homestead::Recipe::HerbedRoots: return TEXT("Roasted roots brightened with meadow herbs.");
     case Homestead::Recipe::SplitFirewood: return TEXT("Prepared fuel split from timber with a carried axe.");
     default:
-        if (const auto* Meal = Homestead::FindCropMeal(Recipe))
-            return Text(Homestead::ItemDescription(Meal->output));
-        if (const auto* Meal = Homestead::FindFishMeal(Recipe))
+        if (const auto* Meal = Homestead::FindMeal(Recipe))
             return Text(Homestead::ItemDescription(Meal->output));
         return TEXT("");
     }

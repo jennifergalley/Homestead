@@ -20,11 +20,13 @@ constexpr GatherPose HandGatherPose(ResourceKind kind)
     case ResourceKind::BrokenCrate:
     case ResourceKind::BrokenBarrel:
     case ResourceKind::RottenPlanks:
+    case ResourceKind::Driftwood:
         return GatherPose::Sticks;
     case ResourceKind::Stones:
     case ResourceKind::SalvagePile:
     case ResourceKind::RubbishHeap:
     case ResourceKind::SlateHeap:
+    case ResourceKind::BeachPebbles:
         return GatherPose::Stones;
     case ResourceKind::Roots:
     case ResourceKind::BerryBush:
@@ -35,6 +37,10 @@ constexpr GatherPose HandGatherPose(ResourceKind kind)
     case ResourceKind::WildGarlic:
     case ResourceKind::Weeds:
     case ResourceKind::Nettles:
+    // Shells, mussels and laver are small finds picked into the pouch.
+    case ResourceKind::Seashells:
+    case ResourceKind::MusselBed:
+    case ResourceKind::LaverRocks:
         return GatherPose::Pouch;
     case ResourceKind::Reeds:
         return GatherPose::Reeds;
