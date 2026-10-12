@@ -71,15 +71,18 @@ bool AHomesteadController::BeginTestTeleport(double X, double Y, const FRotator&
             }
             return;
         }
+        // Clearing the timer destroys this lambda and its captures, so keep what the rest needs on the stack.
+        const FRotator Face = Facing;
+        const TFunction<void()> Next = Then;
         GetWorldTimerManager().ClearTimer(TestTeleportTimer);
         if (AHomesteadCharacter* Heroine = Cast<AHomesteadCharacter>(GetPawn()))
         {
-            Heroine->SetActorRotation(FRotator(0.0, Facing.Yaw, 0.0));
-            Heroine->SetRestingViewRotation(Facing);
+            Heroine->SetActorRotation(FRotator(0.0, Face.Yaw, 0.0));
+            Heroine->SetRestingViewRotation(Face);
             Heroine->SnapCamera();
         }
-        SetControlRotation(Facing);
-        if (Then) Then();
+        SetControlRotation(Face);
+        if (Next) Next();
     }), TestGoto::PollIntervalSeconds, true);
     return true;
 }
@@ -237,6 +240,7 @@ void AHomesteadController::HomesteadGoto(const FString& Target)
 {
     if (RejectPendingGroundSnapAction()) return;
     GetWorldTimerManager().ClearTimer(TestUseTimer);
+    GetWorldTimerManager().ClearTimer(TestOutcomeTimer);
     double StandX = 0.0;
     double StandY = 0.0;
     FRotator Facing = FRotator::ZeroRotator;
@@ -259,6 +263,8 @@ void AHomesteadController::HomesteadGoto(const FString& Target)
 void AHomesteadController::HomesteadUse(const FString& TargetAndItem)
 {
     if (RejectPendingGroundSnapAction()) return;
+    GetWorldTimerManager().ClearTimer(TestUseTimer);
+    GetWorldTimerManager().ClearTimer(TestOutcomeTimer);
     using namespace HomesteadPlaytest;
     // "<target> [item words]": the longest leading run of words that names a target wins, so "plot:3 Seeds"
     // and "oak Hatchet" both work. A leading quoted target may hold spaces.
@@ -320,7 +326,7 @@ void AHomesteadController::HomesteadUse(const FString& TargetAndItem)
             {
                 Interact();
             }
-            GetWorldTimerManager().SetTimer(TestUseTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+            GetWorldTimerManager().SetTimer(TestOutcomeTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
             {
                 UE_LOG(LogHomesteadPlaytest, Display, TEXT("USE: outcome. Toast: \"%s\". Pack: %s. Energy %.0f. Focus now: \"%s\"."), *Toast(),
                     *MenuInventorySummary(), State().energy, *FocusTitle());

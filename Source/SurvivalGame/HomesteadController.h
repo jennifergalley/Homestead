@@ -494,6 +494,7 @@ private:
     bool ResolveTestTarget(const FString& Target, double& StandX, double& StandY, FRotator& Facing, FString& Described) const;
     // HomesteadUse: log what the swing or press did once its animation has had time to land.
     FTimerHandle TestUseTimer;
+    FTimerHandle TestOutcomeTimer;
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;
