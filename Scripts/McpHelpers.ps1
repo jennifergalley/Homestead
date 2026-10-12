@@ -21,7 +21,7 @@ Functions:
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
     tp <x> <y> [z]                         HomesteadTeleport: stand her on the ground at x,y (with z: on the first surface at or below z)
     sellat ["Name N,Name N"]               HomesteadSellAtStore: open the General Store's hours, stand her at its real counter, sell what she carries, open the shop; logs LogHomesteadPlaytest
-    state [n] [radius]                     the full world/character dump (time, weather, pack, hotbar, lamp, equipment, position, focus, nearby with ids, store, open screen)
+    state [n]                              the full world/character dump (time, weather, pack, hotbar, lamp, equipment, position, focus, nearby with ids, store, open screen)
     goto <target> / use "<target> [item]"  walk-free go-to (store, mine, node:ID, plot:N, nearest kind...) / go-to then interact or use the hotbar item
     screen <name> / weather rain|clear / reset   open or close a screen by name / skip to rain or a clear hour / full energy and lamp, screens closed
     plog [n] [pattern]                     recent LogHomesteadPlaytest lines from this worktree's editor log (results of the commands above)
@@ -180,9 +180,8 @@ function plog([int]$n = 12, [string]$pattern = 'LogHomesteadPlaytest') {
 
 # state: the whole world/character picture in one call (st's `world` object). `state | ConvertTo-Json -Depth 6`
 # to read it all; `(state).nearby` lists things with ids, kinds and distances.
-function state([int]$n = 12, [int]$radius = 2000) {
-    $o = mcp $script:TsPlay get_play_state "{`"nearby_count`": $n, `"radius_cm`": $radius}" | Out-String
-    $s = (($o | ConvertFrom-Json).content[0].text | ConvertFrom-Json).returnValue | ConvertFrom-Json
+function state([int]$n = 12) {
+    $s = st $n
     if ($s.world) { $s.world } else { $s }
 }
 

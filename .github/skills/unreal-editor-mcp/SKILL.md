@@ -335,6 +335,9 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython -Ski
 
 ## 3. Choose how to call tools
 
+**Testing a feature in PIE? Start with the `homestead-test-tools` skill:** one-call state (`state`), `goto`/`use`
+without walking, `hotbar`, `screen`, `weather`, `reset`, `sellat`, with recipes. The table below stays the raw reference.
+
 - **Shell helpers (default on this shared machine):** dot-source `Scripts\McpHelpers.ps1 -Port <p>`
   at the start of each command (shell state doesn't persist between calls). It uses
   `Scripts\editor_mcp.py`, which saves images in results to `Saved\McpCaptures\*.png` and replaces
