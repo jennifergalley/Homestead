@@ -57,8 +57,13 @@ slot, then go idle; they do not pick up unflagged queue items.
   from the prior build (first-pass art; carried forward, not introduced by this build).
 - Cove walk is about 80 s one-way; village walk is about 90 s one-way, pending Jenny's card.
 - Cave and beach dressing remain first-pass art (carried forward from the prior build).
-- Accounting: `docs\handoff\accounting\reports\20261011-next-01.json` (pending; real
-  `assistant_usage_events` data required, no estimated figures).
+- Accounting: `docs\handoff\accounting\reports\20261011-next-01.json` — 2,682 calls, 41,025.37 AIU
+  recorded nano-AIU, 100% real/recorded (0 estimated calls, 0 missing sessions, 0 excluded calls,
+  fully rated). Status `incomplete`/`finalCapture: false` reflects only that the figures are not
+  yet billing-reconciled (explicit limitation in the report), not missing or fabricated data.
+  Segments: Mine Art, Mine Gameplay, Integration (merge/build/test/package/promote/closure),
+  Orchestrator (lane split, overnight approval routing, delivery-closure corrections), allocated
+  from the `2026-10-11T20:14:05Z` authorization floor through capture.
 
 ## 2026-10-11 — 8:52 AM
 
