@@ -94,7 +94,9 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-11: Mine Art (029d7c8b) house look check: the engine-house form is OK (Jenny chose it for
   D5). Blocking: green cast on the stone outside and on the limewash inside, mortar smears and the
   bare apron, the 25-stone pile unreadable, flowers at the wall foot and path. Cards to send after
-  its re-shots: yard dressing, wood-brown frames, homely interior props.
+  its re-shots: yard dressing, wood-brown frames, homely interior props. Re-shots: cohesion OK,
+  on condition the packaged/RT-on shots in Jenny's [review] show no green cast; iron trapdoor
+  hardware suggested. The three cards were sent to the Orchestrator.
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
