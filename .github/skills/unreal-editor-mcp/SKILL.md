@@ -361,7 +361,8 @@ clashes between parallel callers.
 | --- | --- |
 | `mcp <toolset> <tool> [json] [timeout]` | `call_tool`, raw JSON result |
 | `hk <tool> [json]` | a `HomesteadPlayTools` **tool** call by tool name (`hk walk_to '{...}'`, `hk tap_key '{"key":"E"}'`), not a hotkey; returns its text |
-| `st [nearby]` | parsed `get_play_state` |
+| `st [nearby]` | parsed `get_play_state` (its `hotbar[]` lists index, key, item, count, selected; needs the Mine Gameplay hotbar readout, `fdddaf8b5`) |
+| `hotbar [item]` | prints the hotbar as the player sees it. `hotbar lamp` / `hotbar pickaxe` presses the number key of the first cell whose item name contains that text, then prints the bar again |
 | `py <code>` | `run_python` (needs `-AllowPython`), returns the output text |
 | `con <command>` | console command in PIE with the player controller (editor world outside PIE) |
 | `shot` | `CaptureEditorImage`, returns the PNG path |

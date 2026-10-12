@@ -218,4 +218,5 @@ void AHomesteadController::FinishTestShop()
         static_cast<long long>(PurseBefore), static_cast<long long>(State().money), static_cast<long long>(Delta));
     Notify(Summary, Sold == 0);
     OpenShopScreen(TestShopId, false);
+    UE_LOG(LogHomesteadPlaytest, Display, TEXT("SELLAT: shop screen open=%d."), IsShopScreenOpen() ? 1 : 0);
 }
