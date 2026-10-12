@@ -4,6 +4,7 @@
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldVisualHelpers.h"
 #include "HomesteadGrassField.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadOvergrowth.h"
 
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
@@ -413,6 +414,11 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         if (Node.kind == Homestead::ResourceKind::DeerRemains)
             for (USceneComponent* Bone : Visual.Components)
                 if (Bone && Bone->IsVisible() == bReady) Bone->SetVisibility(!bReady);
+        // A mine node's spent base lies under the full face; while the full face shows, hide the base (it keeps
+        // its collision) so the two don't z-fight. Mined out, only the base shows.
+        if (Homestead::Mine::IsMineNodeKind(Node.kind))
+            for (USceneComponent* Part : Visual.Components)
+                if (Cast<UPrimitiveComponent>(Part) && Part->IsVisible() == bReady) Part->SetVisibility(!bReady);
     }
     if (Transition) CancelStagedResources();
     RefreshBeachCampfires(State);
