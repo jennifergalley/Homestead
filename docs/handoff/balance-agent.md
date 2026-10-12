@@ -100,6 +100,9 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-11: Jenny dropped gem nodes (now 7 coal, 6 copper). Set gem drops at 3% per rock face
   and 10% per vein, 85/15 quartz/amethyst, one roll per mined node (design §7, `balance.md` §8b).
   Mine Gameplay applied it (native test: rock 8/400, coal 45/400); Balance OK.
+- 2026-10-11: Mine Art RT-on shots: the interior and trapdoor hardware are OK. Still blocking: the
+  exterior lichen reads olive-green, and the trapdoor, crate and barrel are pale, untextured wood.
+  Awaiting re-shots 02 and 23.
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
