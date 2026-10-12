@@ -85,7 +85,13 @@ namespace HomesteadControllerGroundSnap
 {
 // Real time, independent of pause, slow frames and time dilation; Estate collision usually streams in under a minute.
 constexpr double TimeoutSeconds = 90.0;
+// A save made underground whose tunnel floor never appears (the layout moved) stands her at the ladder foot
+// after this long, with the same lift as a normal arrival.
+constexpr float UndergroundLoadFloorWaitSeconds = 25.0f;
+constexpr double UndergroundLoadArrivalLiftCm = 150.0;
 }
+
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadControllerLoad, Log, All);
 
 AHomesteadController::AHomesteadController()
 {
@@ -339,6 +345,15 @@ void AHomesteadController::Tick(float DeltaSeconds)
                 && Homestead::Mine::IsUnderground({PendingLocation.X, PendingLocation.Y}, PendingLocation.Z);
             PendingLocation.Z = bFreshTerrainSpawn ? Ground + 150.0f
                 : bLoadedUnderground ? PendingLocation.Z : FMath::Max(PendingLocation.Z, LoadGround + 100.0f);
+            if (bLoadedUnderground && EstateSpawnWait >= HomesteadControllerGroundSnap::UndergroundLoadFloorWaitSeconds)
+            {
+                const Homestead::Mine::Spot& Foot = Homestead::Mine::GetLayout().ladderFoot;
+                UE_LOG(LogHomesteadControllerLoad, Warning,
+                    TEXT("Saved underground position (%.0f, %.0f) has no tunnel floor; standing her at the ladder foot."),
+                    PendingLocation.X, PendingLocation.Y);
+                PendingLocation = FVector(Foot.x, Foot.y, Foot.z + HomesteadControllerGroundSnap::UndergroundLoadArrivalLiftCm);
+                EstateSpawnWait = 0;
+            }
             if (!SettleOnGround(PendingLocation, EstateSpawnWait, DeltaSeconds, 180.0f,
                 bFreshTerrainSpawn ? TEXT("new game") : TEXT("load"))) return;
         }

@@ -40,7 +40,7 @@ constexpr float StandInLidThicknessCm = 6.0f;
 // The shaft of daylight at the ladder foot: a cool spot looking straight down, its brightness set in UpdateLighting.
 const FLinearColor ShaftColour(0.75f, 0.87f, 1.0f);
 constexpr float ShaftAttenuationRadiusCm = 2600.0f;
-constexpr float ShaftInnerConeDegrees = 6.0f;
+constexpr float ShaftInnerConeDegrees = 20.0f;
 constexpr float ShaftVolumetricScattering = 2.0f;
 
 // Drips along the galleries: one at the ladder foot and one every few floor segments, heard only underground.

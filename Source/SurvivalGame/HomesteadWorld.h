@@ -354,7 +354,9 @@ private:
     static constexpr float MineExposureEV = -0.5f;
     // The tunnel's daylight shaft at the ladder foot (candela at full day) and its cone, from the shaft's top.
     static constexpr float MineShaftIntensity = 1200.0f;
-    static constexpr float MineShaftOuterConeDegrees = 14.0f;
+    // A narrow cone (14 degrees) with shadows blacks the pool out inside the capped shaft; the ceiling hole
+    // trims the beam to the same patch of floor with a wide one (PIE 2026-10-11, layout v3).
+    static constexpr float MineShaftOuterConeDegrees = 40.0f;
     // The hearth as a settled low fire: a warm key low in front of the opening, oil-lamp strength
     // (HomesteadLampLook's lamp is 1400 / 1000 cm), rather than a floodlight filling the room.
     static constexpr float HearthIntensity = 2600.0f;
