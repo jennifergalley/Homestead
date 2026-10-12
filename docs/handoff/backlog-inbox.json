@@ -846,6 +846,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-12T00:32:53.516Z"
+    },
+    {
+      "id": "jenny-mv4l3ffm-lhxz5q",
+      "title": "[Balance] Mine house yard",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (mine house review, 2026-10-11). A worn track to the door, a small spoil heap, a low granite wall and a bench or barrow, so the house sits in a working yard rather than on bare lawn.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-12T01:39:19.138Z"
+    },
+    {
+      "id": "jenny-mv4l3fom-ncu8it",
+      "title": "[Balance] Homely props in the mine house",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 lived-in detail (mine house review, 2026-10-11). Coat pegs, a candle box or tins on a shelf, a jar of wildflowers on the sill and a mine plan pinned to the wall.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-12T01:39:19.462Z"
     }
   ]
 }

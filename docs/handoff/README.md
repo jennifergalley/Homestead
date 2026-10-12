@@ -273,7 +273,10 @@ A lane delivers an increment like this:
 7. Consult Balance again before `[ready]` for final numbers, player-facing copy, and a screenshot.
    Record Balance's OK in the ready evidence.
 8. For new player-visible assets or animations, capture actual-game/PIE review media, obtain Jenny's
-   approval, and record the approval in the ready evidence before sending `[ready]`.
+   approval, and record the approval in the ready evidence before sending `[ready]`. Jenny reviews
+   through an `index.md` page opened in the editor canvas, never a bare folder; see "Review format"
+   in `.github\copilot-instructions.md`. Lanes in autopilot write their folder's `index.md` and send
+   `[progress]`/`[review]`; the Orchestrator views the media and builds and opens her review page.
 9. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text

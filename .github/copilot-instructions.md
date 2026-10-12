@@ -67,6 +67,22 @@ Jenny (2026-10-04) wants to see new art early, before playtest. Any lane that ad
 Batch items so she reviews a handful at once, not one message per icon. This comes on top of the
 Balance Agent's cohesion check, not instead of it.
 
+**Review format (Jenny, 2026-10-11): an `index.md` page opened in the editor canvas.** Jenny doesn't
+browse folders of images. Whoever brings her a review (the Orchestrator for lanes in autopilot, or
+the lane itself in interactive mode) views the media first, then writes a review page and opens it
+for her with `open_canvas` (`canvasId: "editor"`, `scope: "workspace"`, `createIfMissing: true`,
+path `review/<topic>-<nn>/index.md`, one instance per page). The page has:
+
+- a one-line heading and a few bullets: what changed since the last review, and the lane's open
+  questions;
+- **the reviewer's own notes**: what looks wrong or unrealistic, judged against her cards and
+  earlier feedback;
+- the key images inline (`![caption](file.jpg)`), resized to JPEGs about 1,100 px wide and copied
+  next to the `index.md` in the session `files\review\<topic>-<nn>\` folder (keep it small; full
+  PNGs stay in `E:\CopilotScratch`).
+
+In chat, give her a two- or three-line summary and the question; the page carries the detail.
+
 Bias toward fresh task-scoped sessions, retaining an existing session for tightly related follow-ups
 when its working context remains useful. Every session, including the orchestrator, maintains a compact
 repo handoff and records task/build attribution, actual model/configuration and AI credit usage before
