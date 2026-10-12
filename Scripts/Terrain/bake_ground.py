@@ -221,7 +221,8 @@ def ground_fields(h, w, layout):
     d_road = line_distance(layout["road"], h.shape)
     wear = np.maximum(wear, 0.45 * smoothstep(4.5, 2.4, d_road) * smoothstep(0.35, 0.75, clump))
     lm = layout["landmarks"]
-    for name, r in (("MillSite", 16.0), ("MineEntrance", 20.0), ("EstateGateway", 9.0)):
+    # The mine house stands in plain grass (Jenny, 2026-10-11): no worn working-site ring round MineEntrance.
+    for name, r in (("MillSite", 16.0), ("EstateGateway", 9.0)):
         x, y = lm[name][:2]
         d = np.hypot(X - x, Y - y)
         wear = np.maximum(wear, 0.6 * smoothstep(r, r * 0.35, d) * (0.5 + 0.5 * clump))

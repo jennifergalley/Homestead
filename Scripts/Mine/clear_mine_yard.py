@@ -3,6 +3,9 @@
 
     python Scripts\\Mine\\clear_mine_yard.py
 
+Jenny's second review: "Set it in more of a plains-type setting: open grass and heath around it, not woods.
+Clear further." Ferns, bracken and grass tufts stay (heath); trees and shrubs go.
+
 Post-filters the committed decorative scenery (Content/SurvivalGame/Estate/Runtime/EstateScenery.bin,
 written by Scripts/Terrain/scatter.py, which keeps 20 m clear of MineEntrance): trees and shrubs go
 within ``YARD_CLEAR_M`` of the house and within a ``PATH_CLEAR_M`` corridor along the last stretch of the
@@ -26,10 +29,13 @@ RECORD = np.dtype([("k", "u1"), ("pad", "u1", 3), ("x", "<f4"), ("y", "<f4"), ("
 # Kind bytes (EstateSceneryKinds in HomesteadWorldEstate.cpp).
 TREES = {0, 1, 13, 14, 15, 16, 19, 20}
 SHRUBS = {2, 12, 17, 18, 21, 22, 23, 24, 25, 26, 27}
-YARD_CLEAR_M = 24.0         # round the house centre
-PATH_CLEAR_M = 9.0          # each side of the footpath's centreline (trees); shrubs half that
-PATH_TAIL_M = 70.0          # how far back up the path the corridor runs from the yard
+YARD_CLEAR_M = 60.0         # round the house centre (Jenny: "more of a plains-type setting ... not woods")
+PATH_CLEAR_M = 12.0         # each side of the footpath's centreline (trees); shrubs half that
+PATH_TAIL_M = 110.0         # how far back up the path the corridor runs from the yard
 HOUSE_MARGIN_M = 1.0        # nothing inside the footprint plus this
+# Jenny: "remove the ferns and rocks and just give it grass around it": only the grass kinds stay this near.
+GRASS_KINDS = {4, 10, 11, 32, 33}
+GRASS_ONLY_M = 50.0
 
 
 def path_tail():
@@ -63,7 +69,8 @@ def keep_mask(rec):
     tree = np.isin(kind, list(TREES))
     shrub = np.isin(kind, list(SHRUBS))
     drop = tree & ((d_house < YARD_CLEAR_M) | (d_path < PATH_CLEAR_M))
-    drop |= shrub & ((d_house < YARD_CLEAR_M * 0.8) | (d_path < PATH_CLEAR_M * 0.5))
+    drop |= shrub & ((d_house < YARD_CLEAR_M * 0.85) | (d_path < PATH_CLEAR_M * 0.5))
+    drop |= ~np.isin(kind, list(GRASS_KINDS)) & (d_house < GRASS_ONLY_M)
     inside = (np.abs(p[:, 0] - hx) < L.OUT_X / 2 + HOUSE_MARGIN_M) & (np.abs(p[:, 1] - hy) < L.OUT_Y / 2 + HOUSE_MARGIN_M)
     return ~(drop | inside)
 

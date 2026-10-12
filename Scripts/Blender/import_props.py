@@ -273,7 +273,8 @@ COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "comple
                        # She walks into, round and out of the sea cave on its own rock.
                        "SeaCave": "complex",
                        # She walks in through the mine house's door and along the mine's galleries.
-                       "MineHouseBlockout": "complex", "MineTunnelsBlockout": "complex"}
+                       "MineHouseBlockout": "complex", "MineTunnelsBlockout": "complex", "MineTunnels": "complex",
+                       "MineHouse": "complex"}
 # Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.
 COLLISION_LOD = {"StoneDoorway": 1}
 # Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.
@@ -657,7 +658,9 @@ def import_prop(name, parent):
         mesh = import_mesh(source, dest, mesh_name)
         slots = [str(s.get_editor_property("material_slot_name")) for s in
                  mesh.get_editor_property("static_materials")]
-        if sorted(slots) != sorted(instances):
+        # Interchange drops a material slot no face uses (masonry meshes list every kit material), so the mesh may
+        # have fewer slots than the report; any slot it has must be one of the report's.
+        if not slots or not set(slots) <= set(instances):
             raise RuntimeError(f"{mesh_name} material slots {slots} != report {sorted(instances)}")
         for index, slot in enumerate(slots):
             mesh.set_material(index, instances[slot])

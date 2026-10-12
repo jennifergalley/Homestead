@@ -1,0 +1,72 @@
+{
+  "Granite": {
+    "id": "lichen_rock",
+    "name": "Lichen Rock",
+    "authors": {
+      "Rico Cilliers": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/lichen_rock",
+    "mean_luminance": 0.2303
+  },
+  "Mortar": {
+    "id": "grey_plaster_02",
+    "name": "Grey Plaster 02",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/grey_plaster_02",
+    "mean_luminance": 0.5109
+  },
+  "Limewash": {
+    "id": "white_rough_plaster",
+    "name": "White Rough Plaster",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/white_rough_plaster",
+    "mean_luminance": 0.7085
+  },
+  "Slate": {
+    "id": "seaside_rock",
+    "name": "Seaside Rock",
+    "authors": {
+      "Dimitrios Savva": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/seaside_rock",
+    "mean_luminance": 0.2536
+  },
+  "Boards": {
+    "id": "fine_grained_wood",
+    "name": "Fine Grained Wood",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/fine_grained_wood",
+    "mean_luminance": 0.2028
+  },
+  "Timber": {
+    "id": "rough_wood",
+    "name": "Rough Wood",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/rough_wood",
+    "mean_luminance": 0.3889
+  },
+  "Brick": {
+    "id": "rock_surface",
+    "name": "Rock Surface",
+    "authors": {
+      "Amal Kumar": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/rock_surface",
+    "mean_luminance": 0.388
+  }
+}

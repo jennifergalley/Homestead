@@ -16,8 +16,8 @@ from mine import layout as L  # noqa: E402
 
 OUT = ROOT / "Source" / "SurvivalGame" / "Simulation" / "HomesteadMineLayout.inc"
 CM = 100.0
-WAKE_POINT = (2.2, -1.2)         # house frame: inside the door, clear of the desk, crates and trapdoor
-LADDER_TOP_GAP = 0.45            # she stands this far east of the opening's east edge, facing the desk
+WAKE_POINT = (0.6, -1.5)         # house frame: inside the door, clear of the desk, crates and trapdoor
+LADDER_TOP_GAP = 0.40            # she stands this far west of the opening's west edge (the ladder's side)
 LADDER_FOOT = (1.1, 0.0)         # tunnel frame: a pace east of the ladder, facing down the adit
 SUMP_CLEAR = 1.3                 # the alcove's walkable floor stops this short of the sump's centre
 
@@ -54,11 +54,13 @@ def lines():
     sx, sy = L.TRAPDOOR["size"]
     out.append("// Trapdoor: hinge line centre (the +Y edge of the opening), yaw from the hinge toward the closed")
     out.append("// lid's free edge, lid length (hinge to free edge) x width (along the hinge).")
-    out.append("MINE_TRAPDOOR({}, {}, {}, {}, {}, {})".format(*map(c, house(tx, ty + sy / 2, L.FLOOR_Z)), yaw(-90.0),
-                                                           c(sy), c(sx)))
-    out.append("// Ladder top: she stands east of the opening facing it; ladder foot: on the tunnel floor facing east.")
-    out.append("MINE_LADDER_TOP({}, {}, {}, {})".format(*map(c, house(tx + sx / 2 + LADDER_TOP_GAP, ty, L.FLOOR_Z)),
-                                                        yaw(180.0)))
+    lap = L.TRAPDOOR_LAP
+    out.append("MINE_TRAPDOOR({}, {}, {}, {}, {}, {})".format(*map(c, house(tx, ty + sy / 2 + lap, L.FLOOR_Z)),
+                                                           yaw(-90.0), c(sy + 2 * lap), c(sx + 2 * lap)))
+    out.append("// Ladder top: on the ladder's side (-X, the desk side) of the opening, facing it (the ladder tops out")
+    out.append("// just under the floor, under the lid; she turns and steps back onto it). Ladder foot: on the tunnel floor.")
+    out.append("MINE_LADDER_TOP({}, {}, {}, {})".format(*map(c, house(tx - sx / 2 - LADDER_TOP_GAP, ty, L.FLOOR_Z)),
+                                                        yaw(0.0)))
     out.append("MINE_LADDER_FOOT({}, {}, {}, {})".format(*map(c, tunnel(*LADDER_FOOT)), yaw(0.0)))
     out.append("// The rock pile's centre on the floor (a one-time 25 stone).")
     out.append("MINE_PILE({}, {}, {})".format(*map(c, house(*L.ROCK_PILE["centre"], L.FLOOR_Z))))

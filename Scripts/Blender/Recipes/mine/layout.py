@@ -18,7 +18,7 @@ import math
 CM = 100.0
 
 # --------------------------------------------------------------------------- world placement
-HOUSE_WORLD = (-410.0, -722.0, 52.23)      # Anchor::MineEntrance (HomesteadEstate.cpp), metres
+HOUSE_WORLD = (-410.0, -722.0, 56.0)      # Anchor::MineEntrance (HomesteadEstate.cpp), metres
 HOUSE_YAW = 0.0
 TUNNEL_FLOOR_Z = 8.0                       # world metres: about 44 m under the house floor
 
@@ -64,20 +64,22 @@ WINDOWS = [
 ]
 
 # --------------------------------------------------------------------------- furnishing (house frame)
-# Jenny: "move the desk ... centred in the room, set back against the far wall opposite the door.
-# Put the trapdoor a few feet in front of the desk, so it sits between the desk and the door."
-# Entering through the east door facing west: the desk is straight ahead against the bob wall, the
-# trapdoor a pace in front of it, the rock pile in the far left-hand corner (+Y), crates by the door.
+# Jenny (second review): "Desk: move it off the wall, more centred in the room. Trapdoor: move it
+# significantly closer to the door, still between the door and the desk."
+# Entering through the east door facing west: the trapdoor is a couple of paces in, the desk stands free
+# in the middle of the room beyond it with its chair behind, facing the door; the rock pile fills the
+# far left-hand corner (+Y), and crates and a sack stand by the door.
 # The opening is centred on a landscape vertex so the 2 x 2 landscape quads round it can be holed
 # (Scripts/Mine/paint_mine_holes.py): the shaft is seen through the boards, not the yard under them.
-TRAPDOOR = {"centre": (-1.00, 0.00), "size": (1.20, 1.20), "hinge": "+Y"}   # opening in the boards
+TRAPDOOR = {"centre": (2.00, 0.00), "size": (1.20, 1.20), "hinge": "+Y"}   # opening in the boards
+TRAPDOOR_LAP = 0.05                        # the lid overlaps the opening this much all round, in a rebate
 SHAFT_WALL = 0.40                          # the shaft lining round the opening (fills the holed quads)
 SHAFT_DEPTH_SHOWN = 6.0                    # the shaft drawn under the trapdoor before it fades to black
-DESK = {"centre": (IN_W + 0.38, 0.0), "size": (0.72, 1.30, 0.78), "yaw": 90.0}   # long side across the room
-LAMP_ON_DESK = (IN_W + 0.36, -0.40, FLOOR_Z + 0.78)   # base of the desk lamp
-CHAIR = {"centre": (IN_W + 0.55, -1.05), "yaw": 60.0}  # set aside at the desk's -Y end
+DESK = {"centre": (-0.80, 0.0), "size": (0.80, 1.40, 0.78), "yaw": 0.0}   # free-standing, long side across the room
+LAMP_ON_DESK = (-0.98, -0.40, FLOOR_Z + 0.78)   # base of the desk lamp
+CHAIR = {"centre": (-1.55, 0.25), "yaw": 15.0}   # behind the desk, facing the door
 ROCK_PILE = {"centre": (IN_W + 0.75, IN_Y - 0.70), "radius": 0.85, "height": 0.95}
-ROCK_PILE_PICKUP = (-1.15, 1.55)          # where she stands to take the stone (walkable)
+ROCK_PILE_PICKUP = (-1.45, 1.15)          # where she stands to take the stone (walkable)
 
 def house_to_world(x, y, z=0.0):
     """House-frame metres to world metres."""
@@ -127,8 +129,8 @@ EDGES = [
     ("L", "K", "alcove"),
 ]
 SUMP = {"centre": (-2.3, -5.6), "half": (1.0, 0.9), "depth": 0.6}  # kerbed pool at the alcove's end
-RAILS = ["L", "A", "N1", "N2", "B"]           # the tramway runs along the haulage way to the far end
-CART = {"edge": ("L", "A"), "t": 0.62}  # the old ore cart stands on the rails in the adit
+# Jenny (second review): no rails or ore carts ("In Poldark they hauled it out by hand"): broken rock went
+# out in baskets and wooden barrows, so a barrow and baskets stand about as dressing.
 
 # Node sockets: (id, kind, edge, t along it, side) - side +1 is the left wall looking from the
 # edge's first point to its second, -1 the right; t = 1 with side 0 is the drift's blind end.
@@ -198,4 +200,57 @@ def node_sockets():
             y = a[1] + uy * length * t + ly * side * (half - NODE_PROUD)
             nx, ny = -lx * side, -ly * side
         out.append((nid, kind, (x, y), math.degrees(math.atan2(ny, nx)), (nx, ny)))
+    return out
+
+
+# --------------------------------------------------------------------------- dressing placements
+PROPS = "/Game/SurvivalGame/Environment/Props"
+RAIL_SECTION = 4.0
+# Jenny: "Far fewer timber sets, spaced much further apart (only where the rock needs support)": one
+# where the adit leaves the shaft's broken ground, and one at the mouth of each of the two drifts
+# driven through the softer, jointed rock along the lodes.
+TIMBER_SETS = [(("L", "A"), 0.36), (("N1", "E1"), 0.16), (("S2", "E3"), 0.16)]
+HAUL = [("MineBarrow", "SM_MineBarrow", ("L", "A"), 0.68, -1.05, 12.0),
+        ("MineBasketA", "SM_MineBasket", ("A", "N1"), 0.55, 1.15, 0.0),
+        ("MineBasketB", "SM_MineBasket", ("C", "S1"), 0.40, -1.2, 35.0),
+        ("MineBasketC", "SM_MineBasket", ("D", "E4"), 0.45, 1.0, 70.0)]
+LADDER_LENGTH = 10.0
+
+def _edge_point(edge, t):
+    a, b, (ux, uy), _, length = edge_frame(edge)
+    return (a[0] + ux * length * t, a[1] + uy * length * t), math.degrees(math.atan2(uy, ux))
+
+
+def dressing():
+    """[(label, asset path, frame, (x, y, z) m, yaw deg)] for every kit piece and prop the placement
+    script spawns; frame is "house" or "tunnel"."""
+    out = []
+    kit = f"{PROPS}/MineKit"
+    for edge, t in TIMBER_SETS:
+        (x, y), yaw = _edge_point(edge, t)
+        mesh = "SM_MineTimberSet" if edge == ("L", "A") else "SM_MineTimberSetDrift"
+        out.append((f"MineSet{edge[1]}", f"{kit}/{mesh}", "tunnel", (x, y, 0.0), yaw))
+    for label, mesh, edge, t, side, turn in HAUL:
+        (x, y), yaw = _edge_point(edge, t)
+        _, _, _, (lx, ly), _ = edge_frame(edge)
+        out.append((label, f"{kit}/{mesh}", "tunnel", (x + lx * side, y + ly * side, 0.0), yaw + turn))
+    out.append(("MineSumpWater", f"{kit}/SM_MineSumpWater", "tunnel", (*SUMP["centre"], -0.21), 0.0))
+    sx, sy = SHAFT["centre"]
+    out.append(("MineLadderTunnel", f"{kit}/SM_MineLadder", "tunnel", (sx - SHAFT["half"] + 0.13, sy, 0.0), 0.0))
+    tx, ty = TRAPDOOR["centre"]
+    out.append(("MineLadderHouse", f"{kit}/SM_MineLadder", "house",
+                (tx - TRAPDOOR["size"][0] / 2 + 0.12, ty, FLOOR_Z - 0.08 - LADDER_LENGTH), 0.0))   # tops out under the closed lid
+    # The desk lamp (the estate's own oil lamp meshes), lit for good by MineDeskLampLight.
+    lx, ly, lz = LAMP_ON_DESK
+    for part in ("SM_OilLamp", "SM_OilLampGlass", "SM_OilLampFlame"):
+        out.append((f"MineDesk{part[3:]}", f"{PROPS}/OilLamp/{part}", "house", (lx, ly, lz), 200.0))
+    fur = f"{PROPS}/MineFurnishing"
+    out.append(("MineDesk", f"{fur}/SM_MineDesk", "house", (*DESK["centre"], FLOOR_Z), 180.0))
+    out.append(("MineChair", f"{fur}/SM_MineChair", "house", (*CHAIR["centre"], FLOOR_Z), CHAIR["yaw"]))
+    out.append(("MineLedger", f"{fur}/SM_MineLedger", "house", (DESK["centre"][0] - 0.18, 0.2, FLOOR_Z + DESK["size"][2]), 176.0))
+    out.append(("MineRockPile", f"{fur}/SM_MineRockPile", "house", (*ROCK_PILE["centre"], FLOOR_Z), 0.0))
+    # Store props by the door: a crate, a barrel and sacks (shared with the general store's kit).
+    out.append(("MineCrate", f"{PROPS}/StoreCrate/SM_Store_Crate", "house", (IN_E - 0.55, IN_Y - 0.45, FLOOR_Z), 8.0))
+    out.append(("MineBarrel", f"{PROPS}/StoreBarrel/SM_Store_Barrel", "house", (IN_E - 1.35, IN_Y - 0.40, FLOOR_Z), 0.0))
+    out.append(("MineSack", f"{PROPS}/StoreSack/SM_Store_Sack", "house", (IN_E - 0.55, -IN_Y + 0.45, FLOOR_Z), 120.0))
     return out

@@ -123,31 +123,31 @@ def coal(name="M_MineCoal"):
     tree.links.new(color, bsdf.inputs["Base Color"])
     rough = _math(tree, "ADD", _math(tree, "MULTIPLY", bright, -0.38), 0.6)
     tree.links.new(rough, bsdf.inputs["Roughness"])
-    bsdf.inputs["Specular IOR Level"].default_value = 0.6
+    bsdf.inputs["Specular IOR Level"].default_value = 0.45
     height = _math(tree, "ADD", _math(tree, "MULTIPLY", wave.outputs["Fac"], 0.5), _math(tree, "MULTIPLY", grit, 0.3))
     tree.links.new(_bump(tree, height, 0.35, 0.003), bsdf.inputs["Normal"])
     return mat
 
 
-def copper_vein(name="M_MineCopperVein"):
+def copper_vein(name="M_MineCopperVein", malachite=1.0):
     """Milky quartz with malachite crusts, chalcopyrite blebs and gossan staining."""
     mat, tree, bsdf = _tree(name)
     p = _coord(tree)
-    milky = _noise(tree, p, 6.0, 4.0)
-    quartz = _mix(tree, (0.30, 0.30, 0.285), (0.50, 0.49, 0.46), _map(tree, milky, 0.35, 0.7))
+    milky = _noise(tree, p, 9.0, 6.0, 0.65)
+    quartz = _mix(tree, (0.20, 0.20, 0.19), (0.36, 0.355, 0.33), _map(tree, milky, 0.35, 0.7))
     mal_n = _noise(tree, p, 7.5, 6.0, 0.62)
-    mal = _map(tree, mal_n, 0.50, 0.56)
-    mal_col = _mix(tree, (0.015, 0.11, 0.05), (0.06, 0.27, 0.13), _map(tree, _noise(tree, p, 40.0, 3.0), 0.3, 0.7))
-    blue = _map(tree, _noise(tree, p, 11.0, 4.0), 0.66, 0.72)
-    mal_col = _mix(tree, mal_col, (0.03, 0.12, 0.26), blue)
+    mal = _math(tree, "MULTIPLY", _map(tree, mal_n, 0.56, 0.61), malachite)
+    mal_col = _mix(tree, (0.025, 0.075, 0.045), (0.06, 0.17, 0.10), _map(tree, _noise(tree, p, 40.0, 3.0), 0.3, 0.7))
+    blue = _math(tree, "MULTIPLY", _map(tree, _noise(tree, p, 11.0, 4.0), 0.68, 0.73), malachite)
+    mal_col = _mix(tree, mal_col, (0.04, 0.09, 0.17), blue)
     color = _mix(tree, quartz, mal_col, mal)
-    gossan = _map(tree, _noise(tree, p, 3.0, 5.0), 0.55, 0.68, 0.0, 0.8)
+    gossan = _map(tree, _noise(tree, p, 3.0, 5.0), 0.5, 0.66, 0.0, 0.85 * malachite + 0.25)
     color = _mix(tree, color, (0.20, 0.09, 0.03), _math(tree, "MULTIPLY", gossan, _math(tree, "SUBTRACT", 1.0, mal)))
     vor = tree.nodes.new("ShaderNodeTexVoronoi")
     vor.inputs["Scale"].default_value = 26.0
     tree.links.new(p, vor.inputs["Vector"])
     bleb = _map(tree, vor.outputs["Distance"], 0.16, 0.10)
-    bleb = _math(tree, "MULTIPLY", bleb, _map(tree, _noise(tree, p, 5.0, 2.0), 0.45, 0.6))
+    bleb = _math(tree, "MULTIPLY", _math(tree, "MULTIPLY", bleb, _map(tree, _noise(tree, p, 5.0, 2.0), 0.45, 0.6)), malachite)
     color = _mix(tree, color, (0.42, 0.31, 0.10), bleb)
     tree.links.new(color, bsdf.inputs["Base Color"])
     rough = _mix(tree, (0.32, 0.32, 0.32), (0.7, 0.7, 0.7), mal)

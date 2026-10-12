@@ -30,7 +30,7 @@
   "MineEntrance": [
    -410.0,
    -722.0,
-   52.23,
+   56.0,
    0.0
   ],
   "MillSite": [
@@ -9809,5 +9809,16 @@
  },
  "coastSoften": true,
  "coastDetail": true,
- "coastFillet": true
+ "coastFillet": true,
+ "mineSite": {
+  "regraded": true,
+  "smoothed": true,
+  "yardLevel": 56.0,
+  "rect": [
+   1550,
+   1240,
+   1662,
+   1348
+  ]
+ }
 }

@@ -76,6 +76,16 @@ def _tilt(rng, amount):
     return sdf.axis_angle(axis / np.linalg.norm(axis), math.radians(rng.uniform(-amount, amount)))
 
 
+def fractured(node, cell=0.2, depth=0.045, seed=0):
+    """Break a block field's faces into small joint facets (each Voronoi cell knocked back by its own
+    amount) so blocks read as broken rock, not sawn boxes."""
+    def fn(p):
+        f1, f2, r1, r2, c1, c2 = rocks.voronoi(p, cell, seed)
+        edge = rocks.smoothstep(0.0, 0.025, (f2 - f1) * 0.5)
+        return depth * (0.15 + 0.85 * r1) * (0.6 + 0.4 * edge) * rocks.smoothstep(FLOOR_Z, 0.06, p[:, 2])
+    return sdf.displaced(node, lambda p: -fn(p), depth)
+
+
 def blocks(seed, count, proud=(0.08, 0.24), zone=((-HALF_W, HALF_W), (0.0, TOP)), size=(0.16, 0.34),
            skip=None):
     """Joint-bounded blocks standing proud of the wall line, front faces between proud[0] and proud[1]."""
@@ -92,11 +102,11 @@ def blocks(seed, count, proud=(0.08, 0.24), zone=((-HALF_W, HALF_W), (0.0, TOP))
         edge = max(abs(y) / (HALF_W + 0.1), abs(z - TOP * 0.45) / (TOP * 0.62))
         front = WALL_X + rng.uniform(*proud) * max(0.0, 1.0 - edge ** 3)
         hx = rng.uniform(0.22, 0.32)
-        out.append(sdf.box((front - hx, y, z), (hx, hy, hz), rotation=_tilt(rng, 9.0), rounding=0.018))
+        out.append(sdf.box((front - hx, y, z), (hx, hy, hz), rotation=_tilt(rng, 16.0), rounding=0.018))
     return out
 
 
-def backing(front=WALL_X - 0.04):
+def backing(front=WALL_X - 0.22):
     hx = (front - BACK_X) / 2
     return sdf.box((front - hx, 0.0, TOP / 2), (hx, HALF_W + 0.25, TOP / 2 + 0.2), rounding=0.05)
 
@@ -172,8 +182,8 @@ def lining(cavity_centre, radii, seed, count, amethyst_share, broken):
         inward = c - p + rng.normal(scale=0.08, size=3) * np.linalg.norm(r)
         deep = -d[0]             # the back of the hollow holds the amethyst
         mi = 1 if rng.random() < amethyst_share * (0.6 + 0.8 * max(deep, 0.0)) else 0
-        radius = rng.uniform(0.010, 0.026) * (1.25 if mi == 1 else 1.0)
-        length = rng.uniform(0.03, 0.11) if not broken else rng.uniform(0.006, 0.022)
+        radius = rng.uniform(0.014, 0.034) * (1.25 if mi == 1 else 1.0)
+        length = rng.uniform(0.05, 0.15) if not broken else rng.uniform(0.006, 0.022)
         specs.append((p, inward, radius, length, mi, broken))
     return specs
 
@@ -204,7 +214,7 @@ def mesh_node(kit, name, field, special=None, granite=None, special_mat=None, ex
         front = rocks.smoothstep(WALL_X - 0.02, WALL_X + 0.08, points[:, 0])
         fresh = np.clip(out * front * rocks.smoothstep(0.35, 0.65, sdf.fbm(points / 0.22, 3, seed=5) * 0.5 + 0.5)
                         + 0.25 * front, 0.0, 1.0)
-        wet = np.clip(0.25 + 0.5 * rocks.smoothstep(0.5, 0.0, points[:, 2])
+        wet = np.clip(0.55 + 0.35 * rocks.smoothstep(0.5, 0.0, points[:, 2])
                       + 0.3 * rocks.smoothstep(0.1, 0.5, sdf.fbm(points * np.array([1.0, 1.0, 0.15]) / 0.4, 3, seed=9)),
                       0.0, 0.9)
         return grain, {"fresh": fresh, "wet": wet}
@@ -248,13 +258,14 @@ def build(kit):
     coal = minemats.coal()
     vein = minemats.copper_vein()
     quartz, amethyst = minemats.quartz(), minemats.amethyst()
+    boss_quartz = minemats.copper_vein("M_MineQuartzVein", malachite=0.0)
     out = []
 
     # Rock face: a breast of loosened blocks; spent: a pale, flatter scar with spalls at the foot.
-    face = sdf.smooth_union(blocks(11, 26) + [backing()], 0.015)
+    face = fractured(sdf.smooth_union(blocks(11, 26) + [backing()], 0.015), seed=11)
     out += mesh_node(kit, "SM_MineRockFace", face, granite=granite)
-    spent = sdf.smooth_union(blocks(12, 7, proud=(0.0, 0.07), size=(0.14, 0.26)) + [backing(WALL_X + 0.01)]
-                             + rubble(13, 9), 0.012)
+    spent = fractured(sdf.smooth_union(blocks(12, 9, proud=(-0.04, 0.05), size=(0.14, 0.26)) + rubble(13, 9) + [backing()], 0.012),
+                      seed=12)
     out += mesh_node(kit, "SM_MineRockFaceSpent", spent, granite=granite)
 
     # Coal seam: a cleated band 0.4 m thick at 0.55-0.95 m, between blocky rock.
@@ -278,11 +289,11 @@ def build(kit):
     def off_band(y, z):
         return band_lo - 0.12 < z < band_hi + 0.12
 
-    seam = coal_band(WALL_X + 0.12, 21)
-    rock = sdf.smooth_union(blocks(22, 18, skip=off_band) + [backing()], 0.015)
+    seam = fractured(coal_band(WALL_X + 0.12, 21), cell=0.1, depth=0.025, seed=21)
+    rock = fractured(sdf.smooth_union(blocks(22, 18, skip=off_band) + [backing()], 0.015), seed=22)
     out += mesh_node(kit, "SM_MineCoalSeam", sdf.union([rock, seam]), special=seam, granite=granite, special_mat=coal)
     seam_spent = coal_band(WALL_X - 0.16, 23, crumbs=7)
-    rock_spent = sdf.smooth_union(blocks(24, 16, skip=off_band) + [backing()], 0.015)
+    rock_spent = fractured(sdf.smooth_union(blocks(24, 16, skip=off_band) + [backing()], 0.015), seed=24)
     slot_back = WALL_X - 0.16
     rock_spent = sdf.subtract(rock_spent, sdf.box(((slot_back + 1.0) / 2, 0.0, (band_lo + band_hi) / 2),
                                                   ((1.0 - slot_back) / 2, HALF_W + 0.4, (band_hi - band_lo) / 2 + 0.02)), 0.02)
@@ -296,36 +307,37 @@ def build(kit):
 
     def lode(front, width=0.07):
         hx = (front - BACK_X) / 2
-        return sdf.box((front - hx, 0.0, 0.85), (hx, width, 1.6), rotation=rot, rounding=0.01)
+        lode_box = sdf.box((front - hx, 0.0, 0.85), (hx, width, 1.6), rotation=rot, rounding=0.01)
+        return sdf.intersect(lode_box, sdf.box((0.0, 0.0, TOP / 2 + 0.02), (1.0, HALF_W + 0.1, TOP / 2 + 0.05), rounding=0.05))
 
     def off_vein(y, z):
         return abs(normal[1] * y + normal[2] * (z - 0.85)) < 0.16
 
     vein_node = sdf.displaced(lode(WALL_X + 0.15), lambda q: 0.012 * sdf.fbm(q / 0.06, 3, seed=31), 0.012)
-    rock = sdf.smooth_union(blocks(32, 20, skip=off_vein) + [backing()], 0.015)
+    rock = fractured(sdf.smooth_union(blocks(32, 20, skip=off_vein) + [backing()], 0.015), seed=32)
     out += mesh_node(kit, "SM_MineCopperVein", sdf.union([rock, vein_node]), special=vein_node, granite=granite,
                      special_mat=vein)
     vein_spent = lode(WALL_X - 0.12, 0.05)
-    rock = sdf.subtract(sdf.smooth_union(blocks(33, 20, skip=off_vein) + [backing()], 0.015),
+    rock = sdf.subtract(fractured(sdf.smooth_union(blocks(33, 20, skip=off_vein) + [backing()], 0.015), seed=33),
                         lode(0.6, 0.11), 0.02)
     out += mesh_node(kit, "SM_MineCopperVeinSpent", sdf.union([rock, vein_spent] + rubble(34, 6, size=(0.03, 0.07))),
                      special=vein_spent, granite=granite, special_mat=vein)
 
     # Gem pocket: a vug in a quartz boss at chest height, lined with quartz and amethyst points.
-    centre, radii = (WALL_X + 0.08, 0.0, 1.05), (0.30, 0.36, 0.26)
-    boss = sdf.box((WALL_X - 0.15, 0.0, 1.05), (0.33, 0.55, 0.45), rotation=_tilt(np.random.default_rng(41), 6),
-                   rounding=0.12)
+    centre, radii = (WALL_X + 0.13, 0.0, 1.05), (0.26, 0.34, 0.24)
+    boss = fractured(sdf.box((WALL_X - 0.15, 0.0, 1.05), (0.33, 0.55, 0.45), rotation=_tilt(np.random.default_rng(41), 6),
+                             rounding=0.04), cell=0.12, depth=0.05, seed=41)
     boss = sdf.displaced(boss, lambda q: 0.02 * sdf.fbm(q / 0.12, 3, seed=42), 0.02)
     hollow = sdf.ellipsoid(centre, radii)
 
     def off_boss(y, z):
         return abs(y) < 0.62 and abs(z - 1.05) < 0.52
     for spent_state, nm in ((False, "SM_MineGemPocket"), (True, "SM_MineGemPocketSpent")):
-        rock = sdf.smooth_union(blocks(43 + spent_state, 18, skip=off_boss) + [backing()], 0.015)
+        rock = fractured(sdf.smooth_union(blocks(43 + spent_state, 18, skip=off_boss) + [backing()], 0.015), seed=43)
         shell = sdf.subtract(boss, hollow, 0.02)
         field = sdf.union([rock, shell] + (rubble(45, 6, size=(0.02, 0.05)) if spent_state else []))
-        specs = lining(centre, radii, 46 + spent_state, 70 if not spent_state else 40, 0.45, spent_state)
+        specs = lining(centre, radii, 46 + spent_state, 120 if not spent_state else 60, 0.45, spent_state)
         crystals = crystal_mesh(nm + "Crystals", specs, [quartz, amethyst])
         # Crystal slots follow the rock's two (granite, quartz boss) in the joined mesh.
-        out += mesh_node(kit, nm, field, special=shell, granite=granite, special_mat=vein, extra=[crystals])
+        out += mesh_node(kit, nm, field, special=shell, granite=granite, special_mat=boss_quartz, extra=[crystals])
     return out

@@ -1,0 +1,1247 @@
+{
+  "schema": 1,
+  "name": "MineNodes",
+  "description": "Mine nodes: rock face, coal seam, copper vein and gem pocket, each with a spent state; pivot on the floor at the node socket, +X out of the wall.",
+  "collision": "box",
+  "triangle_budget": 900000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/mine_nodes.py",
+  "source_sha256": "a907b4374496fa0283b3e7662217e7ff8b27daa2a6b9e93258df055b64510739",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_MineRockFace": {
+      "vertices": 178846,
+      "triangles": 357656,
+      "size_cm": [
+        85.25,
+        220.24,
+        201.22
+      ],
+      "materials": [
+        {
+          "name": "M_MineRockFace",
+          "textures": {
+            "basecolor": "T_MineRockFace_basecolor.png",
+            "roughness": "T_MineRockFace_roughness.png",
+            "normal": "T_MineRockFace_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineRockFace_basecolor.png",
+          "roughness": "T_MineRockFace_roughness.png",
+          "normal": "T_MineRockFace_normal.png",
+          "ao": "T_MineRockFace_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineRockFace.fbx",
+      "sha256": "1ed56bfe0bd19e1a19df1ae95093c3e3170416ecaa6c57fdba4ac00364d596da",
+      "preview": "preview_SM_MineRockFace.png"
+    },
+    "SM_MineRockFace_LOD1": {
+      "vertices": 53666,
+      "triangles": 107296,
+      "size_cm": [
+        85.23,
+        220.21,
+        201.21
+      ],
+      "materials": [
+        {
+          "name": "M_MineRockFace",
+          "textures": {
+            "basecolor": "T_MineRockFace_basecolor.png",
+            "roughness": "T_MineRockFace_roughness.png",
+            "normal": "T_MineRockFace_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineRockFace_basecolor.png",
+          "roughness": "T_MineRockFace_roughness.png",
+          "normal": "T_MineRockFace_normal.png",
+          "ao": "T_MineRockFace_ao.png"
+        },
+        "shared_with": "SM_MineRockFace"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFace_LOD1.fbx",
+      "sha256": "5dc13b40b8dd57fd00501e4ef60b93b15b280669c7c10d856eeb21cdc9bc9be0",
+      "preview": "preview_SM_MineRockFace_LOD1.png"
+    },
+    "SM_MineRockFace_LOD2": {
+      "vertices": 14319,
+      "triangles": 28611,
+      "size_cm": [
+        85.3,
+        220.23,
+        201.17
+      ],
+      "materials": [
+        {
+          "name": "M_MineRockFace",
+          "textures": {
+            "basecolor": "T_MineRockFace_basecolor.png",
+            "roughness": "T_MineRockFace_roughness.png",
+            "normal": "T_MineRockFace_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineRockFace_basecolor.png",
+          "roughness": "T_MineRockFace_roughness.png",
+          "normal": "T_MineRockFace_normal.png",
+          "ao": "T_MineRockFace_ao.png"
+        },
+        "shared_with": "SM_MineRockFace"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFace_LOD2.fbx",
+      "sha256": "d8b53eb7e9b772542edf55634cf478e847b11e12b9d2aba19bad71bcf41de19f",
+      "preview": "preview_SM_MineRockFace_LOD2.png"
+    },
+    "SM_MineRockFaceSpent": {
+      "vertices": 156957,
+      "triangles": 313876,
+      "size_cm": [
+        140.36,
+        220.17,
+        201.33
+      ],
+      "materials": [
+        {
+          "name": "M_MineRockFaceSpent",
+          "textures": {
+            "basecolor": "T_MineRockFaceSpent_basecolor.png",
+            "roughness": "T_MineRockFaceSpent_roughness.png",
+            "normal": "T_MineRockFaceSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineRockFaceSpent_basecolor.png",
+          "roughness": "T_MineRockFaceSpent_roughness.png",
+          "normal": "T_MineRockFaceSpent_normal.png",
+          "ao": "T_MineRockFaceSpent_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineRockFaceSpent.fbx",
+      "sha256": "fcb49f4540e89e85329f35d998bc23a98568d02a07bd6773ea05cfce92409047",
+      "preview": "preview_SM_MineRockFaceSpent.png"
+    },
+    "SM_MineRockFaceSpent_LOD1": {
+      "vertices": 47100,
+      "triangles": 94162,
+      "size_cm": [
+        140.33,
+        220.17,
+        201.28
+      ],
+      "materials": [
+        {
+          "name": "M_MineRockFaceSpent",
+          "textures": {
+            "basecolor": "T_MineRockFaceSpent_basecolor.png",
+            "roughness": "T_MineRockFaceSpent_roughness.png",
+            "normal": "T_MineRockFaceSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineRockFaceSpent_basecolor.png",
+          "roughness": "T_MineRockFaceSpent_roughness.png",
+          "normal": "T_MineRockFaceSpent_normal.png",
+          "ao": "T_MineRockFaceSpent_ao.png"
+        },
+        "shared_with": "SM_MineRockFaceSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFaceSpent_LOD1.fbx",
+      "sha256": "1fdef442b1023700b1af366d54af7415df2a8e1a509b85f365ed668fd7e7b77f",
+      "preview": "preview_SM_MineRockFaceSpent_LOD1.png"
+    },
+    "SM_MineRockFaceSpent_LOD2": {
+      "vertices": 12571,
+      "triangles": 25110,
+      "size_cm": [
+        140.36,
+        220.15,
+        201.4
+      ],
+      "materials": [
+        {
+          "name": "M_MineRockFaceSpent",
+          "textures": {
+            "basecolor": "T_MineRockFaceSpent_basecolor.png",
+            "roughness": "T_MineRockFaceSpent_roughness.png",
+            "normal": "T_MineRockFaceSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineRockFaceSpent_basecolor.png",
+          "roughness": "T_MineRockFaceSpent_roughness.png",
+          "normal": "T_MineRockFaceSpent_normal.png",
+          "ao": "T_MineRockFaceSpent_ao.png"
+        },
+        "shared_with": "SM_MineRockFaceSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFaceSpent_LOD2.fbx",
+      "sha256": "9e75c99bdd3dab66a59775eeb89d118dd37cfd52d0b63cf279783a7059cb9c04",
+      "preview": "preview_SM_MineRockFaceSpent_LOD2.png"
+    },
+    "SM_MineCoalSeam": {
+      "vertices": 230391,
+      "triangles": 460780,
+      "size_cm": [
+        88.37,
+        222.49,
+        205.48
+      ],
+      "materials": [
+        {
+          "name": "M_MineCoalSeam",
+          "textures": {
+            "basecolor": "T_MineCoalSeam_basecolor.png",
+            "roughness": "T_MineCoalSeam_roughness.png",
+            "normal": "T_MineCoalSeam_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCoalSeam_basecolor.png",
+          "roughness": "T_MineCoalSeam_roughness.png",
+          "normal": "T_MineCoalSeam_normal.png",
+          "ao": "T_MineCoalSeam_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCoalSeam.fbx",
+      "sha256": "9a1eda5779d74e4d8cac943c7f3c1669889edb20509d72ae924805744c02b11b",
+      "preview": "preview_SM_MineCoalSeam.png"
+    },
+    "SM_MineCoalSeam_LOD1": {
+      "vertices": 69117,
+      "triangles": 138233,
+      "size_cm": [
+        88.39,
+        222.5,
+        205.46
+      ],
+      "materials": [
+        {
+          "name": "M_MineCoalSeam",
+          "textures": {
+            "basecolor": "T_MineCoalSeam_basecolor.png",
+            "roughness": "T_MineCoalSeam_roughness.png",
+            "normal": "T_MineCoalSeam_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCoalSeam_basecolor.png",
+          "roughness": "T_MineCoalSeam_roughness.png",
+          "normal": "T_MineCoalSeam_normal.png",
+          "ao": "T_MineCoalSeam_ao.png"
+        },
+        "shared_with": "SM_MineCoalSeam"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeam_LOD1.fbx",
+      "sha256": "40e17aeef9c06aa7cf3d403056eb6baa7bbfa99c8f5b94c96230bc07b353300e",
+      "preview": "preview_SM_MineCoalSeam_LOD1.png"
+    },
+    "SM_MineCoalSeam_LOD2": {
+      "vertices": 18423,
+      "triangles": 36861,
+      "size_cm": [
+        88.47,
+        222.37,
+        205.41
+      ],
+      "materials": [
+        {
+          "name": "M_MineCoalSeam",
+          "textures": {
+            "basecolor": "T_MineCoalSeam_basecolor.png",
+            "roughness": "T_MineCoalSeam_roughness.png",
+            "normal": "T_MineCoalSeam_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCoalSeam_basecolor.png",
+          "roughness": "T_MineCoalSeam_roughness.png",
+          "normal": "T_MineCoalSeam_normal.png",
+          "ao": "T_MineCoalSeam_ao.png"
+        },
+        "shared_with": "SM_MineCoalSeam"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeam_LOD2.fbx",
+      "sha256": "0e5edf630463bc6c12c82a4e821f21db5c603af6f1354afd723ec824c785d6cb",
+      "preview": "preview_SM_MineCoalSeam_LOD2.png"
+    },
+    "SM_MineCoalSeamSpent": {
+      "vertices": 182937,
+      "triangles": 365848,
+      "size_cm": [
+        122.73,
+        220.17,
+        201.45
+      ],
+      "materials": [
+        {
+          "name": "M_MineCoalSeamSpent",
+          "textures": {
+            "basecolor": "T_MineCoalSeamSpent_basecolor.png",
+            "roughness": "T_MineCoalSeamSpent_roughness.png",
+            "normal": "T_MineCoalSeamSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCoalSeamSpent_basecolor.png",
+          "roughness": "T_MineCoalSeamSpent_roughness.png",
+          "normal": "T_MineCoalSeamSpent_normal.png",
+          "ao": "T_MineCoalSeamSpent_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCoalSeamSpent.fbx",
+      "sha256": "344d778d493958560bda0fd24d4c020b7a65d043a57c62dd97821819e0499780",
+      "preview": "preview_SM_MineCoalSeamSpent.png"
+    },
+    "SM_MineCoalSeamSpent_LOD1": {
+      "vertices": 54886,
+      "triangles": 109753,
+      "size_cm": [
+        122.71,
+        220.18,
+        201.45
+      ],
+      "materials": [
+        {
+          "name": "M_MineCoalSeamSpent",
+          "textures": {
+            "basecolor": "T_MineCoalSeamSpent_basecolor.png",
+            "roughness": "T_MineCoalSeamSpent_roughness.png",
+            "normal": "T_MineCoalSeamSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCoalSeamSpent_basecolor.png",
+          "roughness": "T_MineCoalSeamSpent_roughness.png",
+          "normal": "T_MineCoalSeamSpent_normal.png",
+          "ao": "T_MineCoalSeamSpent_ao.png"
+        },
+        "shared_with": "SM_MineCoalSeamSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeamSpent_LOD1.fbx",
+      "sha256": "9e932d478de34213ded4d8d14999527f4d9987253bfec4d72f59711255b6e0bd",
+      "preview": "preview_SM_MineCoalSeamSpent_LOD1.png"
+    },
+    "SM_MineCoalSeamSpent_LOD2": {
+      "vertices": 14637,
+      "triangles": 29266,
+      "size_cm": [
+        122.68,
+        220.2,
+        201.48
+      ],
+      "materials": [
+        {
+          "name": "M_MineCoalSeamSpent",
+          "textures": {
+            "basecolor": "T_MineCoalSeamSpent_basecolor.png",
+            "roughness": "T_MineCoalSeamSpent_roughness.png",
+            "normal": "T_MineCoalSeamSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCoalSeamSpent_basecolor.png",
+          "roughness": "T_MineCoalSeamSpent_roughness.png",
+          "normal": "T_MineCoalSeamSpent_normal.png",
+          "ao": "T_MineCoalSeamSpent_ao.png"
+        },
+        "shared_with": "SM_MineCoalSeamSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeamSpent_LOD2.fbx",
+      "sha256": "f39f90516a3b86e25a804e5df8b4feb69e84f0c4cb57c23dc201433f0561cd4f",
+      "preview": "preview_SM_MineCoalSeamSpent_LOD2.png"
+    },
+    "SM_MineCopperVein": {
+      "vertices": 192141,
+      "triangles": 384264,
+      "size_cm": [
+        87.59,
+        220.33,
+        201.4
+      ],
+      "materials": [
+        {
+          "name": "M_MineCopperVein",
+          "textures": {
+            "basecolor": "T_MineCopperVein_basecolor.png",
+            "roughness": "T_MineCopperVein_roughness.png",
+            "normal": "T_MineCopperVein_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCopperVein_basecolor.png",
+          "roughness": "T_MineCopperVein_roughness.png",
+          "normal": "T_MineCopperVein_normal.png",
+          "ao": "T_MineCopperVein_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCopperVein.fbx",
+      "sha256": "af669f1d6b917112c5be39ba615ff7fef32904a4cf5590f85475b8b475cad017",
+      "preview": "preview_SM_MineCopperVein.png"
+    },
+    "SM_MineCopperVein_LOD1": {
+      "vertices": 57648,
+      "triangles": 115278,
+      "size_cm": [
+        87.59,
+        220.32,
+        201.4
+      ],
+      "materials": [
+        {
+          "name": "M_MineCopperVein",
+          "textures": {
+            "basecolor": "T_MineCopperVein_basecolor.png",
+            "roughness": "T_MineCopperVein_roughness.png",
+            "normal": "T_MineCopperVein_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCopperVein_basecolor.png",
+          "roughness": "T_MineCopperVein_roughness.png",
+          "normal": "T_MineCopperVein_normal.png",
+          "ao": "T_MineCopperVein_ao.png"
+        },
+        "shared_with": "SM_MineCopperVein"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVein_LOD1.fbx",
+      "sha256": "58d7181354b333eadd6654eee8ba32651c8bd741a527fa1bee9de30705fa4d0e",
+      "preview": "preview_SM_MineCopperVein_LOD1.png"
+    },
+    "SM_MineCopperVein_LOD2": {
+      "vertices": 15377,
+      "triangles": 30740,
+      "size_cm": [
+        87.66,
+        220.39,
+        201.39
+      ],
+      "materials": [
+        {
+          "name": "M_MineCopperVein",
+          "textures": {
+            "basecolor": "T_MineCopperVein_basecolor.png",
+            "roughness": "T_MineCopperVein_roughness.png",
+            "normal": "T_MineCopperVein_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCopperVein_basecolor.png",
+          "roughness": "T_MineCopperVein_roughness.png",
+          "normal": "T_MineCopperVein_normal.png",
+          "ao": "T_MineCopperVein_ao.png"
+        },
+        "shared_with": "SM_MineCopperVein"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVein_LOD2.fbx",
+      "sha256": "69e314ccc0175cf975f247157872feeb9554b8d1d601c7089b555d64e6245402",
+      "preview": "preview_SM_MineCopperVein_LOD2.png"
+    },
+    "SM_MineCopperVeinSpent": {
+      "vertices": 214380,
+      "triangles": 428712,
+      "size_cm": [
+        139.31,
+        222.11,
+        201.74
+      ],
+      "materials": [
+        {
+          "name": "M_MineCopperVeinSpent",
+          "textures": {
+            "basecolor": "T_MineCopperVeinSpent_basecolor.png",
+            "roughness": "T_MineCopperVeinSpent_roughness.png",
+            "normal": "T_MineCopperVeinSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCopperVeinSpent_basecolor.png",
+          "roughness": "T_MineCopperVeinSpent_roughness.png",
+          "normal": "T_MineCopperVeinSpent_normal.png",
+          "ao": "T_MineCopperVeinSpent_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCopperVeinSpent.fbx",
+      "sha256": "00d1c6a6810e2ccde1f70f25720f0fc2b0429433745cd18190fff89dbeb4021c",
+      "preview": "preview_SM_MineCopperVeinSpent.png"
+    },
+    "SM_MineCopperVeinSpent_LOD1": {
+      "vertices": 64329,
+      "triangles": 128612,
+      "size_cm": [
+        139.32,
+        222.14,
+        201.75
+      ],
+      "materials": [
+        {
+          "name": "M_MineCopperVeinSpent",
+          "textures": {
+            "basecolor": "T_MineCopperVeinSpent_basecolor.png",
+            "roughness": "T_MineCopperVeinSpent_roughness.png",
+            "normal": "T_MineCopperVeinSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCopperVeinSpent_basecolor.png",
+          "roughness": "T_MineCopperVeinSpent_roughness.png",
+          "normal": "T_MineCopperVeinSpent_normal.png",
+          "ao": "T_MineCopperVeinSpent_ao.png"
+        },
+        "shared_with": "SM_MineCopperVeinSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVeinSpent_LOD1.fbx",
+      "sha256": "da5b10fc48ea4febb16d6985450a09f636ab6fbf28130ac11262745693d26438",
+      "preview": "preview_SM_MineCopperVeinSpent_LOD1.png"
+    },
+    "SM_MineCopperVeinSpent_LOD2": {
+      "vertices": 17169,
+      "triangles": 34296,
+      "size_cm": [
+        139.28,
+        222.1,
+        201.73
+      ],
+      "materials": [
+        {
+          "name": "M_MineCopperVeinSpent",
+          "textures": {
+            "basecolor": "T_MineCopperVeinSpent_basecolor.png",
+            "roughness": "T_MineCopperVeinSpent_roughness.png",
+            "normal": "T_MineCopperVeinSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineCopperVeinSpent_basecolor.png",
+          "roughness": "T_MineCopperVeinSpent_roughness.png",
+          "normal": "T_MineCopperVeinSpent_normal.png",
+          "ao": "T_MineCopperVeinSpent_ao.png"
+        },
+        "shared_with": "SM_MineCopperVeinSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVeinSpent_LOD2.fbx",
+      "sha256": "65b1819c75153945571172ecbbc4870eec8deba5acaf423c22700a99883a0f0b",
+      "preview": "preview_SM_MineCopperVeinSpent_LOD2.png"
+    },
+    "SM_MineGemPocket": {
+      "vertices": 174892,
+      "triangles": 348820,
+      "size_cm": [
+        90.42,
+        219.77,
+        201.7
+      ],
+      "materials": [
+        {
+          "name": "M_MineGemPocket",
+          "textures": {
+            "basecolor": "T_MineGemPocket_basecolor.png",
+            "roughness": "T_MineGemPocket_roughness.png",
+            "normal": "T_MineGemPocket_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineGemPocket_basecolor.png",
+          "roughness": "T_MineGemPocket_roughness.png",
+          "normal": "T_MineGemPocket_normal.png",
+          "ao": "T_MineGemPocket_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineGemPocket.fbx",
+      "sha256": "8f8f66bf72fa0bb152e3fab41a0c335b3ee3d3790710a2abebfecd250e75bf5f",
+      "preview": "preview_SM_MineGemPocket.png"
+    },
+    "SM_MineGemPocket_LOD1": {
+      "vertices": 52805,
+      "triangles": 104646,
+      "size_cm": [
+        90.42,
+        219.73,
+        201.67
+      ],
+      "materials": [
+        {
+          "name": "M_MineGemPocket",
+          "textures": {
+            "basecolor": "T_MineGemPocket_basecolor.png",
+            "roughness": "T_MineGemPocket_roughness.png",
+            "normal": "T_MineGemPocket_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineGemPocket_basecolor.png",
+          "roughness": "T_MineGemPocket_roughness.png",
+          "normal": "T_MineGemPocket_normal.png",
+          "ao": "T_MineGemPocket_ao.png"
+        },
+        "shared_with": "SM_MineGemPocket"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineGemPocket_LOD1.fbx",
+      "sha256": "154c4b33a4c35033095abe3d7525afda93c9c82db0dd1f3fb0d2041e2e435a19",
+      "preview": "preview_SM_MineGemPocket_LOD1.png"
+    },
+    "SM_MineGemPocket_LOD2": {
+      "vertices": 14410,
+      "triangles": 27905,
+      "size_cm": [
+        90.44,
+        219.73,
+        201.81
+      ],
+      "materials": [
+        {
+          "name": "M_MineGemPocket",
+          "textures": {
+            "basecolor": "T_MineGemPocket_basecolor.png",
+            "roughness": "T_MineGemPocket_roughness.png",
+            "normal": "T_MineGemPocket_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineGemPocket_basecolor.png",
+          "roughness": "T_MineGemPocket_roughness.png",
+          "normal": "T_MineGemPocket_normal.png",
+          "ao": "T_MineGemPocket_ao.png"
+        },
+        "shared_with": "SM_MineGemPocket"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineGemPocket_LOD2.fbx",
+      "sha256": "8d3cc443a6b0e780fd29779998fc2132bd64d856f5d655d2f27dca547cc9cf2a",
+      "preview": "preview_SM_MineGemPocket_LOD2.png"
+    },
+    "SM_MineGemPocketSpent": {
+      "vertices": 181928,
+      "triangles": 363344,
+      "size_cm": [
+        125.48,
+        222.9,
+        201.7
+      ],
+      "materials": [
+        {
+          "name": "M_MineGemPocketSpent",
+          "textures": {
+            "basecolor": "T_MineGemPocketSpent_basecolor.png",
+            "roughness": "T_MineGemPocketSpent_roughness.png",
+            "normal": "T_MineGemPocketSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineGemPocketSpent_basecolor.png",
+          "roughness": "T_MineGemPocketSpent_roughness.png",
+          "normal": "T_MineGemPocketSpent_normal.png",
+          "ao": "T_MineGemPocketSpent_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineGemPocketSpent.fbx",
+      "sha256": "8bed9226892ad8e7cd57a6283294810b336aeb4d92c04383f033aa0af56a785a",
+      "preview": "preview_SM_MineGemPocketSpent.png"
+    },
+    "SM_MineGemPocketSpent_LOD1": {
+      "vertices": 54757,
+      "triangles": 109002,
+      "size_cm": [
+        125.43,
+        222.92,
+        201.69
+      ],
+      "materials": [
+        {
+          "name": "M_MineGemPocketSpent",
+          "textures": {
+            "basecolor": "T_MineGemPocketSpent_basecolor.png",
+            "roughness": "T_MineGemPocketSpent_roughness.png",
+            "normal": "T_MineGemPocketSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineGemPocketSpent_basecolor.png",
+          "roughness": "T_MineGemPocketSpent_roughness.png",
+          "normal": "T_MineGemPocketSpent_normal.png",
+          "ao": "T_MineGemPocketSpent_ao.png"
+        },
+        "shared_with": "SM_MineGemPocketSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineGemPocketSpent_LOD1.fbx",
+      "sha256": "71b9d85807e2b0f63d51aaa8aef27f90bcb03a5b5eb835eea83f178348b60a1b",
+      "preview": "preview_SM_MineGemPocketSpent_LOD1.png"
+    },
+    "SM_MineGemPocketSpent_LOD2": {
+      "vertices": 14780,
+      "triangles": 29066,
+      "size_cm": [
+        125.41,
+        223.12,
+        201.69
+      ],
+      "materials": [
+        {
+          "name": "M_MineGemPocketSpent",
+          "textures": {
+            "basecolor": "T_MineGemPocketSpent_basecolor.png",
+            "roughness": "T_MineGemPocketSpent_roughness.png",
+            "normal": "T_MineGemPocketSpent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineGemPocketSpent_basecolor.png",
+          "roughness": "T_MineGemPocketSpent_roughness.png",
+          "normal": "T_MineGemPocketSpent_normal.png",
+          "ao": "T_MineGemPocketSpent_ao.png"
+        },
+        "shared_with": "SM_MineGemPocketSpent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineGemPocketSpent_LOD2.fbx",
+      "sha256": "659e57209504990a7f03fd5db3ab9df222642aa5f8630b866299c1bd28a1acff",
+      "preview": "preview_SM_MineGemPocketSpent_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "pivot": "Node socket on the floor; +X faces into the gallery (place with the socket's yaw).",
+  "extent_m": {
+    "x": [
+      -0.75,
+      0.35
+    ],
+    "y": [
+      -1.0,
+      1.0
+    ],
+    "z": [
+      -0.06,
+      1.9
+    ]
+  },
+  "textures": {
+    "T_MineRockFace_basecolor.png": "72e960940ec0e22e7e79ba40b316d292cac0287914be1ad46c188f9a9e1b1eb5",
+    "T_MineRockFace_roughness.png": "0f35612c2789744bd13b99ea530dfdea8015a5e7c71e1debddbb75d72da20e3c",
+    "T_MineRockFace_normal.png": "7887be7d93b933f6b0687a84155cb1044f69ab1e031e45e6725f94171ad0c82d",
+    "T_MineRockFaceSpent_basecolor.png": "6e16a77e5b9314de69af97a832e9b0c516557ce5273c0e3b6c61a2ea8235e501",
+    "T_MineRockFaceSpent_roughness.png": "adb33a60ac7681009ad724f5c0589cf6cc0fac0b2b9186b3676ad41e4398f75d",
+    "T_MineRockFaceSpent_normal.png": "199c771c38178d5a0a1134938d37f4350214e3f30f7ddbf42ff93e9762a69aec",
+    "T_MineCoalSeam_basecolor.png": "0cfd29585463c69c7262d23c053b32c73cd24b956ac96a01944a0b9cf4595157",
+    "T_MineCoalSeam_roughness.png": "33949e1382c374f1825657e16dd700c7b9d9d82b6880418c29f2c494a9e3affd",
+    "T_MineCoalSeam_normal.png": "925a5baea92193c2a4c42c6fae45ac9dfa0462b713b10bccd42c3179fb532ab7",
+    "T_MineCoalSeamSpent_basecolor.png": "88463b2c6425f0efa02e41552980b98f27141d4aed2af5f07542eaedfcb2d85f",
+    "T_MineCoalSeamSpent_roughness.png": "1da4854f228c2d34d0e6d21033bac3a693695b9d65d4df221e37dd7d03841971",
+    "T_MineCoalSeamSpent_normal.png": "75b8a0431afb1a5c18a190d37a3c29c0d5e24df370d67fc9aeda6dce6036dcd2",
+    "T_MineCopperVein_basecolor.png": "802bdb4d1d3013092c5f6c2394b19b88d8f648cff4b0059edc0414fcad1d2ed3",
+    "T_MineCopperVein_roughness.png": "eaa0173e56d4fa585f40d0d23e6252c40838f3eaa8dcfd69a3aa92b5ed3fbb6a",
+    "T_MineCopperVein_normal.png": "d2e814c569fd4072ec72b89df94b3e2861b817ebe0e365cb3e1e00d821e9d85f",
+    "T_MineCopperVeinSpent_basecolor.png": "bf1ad3144e6f555aca8c411bce1461ccc3c1581af6a532d04bf95deb53c3d1b7",
+    "T_MineCopperVeinSpent_roughness.png": "150312ef8c9fc68e14fb957987f4888519ac5edb074170c10e342352ce718e31",
+    "T_MineCopperVeinSpent_normal.png": "ed691373e0eae3f4d99863c60e7e10990520daec9e33be7a794c919885b63afa",
+    "T_MineGemPocket_basecolor.png": "5073e2215493323e21b2bd46a36c3b067a685c03a82194581cd306ccb5908d1f",
+    "T_MineGemPocket_roughness.png": "4a65b8404523658c9e1d50289a9a5f6fd5d391d5081250f994abe6222f7279c0",
+    "T_MineGemPocket_normal.png": "0c7c4deb06027ccc8d144cdac12832854a6114495b85b320b5920563ee344079",
+    "T_MineGemPocketSpent_basecolor.png": "3cd68ca0396bfae1aab7e1fc28ca2ff0991eb83bf6ab3cfa1c2e8b6d539fafb7",
+    "T_MineGemPocketSpent_roughness.png": "acdbbf5a38fd448d2085589b5a64c5a6262c4a3c36391960c80fb6204f0ed212",
+    "T_MineGemPocketSpent_normal.png": "0a62adc783455fa51863494dec54224a70d08197876005940f318a2a4847115d"
+  }
+}

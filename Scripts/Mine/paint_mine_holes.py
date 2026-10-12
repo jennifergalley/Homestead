@@ -24,7 +24,7 @@ importlib.reload(L)
 
 HALF = 2016                 # landscape vertex index = world metres + HALF (EstateHeightfield.r16)
 QUADS = 2                   # quads holed on each side of the opening's centre vertex (4 x 4 m under the boards)
-RING = 4                    # the paint rectangle reaches this far round it (cleared, then painted)
+RING = 6                    # the paint rectangle reaches this far round it (cleared, then painted)
 
 
 def main(dry_run=False):
@@ -40,7 +40,16 @@ def main(dry_run=False):
     if result.startswith("error"):
         raise RuntimeError(result)
     if not dry_run:
-        unreal.EditorLoadingAndSavingUtils.save_dirty_packages(True, True)
+        # Save only the landscape proxies over the hole (a blanket save would also save unrelated dirty actors).
+        x, y = cx * 100.0, cy * 100.0
+        proxies = []
+        for actor in unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors():
+            if isinstance(actor, unreal.LandscapeStreamingProxy):
+                origin, extent = actor.get_actor_bounds(False)
+                if abs(origin.x - x) < extent.x + 600 and abs(origin.y - y) < extent.y + 600:
+                    proxies.append(actor.get_outermost())
+        unreal.EditorLoadingAndSavingUtils.save_packages(proxies, False)
+        print("mine landscape holes: saved", [p.get_name() for p in proxies])
 
 
 main()
