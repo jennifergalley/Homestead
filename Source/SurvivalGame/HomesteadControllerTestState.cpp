@@ -6,6 +6,7 @@
 #include "HomesteadController.h"
 #include "HomesteadPlaytestSupport.h"
 #include "Simulation/HomesteadEstate.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadRain.h"
 #include "Simulation/HomesteadShops.h"
@@ -140,6 +141,11 @@ FString AHomesteadController::BuildTestStateJson(int32 NearbyCount, float Radius
     Position->SetNumberField(TEXT("x"), Here.x);
     Position->SetNumberField(TEXT("y"), Here.y);
     Position->SetNumberField(TEXT("facingYaw"), FMath::UnwindDegrees(FacingYaw));
+    const double HereZ = GetPawn() ? GetPawn()->GetActorLocation().Z : 0.0;
+    const bool bHereUnderground = IsUnderground();
+    Position->SetNumberField(TEXT("z"), FMath::RoundToInt(HereZ));
+    Position->SetBoolField(TEXT("underground"), bHereUnderground);
+    Position->SetStringField(TEXT("level"), bHereUnderground ? TEXT("underground") : TEXT("surface"));
     Position->SetBoolField(TEXT("sheltered"), Sim.IsSheltered(Here));
     Position->SetBoolField(TEXT("nearFire"), Sim.IsNearFire(Here));
     Position->SetBoolField(TEXT("nearWater"), Sim.NearWater(Here));
@@ -156,6 +162,7 @@ FString AHomesteadController::BuildTestStateJson(int32 NearbyCount, float Radius
     }
     Position->SetBoolField(TEXT("worldReady"), IsWorldReady());
     Position->SetBoolField(TEXT("groundSnapPending"), bPendingGroundSnap);
+    if (bPendingGroundSnap) Position->SetNumberField(TEXT("groundSnapPendingSeconds"), FMath::RoundToInt(FPlatformTime::Seconds() - GroundSnapStartedAt));
     Root->SetObjectField(TEXT("position"), Position);
 
     // What she is facing.
@@ -167,9 +174,18 @@ FString AHomesteadController::BuildTestStateJson(int32 NearbyCount, float Radius
     // Interactables around her, nearest first.
     TArray<TestState::FNearby> Nearby;
     const double Radius = FMath::Max(100.0, static_cast<double>(RadiusCm));
-    const auto Add = [&](const TCHAR* Kind, int32 Id, const FString& Name, double X, double Y, const FString& Note)
+    // Distances are 2D on one level. Across levels (she is on the yard, the node is in the tunnel below) the height
+    // counts, so a tunnel face does not read "2 m away" from the surface above it; mine nodes carry their own z.
+    const auto Add = [&](const TCHAR* Kind, int32 Id, const FString& Name, double X, double Y, const FString& Note,
+        const Homestead::Mine::Node* MineNode = nullptr)
     {
-        const double Distance = FVector2D::Distance(FVector2D(X, Y), FVector2D(Here.x, Here.y));
+        double Distance = FVector2D::Distance(FVector2D(X, Y), FVector2D(Here.x, Here.y));
+        const bool bTargetUnderground = MineNode != nullptr;
+        if (bTargetUnderground != bHereUnderground)
+        {
+            const double TargetZ = MineNode ? MineNode->z : static_cast<double>(GroundHeight(static_cast<float>(X), static_cast<float>(Y)));
+            Distance = FMath::Sqrt(Distance * Distance + FMath::Square(TargetZ - HereZ));
+        }
         if (Distance > Radius) return;
         TestState::FNearby Entry;
         Entry.Distance = Distance;
@@ -178,6 +194,7 @@ FString AHomesteadController::BuildTestStateJson(int32 NearbyCount, float Radius
         Entry.Object->SetNumberField(TEXT("id"), Id);
         Entry.Object->SetStringField(TEXT("name"), Name);
         Entry.Object->SetNumberField(TEXT("distanceCm"), FMath::RoundToInt(Distance));
+        Entry.Object->SetStringField(TEXT("level"), bTargetUnderground ? TEXT("underground") : TEXT("surface"));
         Entry.Object->SetNumberField(TEXT("bearingDeg"), FMath::RoundToInt(TestState::BearingFrom(Here.x, Here.y, X, Y, FacingYaw)));
         Entry.Object->SetNumberField(TEXT("x"), FMath::RoundToInt(X));
         Entry.Object->SetNumberField(TEXT("y"), FMath::RoundToInt(Y));
@@ -186,7 +203,8 @@ FString AHomesteadController::BuildTestStateJson(int32 NearbyCount, float Radius
     };
     for (const Homestead::ResourceNode& Node : Now.resources)
         if (!Node.cleared) Add(TEXT("resource"), Node.id, ToText(Homestead::ResourceName(Node.kind)), Node.position.x, Node.position.y,
-            Node.minTier != Homestead::ToolTier::Worn ? FString::Printf(TEXT("needs %s tool"), *ToText(Homestead::ToolTierName(Node.minTier))) : FString());
+            Node.minTier != Homestead::ToolTier::Worn ? FString::Printf(TEXT("needs %s tool"), *ToText(Homestead::ToolTierName(Node.minTier))) : FString(),
+            Homestead::Mine::FindNode(Node.id));
     for (const Homestead::Structure& Structure : Now.structures)
     {
         const Homestead::Point Centre = Homestead::StructureCenter(Now, Structure);

@@ -487,12 +487,17 @@ private:
     int32 TestShopId = INDEX_NONE;
     void FinishTestShop();
     // Agent test tools (HomesteadControllerTest*.cpp, .github\skills\homestead-test-tools): teleport to
-    // X,Y with HomesteadTeleport, wait for the ground snap to settle, face her `Facing`, then run `Then`.
-    // False (and logged under `Tag`) when the teleport could not start.
-    bool BeginTestTeleport(double X, double Y, const FRotator& Facing, const TCHAR* Tag, TFunction<void()> Then);
+    // X,Y with HomesteadTeleport (at height `Z` for an underground spot, else on the terrain), wait for the ground
+    // snap to settle, face her `Facing`, then run `Then`. If she did not end up at X,Y (the snap timed out or was
+    // abandoned) `Failed` runs instead. False (and logged under `Tag`) when the teleport could not start.
+    bool BeginTestTeleport(double X, double Y, const FRotator& Facing, const TCHAR* Tag, TFunction<void()> Then,
+        TFunction<void()> Failed = nullptr, double Z = -1000000.0);
     FTimerHandle TestTeleportTimer;
-    // Resolves a Goto target (landmark, id or kind name) to where she should stand and face.
-    bool ResolveTestTarget(const FString& Target, double& StandX, double& StandY, FRotator& Facing, FString& Described) const;
+    // Resolves a Goto target (landmark, id or kind name) to where she should stand and face; StandZ is the
+    // underground floor height for a mine target and -1000000 (the terrain) otherwise.
+    bool ResolveTestTarget(const FString& Target, double& StandX, double& StandY, double& StandZ, FRotator& Facing, FString& Described) const;
+    // Rejects a test action while a ground snap is pending, and says so in the log (not only as a toast).
+    bool RejectTestWhileSnapping(const TCHAR* Tag);
     // HomesteadUse: log what the swing or press did once its animation has had time to land.
     FTimerHandle TestUseTimer;
     FTimerHandle TestOutcomeTimer;
