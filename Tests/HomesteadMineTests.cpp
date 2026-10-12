@@ -457,7 +457,7 @@ void MiningRefusesAFaceBeyondTheSetDownLamp()
     // Lit, but the face is outside its light.
     CHECK(sim.IsLampLit());
     const auto dark = sim.CheckMine(rock, Item::Pickaxe, At(rock), ZOf(rock));
-    CHECK(!dark.ok && dark.message == "Too dark - bring the lamp closer.");
+    CHECK(!dark.ok && dark.message == "Too dark \xE2\x80\x93 bring the lamp closer.");
     const int stone = sim.Count(Item::Stone);
     CHECK(!Swing(sim, rock).ok && sim.Count(Item::Stone) == stone);
 }
