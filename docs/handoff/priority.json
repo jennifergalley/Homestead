@@ -21,16 +21,13 @@
     "backlog:jenny-muucngve-dfc8a4",
     "backlog:jenny-muucnguw-nc2d6p",
     "backlog:jenny-muucngtd-ksulr2",
-    "backlog:jenny-mutdvi4f-5daxbq",
     "backlog:jenny-mutde36c-gtsw0n",
-    "backlog:jenny-mut6zr63-iu7hm9",
     "add-swimming",
     "backlog:jenny-mus200q1-469jig",
     "backlog:jenny-mus200pa-iiju4e",
     "fit-rucksack-straps",
     "reduce-foliage-shadow-motion",
     "restore-mine-pumping-and-deep-levels",
-    "open-estate-mine-shallow-level",
     "add-watermill-and-artisan-goods",
     "add-ranching-and-livestock",
     "add-horse-and-wagon",
@@ -53,17 +50,13 @@
     "backlog:jenny-mv3q32oa-bchhld"
   ],
   "slots": {
-    "backlog:jenny-mv1jsi38-balcu1": "after-next",
-    "backlog:jenny-muw5uae9-2zgp1v": "after-next",
-    "backlog:jenny-muuec1p1-u804w0": "after-next",
-    "backlog:jenny-mutdvi4f-5daxbq": "next",
-    "backlog:jenny-mut6zr63-iu7hm9": "next",
-    "backlog:jenny-mutde36c-gtsw0n": "after-next",
-    "open-estate-mine-shallow-level": "next",
-    "backlog:jenny-mv1jukpf-balow1": "after-next",
-    "backlog:jenny-mv48a218-e7wpr0": "after-next",
-    "backlog:jenny-mv455cm5-u3ccq9": "next",
-    "backlog:jenny-mv448c92-isp8wm": "after-next"
+    "backlog:jenny-mv1jsi38-balcu1": "next",
+    "backlog:jenny-muw5uae9-2zgp1v": "next",
+    "backlog:jenny-muuec1p1-u804w0": "next",
+    "backlog:jenny-mutde36c-gtsw0n": "next",
+    "backlog:jenny-mv1jukpf-balow1": "next",
+    "backlog:jenny-mv48a218-e7wpr0": "next",
+    "backlog:jenny-mv448c92-isp8wm": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -168,7 +161,11 @@
     "backlog:jenny-muucngud-3xpzgt",
     "backlog:jenny-mv4iq00t-us4ndm",
     "backlog:jenny-mv4iq039-r54jz6",
-    "backlog:jenny-mv4iq03w-159yjt"
+    "backlog:jenny-mv4iq03w-159yjt",
+    "backlog:jenny-mutdvi4f-5daxbq",
+    "backlog:jenny-mut6zr63-iu7hm9",
+    "open-estate-mine-shallow-level",
+    "backlog:jenny-mv455cm5-u3ccq9"
   ],
-  "updated": "2026-10-12T05:34:41.653Z"
+  "updated": "2026-10-12T06:10:00.000Z"
 }

@@ -1,0 +1,67 @@
+{
+  "buildId": "20261011-next-01",
+  "authorizedAt": "2026-10-11T20:14:00Z",
+  "allocationPolicy": "Covers the interim mine-only build (Jenny narrowed Next to the mine alone; other unstarted Next cards moved to Build after next on main at 2e3e2c111). Segments: Mine Art, Mine Gameplay, Integration (merge/build/test/package/promote/closure), Orchestrator (lane split, overnight approval routing, delivery-closure corrections). Excludes 20261010-next-02 and earlier builds' work by the long-running Integration session, bounded out by the authorizedAt floor below.",
+  "limits": [
+    "authorizedAt is a single global floor applied across every session in this allocation; per-segment since values are evidence, not independent filters. It is set at Mine Art/Mine Gameplay session creation (2026-10-11T20:14:09Z, just after the Orchestrator's own creation at 19:43:41Z) and is safely after the prior build's report generatedAt (20261010-next-02.json: 2026-10-11T17:36:04.851Z), so no event countable in that report can recur here.",
+    "The Integration segment's sessionId (09ae4063-4f60-475e-bb88-7c6d6a7bbc7c) is a long-running session spanning multiple builds; its since floor excludes all round-4/20261010-next-02 work already reported separately.",
+    "The Orchestrator session (fc0ce9e2-4586-4dec-8f40-6561960819c3) is included as a segment, following the accepted precedent in 20261010-next-02-allocation.json's actual segments array (an orchestration-category segment was billed there despite that same file's limits text asserting orchestrator work is 'not billed as a segment here'). No policy document anywhere in docs supports excluding it; this allocation treats the precedent's actual practice, not its contradictory prose, as the real rule.",
+    "Recorded nano-AIU is not billing-reconciled AI credits.",
+    "Some calls have no recorded reasoning effort; preserve unknown in the export, not an inferred high value.",
+    "Model/reasoningEffort fields below reflect each session's dominant/standing configuration; actual per-call model and effort are preserved in the exported usage records, not overwritten by this label."
+  ],
+  "segments": [
+    {
+      "sessionId": "029d7c8b-39a6-4be0-8c9a-ff230c5aef11",
+      "projectSessionId": "029d7c8b-39a6-4be0-8c9a-ff230c5aef11",
+      "task": "mine-build",
+      "tasks": ["mine-build"],
+      "category": "implementation",
+      "since": "2026-10-11T20:14:00Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Mine Art Agent session (branch jennifergalley-mine-art-agent): mine house, tunnel kit + shallow level, layout .inc with 33 nodes, landscape regrade/paint/holes, scenery and tree clearing; touched landscape proxies 1/EB/K26WDRX6D50OZA024R2QUG and 2/UN/LK8IPKTGYLEIVJKRL2E1C3, EstateHeightfield.r16, Estate_Heightmap_4033.png, EstateScenery.bin, EstateGround.bin, T_EstateGround/Canopy; MineEntrance z 5600; retired 14 ids (585020, 585027, 584001/002/016/024/070/117/135/141/142/154/155/163). [ready] at 1d9c16bf2; Balance OK (incl. the granite-colour condition, satisfied with HighresScreenshot00017.png); approved for Jenny by the Orchestrator overnight; merged cleanly into integration-batch as 063058d72."
+    },
+    {
+      "sessionId": "d3cc45c6-7209-44d9-9069-1f3e6a242412",
+      "projectSessionId": "d3cc45c6-7209-44d9-9069-1f3e6a242412",
+      "task": "mine-build",
+      "tasks": ["mine-build"],
+      "category": "implementation",
+      "since": "2026-10-11T20:14:00Z",
+      "model": "claude-sonnet-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Mine Gameplay Agent session (branch jennifergalley-mine-gameplay-agent, includes Test Tools' 4 mine-aware goto commits): mine sim/items/nodes/refill/store, trapdoor+ladder, darkness 0.1, light-at-face, random gems, signs, grass squares, foot-IK kerb fix; new placements 588000-588199; no SimulationSaveVersion change. [ready] at d26cccaae; Balance OK; Jenny approved signage and darkness; native 29/29; merged into integration-batch as ff66d1502 (3 text conflicts resolved, kept this lane's docs/openspec)."
+    },
+    {
+      "sessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
+      "projectSessionId": "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c",
+      "task": "integration-mine-build",
+      "tasks": ["integration-mine-build"],
+      "category": "integration",
+      "since": "2026-10-11T20:14:00Z",
+      "model": "claude-sonnet-5",
+      "reasoningEffort": "medium",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Integration Agent session (reserved editor slot). Merged Mine Art 1d9c16bf2 -> 063058d72 and Mine Gameplay d26cccaae -> ff66d1502 into integration-batch; verified all [ready] claims (save version, MineEntrance z, retired ids, placement-range allow-list); editor build + native 29/29; full PIE verification incl. descent (trapdoor/ladder both directions), mining loop, darkness gate, and the Balance granite-colour screenshot; packaged Development, found/fixed/committed a genuine Nanite usage-flag bug on MI_OilLampGlass's base material M_Field (place_mine.py overrides MineHouseGlass to this material at runtime) as 6c68440ee, repackaged clean; EstateSmoke/ToolRepeat/F5F9 all passed against both the worktree package and the installed copy; merged integration-batch into the main checkout's main as 6c7b1f8e6; installed to E:\\Repos\\SurvivalGame\\Build\\Windows with saves/config preserved (55/55 hash match, isolation and F5/F9-against-installed-copy proofs passed); pushed to origin/main; full delivery closure (builds.md card, this accounting report, shipped-card removal, Build after next -> Next promotion, skill field note)."
+    },
+    {
+      "sessionId": "fc0ce9e2-4586-4dec-8f40-6561960819c3",
+      "projectSessionId": "fc0ce9e2-4586-4dec-8f40-6561960819c3",
+      "task": "integration-mine-build",
+      "tasks": ["integration-mine-build"],
+      "category": "orchestration",
+      "since": "2026-10-11T20:14:00Z",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "Orchestrator Agent: relayed Jenny's overnight delegation and scope-narrowing to mine-only (other Next cards moved to Build after next), forwarded [ready]s for Mine Art and Mine Gameplay with merge notes, OK'd Balance's granite-colour condition, and received this build's closure."
+    }
+  ]
+}

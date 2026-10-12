@@ -7,6 +7,59 @@ Delivery is work-driven: the planner's Next build ships as soon as its admitted 
 reviewed, then Build after next moves up. Lanes implement only what Jenny has prioritized for a planner
 slot, then go idle; they do not pick up unflagged queue items.
 
+## 2026-10-12 — 1:58 AM
+
+- Build ID: `20261011-next-01`
+- Package source SHA: `6c7b1f8e6136afe7670341deda5384e2ee2d5e35`
+- Status: delivered
+- Configuration: Development
+- Ships:
+- Existing saves load in this build.
+- A mine house and shallow tunnel level open off the estate, reached through a trapdoor and ladder down a dark shaft.
+- Mining with the pickaxe yields random gems and ore; nodes refill over time and sell at the store.
+- The tunnels are dark except right at her face, with signs marking the way and grass squares clearing out near the entrance.
+- Foot placement on uneven mine floors no longer kerbs her toes through the ground.
+- Admitted: Mine Art `1d9c16bf2`, Mine Gameplay `d26cccaae` (includes Test Tools' 4 mine-aware
+  `goto` commits), plus the already-merged Test Tools agent tooling (`f86eb6d9b`, agent test
+  tooling only, no gameplay/save change).
+- Verification: editor module and game target rebuilt; native suite 29/29 passed post-merge. Full
+  PIE pass covered the trapdoor/ladder descent in both directions (open trapdoor shows a dark
+  shaft, not a closed lid, per the Orchestrator's gate), the mining swing/yield/depletion loop,
+  the darkness gate and light-at-face, the pickaxe prompt, and the Balance-required exterior
+  mine-house daylight capture (`Saved\Screenshots\WindowsEditor\HighresScreenshot00017.png` —
+  natural grey granite, not olive). Packaging found and fixed one genuine bug: the first package
+  logged `Material .../MI_OilLampGlass missing usage flag Nanite! Default Material will be used in
+  game` — `Scripts\Mine\place_mine.py` overrides the Nanite-enabled `MineHouseGlass` mesh's
+  material to `MI_OilLampGlass`, whose base `M_Field` lacked the Nanite usage flag. Fixed by
+  setting `used_with_nanite = True` on `M_Field` (commit `6c68440ee5dacd1863ecb9a386e87b1681027402`),
+  repackaged clean (zero missing-usage-flag matches). Packaged `EstateSmoke`, `ToolRepeat` and the
+  F5/F9 save-proof (`Test-Game.ps1 -Packaged -NativeSaveRetry`) all passed against both the
+  worktree-staged package and the installed copy. Installed-copy save isolation independently
+  confirmed: `Assert-ReleaseSaveIsolation.ps1` passed, and a before/after SHA-256 diff of all 9 of
+  Jenny's real save files showed 0 changes. File-hash integrity check of the install against the
+  verified package: 55/55 files byte-identical. `SimulationSaveVersion` unchanged at 13;
+  `MineEntrance` anchor z=5600 confirmed; all 14 retired ids (585020, 585027, 584001/002/016/024/
+  070/117/135/141/142/154/155/163) present in the retired list; new placements 588000-588199
+  admitted into the Manor/Simulation tests' id-range allow-lists.
+- Promotion: merged `integration-batch` onto the main checkout's `main` as `6c7b1f8e6` (clean, no
+  conflicts) and pushed to `origin/main` (`b18a235a3..6c7b1f8e6`). Installed into
+  `E:\Repos\SurvivalGame\Build\Windows` (Jenny's saves/config preserved and restored).
+  `Homestead Estate.lnk` already pointed at the correct exe — no change needed. Current + one
+  rollback retained under the main checkout's `Build\` (`Windows`, `Windows-20261010-morning`); no
+  pruning needed.
+- Review: Balance OK'd Mine Art (`1d9c16bf2`) and Mine Gameplay (`d26cccaae`), including signage
+  and darkness, conditional on the exterior mine-house daylight capture above (satisfied).
+  Orchestrator approved both lanes for Jenny overnight.
+- Known issues:
+- FullLoop still fails on the Woodland positional-map route (not player-facing; Estate-only play);
+  tracked as an OpenSpec change. The real save/load gate (F5/F9) passed via `-NativeSaveRetry` as above.
+- About 107 scattered stale landscape seam vertices survive the perturbed-then-real r16 reapply
+  from the prior build (first-pass art; carried forward, not introduced by this build).
+- Cove walk is about 80 s one-way; village walk is about 90 s one-way, pending Jenny's card.
+- Cave and beach dressing remain first-pass art (carried forward from the prior build).
+- Accounting: `docs\handoff\accounting\reports\20261011-next-01.json` (pending; real
+  `assistant_usage_events` data required, no estimated figures).
+
 ## 2026-10-11 — 8:52 AM
 
 - Build ID: `20261010-next-02`
