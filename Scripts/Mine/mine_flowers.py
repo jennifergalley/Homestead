@@ -27,6 +27,7 @@ RED_CAMPION, FOXGLOVE, COW_PARSLEY, PRIMROSE = 46, 47, 48, 43
 FLOWER_SCALE = {43: 1.8, 46: 1.35, 47: 1.15, 48: 1.3}       # lake_path_plants.FLOWER_SCALE
 WALL_FOOT_M = (0.2, 0.9)       # out from the wall face
 WALL_SPECIES = [(FOXGLOVE, 0.45), (RED_CAMPION, 0.4), (COW_PARSLEY, 0.15)]
+DOOR_SIZE = 1.4               # the door drifts' scale over FLOWER_SCALE
 DOOR_CLEAR_M = 1.0             # half-width kept clear in front of the door (door 1.5 m wide)
 PATH_TAIL_M = 28.0             # verges planted along this much of the path before the door
 PATH_VERGE_M = (0.9, 2.2)      # either side of the path's centreline
@@ -38,10 +39,10 @@ def pick(rng, species):
     return int(rng.choice(kinds, p=np.array(weights) / sum(weights)))
 
 
-def drift(rng, out, kind, cx, cy, n, spread):
+def drift(rng, out, kind, cx, cy, n, spread, size=1.0):
     for _ in range(n):
         out.append((kind, cx + rng.normal(0, spread), cy + rng.normal(0, spread), rng.uniform(0, 360),
-                    FLOWER_SCALE[kind] * rng.uniform(0.85, 1.15)))
+                    FLOWER_SCALE[kind] * size * rng.uniform(0.85, 1.15)))
 
 
 def plant(rng):
@@ -61,10 +62,10 @@ def plant(rng):
                 drift(rng, out, pick(rng, WALL_SPECIES), hx + px + nx * off, hy + py + ny * off,
                       int(rng.integers(2, 5)), 0.18)
             t += rng.uniform(0.9, 2.2)
-    # By the door: a drift either side.
+    # By the door: a drift either side, a size up so they read from the path (Balance, 2026-10-11).
     for s in (-1, 1):
-        drift(rng, out, FOXGLOVE, hx + ax + 0.5, hy + s * (DOOR_CLEAR_M + 0.5), 4, 0.2)
-        drift(rng, out, RED_CAMPION, hx + ax + 1.3, hy + s * (DOOR_CLEAR_M + 0.9), 3, 0.25)
+        drift(rng, out, FOXGLOVE, hx + ax + 0.5, hy + s * (DOOR_CLEAR_M + 0.5), 4, 0.2, DOOR_SIZE)
+        drift(rng, out, RED_CAMPION, hx + ax + 1.3, hy + s * (DOOR_CLEAR_M + 0.9), 3, 0.25, DOOR_SIZE)
     # The path's last stretch: verge drifts on both sides.
     path = np.asarray(next(f["points"] for f in json.loads(LAYOUT.read_text())["footpaths"] if f["name"] == "Mine"))
     seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1))]
