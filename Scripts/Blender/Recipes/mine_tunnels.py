@@ -60,7 +60,8 @@ def facets(p):
     edge = rocks.smoothstep(0.0, 0.06, (f2 - f1) * 0.5)          # a narrow broken step between cells
     depth = depth * (0.55 + 0.45 * edge)
     up = rocks.smoothstep(0.02, FLOOR_KEEP, p[:, 2])
-    return np.clip(depth, 0.0, FACET_DEPTH * 1.2) * up
+    flat, _ = tunnels.node_flat_weight(p)            # dressed flat behind the nodes (no facets there)
+    return np.clip(depth, 0.0, FACET_DEPTH * 1.2) * up * (1.0 - flat)
 
 
 def air():

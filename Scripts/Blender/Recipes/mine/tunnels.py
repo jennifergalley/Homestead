@@ -110,6 +110,37 @@ def set_roofs():
     return out
 
 
+# Jenny (lamp review): "the ore veins look like squares set into the stone, so they're distinguishable by their
+# edges. Please make them more flush with the surrounding stone." The gallery wall is dressed flat behind each node
+# socket (the wall line NODE_PROUD behind it) and its blast facets fade out there, so a node's face, a few cm
+# proud at its middle and feathered behind that plane at its edges, meets the wall with no step.
+NODE_FLAT = {"half_along": 1.0, "half_up": 1.05, "centre_z": 0.95, "blend": 0.45, "reach": 0.6}
+
+
+def node_flat_weight(p):
+    """0..1: how much the wall at p is dressed to a node's back plane; also returns that plane's signed distance."""
+    w = np.zeros(len(p))
+    plane = np.zeros(len(p))
+    f = NODE_FLAT
+    for _, _, (x, y), _, (nx, ny) in L.node_sockets():
+        n = np.array([nx, ny])
+        wall = np.array([x, y]) - n * L.NODE_PROUD
+        rel = p[:, :2] - wall
+        out = rel @ n                                  # metres in front of the wall plane (into the gallery)
+        along = rel @ np.array([-n[1], n[0]])
+        rr = np.sqrt((along / f["half_along"]) ** 2 + ((p[:, 2] - f["centre_z"]) / f["half_up"]) ** 2)
+        k = (1.0 - _smooth(1.0, 1.0 + f["blend"], rr)) * (1.0 - _smooth(f["reach"] * 0.6, f["reach"], np.abs(out)))
+        take = k > w
+        w = np.where(take, k, w)
+        plane = np.where(take, -out, plane)
+    return w, plane
+
+
+def _smooth(e0, e1, x):
+    t = np.clip((x - e0) / (e1 - e0), 0.0, 1.0)
+    return t * t * (3 - 2 * t)
+
+
 def air(extra=None, blend=JUNCTION_BLEND):
     """The whole level's air. ``extra`` adds more upper-volume nodes (e.g. node recesses)."""
     upper = sdf.smooth_union(runs() + [chamber(), shaft()] + list(extra or []), blend)
@@ -128,6 +159,8 @@ def air(extra=None, blend=JUNCTION_BLEND):
                 ease = np.clip((s[near] - SET_HOLD) / SET_EASE, 0.0, 1.0)
                 lid = p[near, 2] - (roof + 1.6 * ease * ease * (3 - 2 * ease))
                 d[near] = np.maximum(d[near], lid)
+        w, plane = node_flat_weight(p)
+        d = d + (plane - d) * w
         return np.minimum(d, pit(p, band)).astype(np.float32)
     lo = np.minimum(upper.lo, pit.lo)
     hi = np.maximum(upper.hi, pit.hi)

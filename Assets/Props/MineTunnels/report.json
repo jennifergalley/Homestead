@@ -6,15 +6,15 @@
   "triangle_budget": 2600000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/mine_tunnels.py",
-  "source_sha256": "334d4a6117fe778e3d5fa1fbf8265ab92e4ddc746de54cbb7905c2cb068de459",
+  "source_sha256": "fb062f0b5965867ad1be33c4bceb7018fea050ae0305a32e90e4e84abf94bb03",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_MineTunnels": {
-      "vertices": 1209489,
-      "triangles": 2418700,
+      "vertices": 1210585,
+      "triangles": 2420916,
       "size_cm": [
-        7871.19,
-        4768.68,
+        7867.49,
+        4749.63,
         1421.97
       ],
       "materials": [
@@ -61,14 +61,14 @@
         "eye_distance": 90.0
       },
       "fbx": "SM_MineTunnels.fbx",
-      "sha256": "a1e076654755de2c35b46ea9ca24492d29c7dbf02216ac5db4914148e3da65b5"
+      "sha256": "8f2a1cf62431bd897c5be72dce0da020920a864f40f4e9c747d9dcc549c73d82"
     },
     "SM_MineTunnels_LOD1": {
-      "vertices": 180118,
-      "triangles": 360000,
+      "vertices": 180110,
+      "triangles": 359998,
       "size_cm": [
-        7871.47,
-        4768.74,
+        7867.43,
+        4749.71,
         1421.75
       ],
       "materials": [
@@ -100,14 +100,14 @@
         "eye_distance": 90.0
       },
       "fbx": "SM_MineTunnels_LOD1.fbx",
-      "sha256": "9ec0e8122593f69f72d2a5fc953706ad7020b03fb71cd5337a6ef3af6d7cf90d"
+      "sha256": "22c904fdd711c941b8ce3829da190d13cab7b21cb012d83e0b3504bf48a10943"
     },
     "SM_MineTunnels_LOD2": {
-      "vertices": 55104,
+      "vertices": 55101,
       "triangles": 109999,
       "size_cm": [
-        7871.37,
-        4768.51,
+        7867.36,
+        4750.56,
         1421.08
       ],
       "materials": [
@@ -139,7 +139,7 @@
         "eye_distance": 90.0
       },
       "fbx": "SM_MineTunnels_LOD2.fbx",
-      "sha256": "0e7ae3a92b0e7c210b5e525f1a11fa85c166fe0d03d8651ba608f85d835ee00a"
+      "sha256": "9cf295a3b9a51bd074f84d526bdc02f9d5b9c4089c503a93a94daf7b56d371ef"
     }
   },
   "warnings": [],
@@ -157,11 +157,11 @@
   "nanite": true,
   "pivot": "Tunnel frame origin: the floor under the trapdoor's centre; place at layout.tunnel_world(), yaw 0.",
   "textures": {
-    "T_MineTunnels_basecolor.png": "72a0579f23274dc4f7b1aed2b8b367a0115b21711a3aa703bbdabae7b8e2a8f8",
-    "T_MineTunnels_roughness.png": "4afac62d518fbc302d7b52789f2ff1f39c2ad20db14594a50482c62ee309aee4",
-    "T_MineTunnels_normal.png": "521db45bd78e2d78fec62360a9e129f8805ccbfd80f2c515fbc32af58425984e",
+    "T_MineTunnels_basecolor.png": "0c58cfe6154be6484a39d4a0a6fb7c70e72027b5cfa3795bad590d2b2e4ab00f",
+    "T_MineTunnels_roughness.png": "2359d911c784815f7d5df1cae62bb0a50f11393cb58575b88872e1238927bd4f",
+    "T_MineTunnels_normal.png": "68fbdf3a42c0cb3870c667f26d9662938e1193b0e4efa9c7a1ea68505d18d244",
     "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
-    "T_MineTunnels_mask.png": "b7b1db51ae1d95d923f0745b2b0213ba19f696a4ca716bb1255e7d7db2838802",
+    "T_MineTunnels_mask.png": "cf8ac9921b968f0ab912a09dc28b4c1b25da3e95f06b29cdb2b20d4ec1e48d44",
     "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
     "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
   }

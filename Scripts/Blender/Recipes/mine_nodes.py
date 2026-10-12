@@ -195,27 +195,51 @@ ZC, HZ = 0.95, 0.98          # the face's centre height and half height
 SLOT_ROCK, SLOT_ORE, SLOT_HALO = 0, 1, 2
 
 
-def face(seed, proud=0.07, cell=0.3, depth=0.07):
-    """A worked patch of the wall: proud at the middle, sunk behind the wall line at the edges, broken into
-    quarried facets (Voronoi cells knocked back) with a little rock relief."""
+def face(seed, proud=0.06, cell=0.3, depth=0.025):
+    """A worked patch of the wall, flush with it (Jenny: the veins "look like squares set into the stone ...
+    make them more flush"): the tunnel is dressed flat behind each socket (mine/tunnels.py NODE_FLAT), and this
+    face stands at most ``proud`` in front of that plane at its middle, feathering behind it towards a round,
+    ragged edge, so the wall's own rock closes over the rim with no step. Quarried facets are knocked back into it."""
     front = WALL_X
     hx = (front - BACK_X) / 2
-    slab = sdf.box((front - hx, 0.0, ZC), (hx, HALF_W + 0.25, HZ + 0.2), rounding=0.02)
+    box = sdf.box((front - hx, 0.0, ZC), (hx, HALF_W + 0.25, HZ + 0.2), rounding=0.02)
+    # Round in outline (an elliptic cylinder along X): a box's corners poked out of the wall's facets beyond the
+    # dressed patch (Jenny: "corners of the original square are also still visible").
+    a, b = HALF_W + 0.15, HZ + 0.15
+
+    def round_dist(p):
+        return (np.sqrt((p[:, 1] / a) ** 2 + ((p[:, 2] - ZC) / b) ** 2) - 1.0) * min(a, b)
+    rim = sdf._primitive(round_dist, np.array([BACK_X - 0.1, -a, ZC - b]), np.array([front + 0.3, a, ZC + b]))
+    slab = sdf.intersect(box, rim, 0.04)
 
     def shape(p):
-        # A rounded, ragged outline (a squarish one read as a slab stuck on the wall).
-        e = ((np.abs(p[:, 1]) / HALF_W) ** 2.6 + (np.abs(p[:, 2] - ZC) / HZ) ** 2.6) ** (1 / 2.6)
-        e = e + 0.22 * sdf.fbm(p / 0.45, 3, seed=seed)
-        return proud * (1.0 - rocks.smoothstep(0.55, 1.0, e)) - 0.12 * rocks.smoothstep(0.9, 1.15, e) \
-            + 0.025 * sdf.fbm(p / 0.25, 3, seed=seed + 1)
-    shaped = sdf.displaced(slab, shape, proud + 0.16)
+        e = np.sqrt((p[:, 1] / HALF_W) ** 2 + ((p[:, 2] - ZC) / HZ) ** 2)
+        e = e + 0.18 * sdf.fbm(p / 0.45, 3, seed=seed)
+        return proud * (1.0 - rocks.smoothstep(0.55, 0.92, e)) - 0.28 * rocks.smoothstep(0.85, 1.08, e) \
+            + 0.012 * sdf.fbm(p / 0.25, 3, seed=seed + 1)
+    shaped = sdf.displaced(slab, shape, proud + 0.3)
     return fractured(shaped, cell=cell, depth=depth, seed=seed)
-
 
 def band_box(lo, hi, front=0.6, wave=0.0, seed=0):
     """A bed between lo and hi; ``wave`` (m) lets its edges pinch and swell like a real seam."""
     box = sdf.box(((front + BACK_X) / 2, 0.0, (lo + hi) / 2), ((front - BACK_X) / 2, HALF_W + 0.4, (hi - lo) / 2))
     return sdf.displaced(box, lambda q: wave * sdf.fbm(q / 0.35, 3, seed=seed), wave) if wave else box
+
+
+def seam_lens(lo, hi, seed, grow=0.0):
+    """A coal seam as it really lies: a bed that wanders up and down, swells and pinches, and thins out to
+    nothing towards the face's sides (a straight-edged band read as a black rectangle)."""
+    mid, half = (lo + hi) / 2, (hi - lo) / 2
+
+    def dist(p):
+        y = p[:, 1]
+        q = np.c_[np.zeros_like(y), y, np.zeros_like(y)]
+        centre = mid + 0.07 * sdf.fbm(q / 0.6 + seed, 2, seed=seed)
+        swell = 0.75 + 0.5 * (sdf.fbm(q / 0.35 + seed, 2, seed=seed + 1) * 0.5 + 0.5)
+        pinch = 1.0 - rocks.smoothstep(0.45, 0.95, np.abs(y) / HALF_W)
+        h = half * swell * pinch + grow
+        return np.abs(p[:, 2] - centre) - h
+    return sdf._primitive(dist, np.array([BACK_X - 0.1, -HALF_W - 0.4, lo - 0.3]), np.array([0.6, HALF_W + 0.4, hi + 0.3]))
 
 
 def dipping(centre_z, width, dip_deg, front=0.6, wave=0.0, seed=0):
@@ -267,25 +291,25 @@ def build(kit):
     out = []
 
     # Rock face: a quarried breast in big facets; spent: worked back flatter, finely pick-scarred, spalls at the foot.
-    out += mesh_regions(kit, "SM_MineRockFace", face(11, proud=0.09, cell=0.32, depth=0.09), [rock])
-    spent = sdf.union([face(12, proud=0.03, cell=0.13, depth=0.03)] + rubble(13, 10))
+    out += mesh_regions(kit, "SM_MineRockFace", face(11, proud=0.07, cell=0.32, depth=0.035), [rock])
+    spent = sdf.union([face(12, proud=0.035, cell=0.13, depth=0.015)] + rubble(13, 10))
     out += mesh_regions(kit, "SM_MineRockFaceSpent", spent, [rock])
 
     # Coal seam: a dark glossy band 0.4 m thick through the face, a little cleated; spent: the band cut out as a slot.
     lo, hi = 0.62, 1.02
-    seam = fractured(face(21, proud=0.08, cell=0.3, depth=0.06), cell=0.09, depth=0.015, seed=29)
-    out += mesh_regions(kit, "SM_MineCoalSeam", seam, [rock, coal], [(band_box(lo, hi, wave=0.06, seed=27), 0.0, SLOT_ORE)])
-    slot = sdf.subtract(face(22, proud=0.07, cell=0.3, depth=0.06), band_box(lo + 0.03, hi - 0.03, 0.6), 0.03)
-    slot = sdf.union([slot, sdf.box((WALL_X - 0.18, 0.0, (lo + hi) / 2), (0.05, HALF_W, (hi - lo) / 2))] + rubble(23, 7))
+    seam = fractured(face(21), cell=0.09, depth=0.015, seed=29)
+    out += mesh_regions(kit, "SM_MineCoalSeam", seam, [rock, coal], [(seam_lens(lo, hi, 27), 0.0, SLOT_ORE)])
+    slot = sdf.subtract(face(22), sdf.intersect(seam_lens(lo, hi, 28), sdf.box(((0.6 + WALL_X - 0.12) / 2, 0.0, (lo + hi) / 2), ((0.6 - WALL_X + 0.12) / 2, HALF_W + 0.4, 0.6))), 0.03)
+    slot = sdf.union([slot] + rubble(23, 7))
     out += mesh_regions(kit, "SM_MineCoalSeamSpent", slot, [rock, coal],
-                        [(band_box(lo - 0.02, hi + 0.02, wave=0.04, seed=28), 0.0, SLOT_ORE)])
+                        [(seam_lens(lo, hi, 28, grow=0.02), 0.0, SLOT_ORE)])
 
     # Copper vein: a steep streak 12 cm wide, green with malachite, with a fading stain either side;
     # spent: a groove cut along it, the stain left behind.
     vein, halo = dipping(0.9, 0.06, 68.0, wave=0.035, seed=35), dipping(0.9, 0.2, 68.0, wave=0.09, seed=36)
-    out += mesh_regions(kit, "SM_MineCopperVein", face(31, proud=0.08), [rock, copper, stain],
+    out += mesh_regions(kit, "SM_MineCopperVein", face(31), [rock, copper, stain],
                         [(halo, 0.0, SLOT_HALO), (vein, 0.0, SLOT_ORE)])
-    groove = sdf.subtract(face(32, proud=0.07), dipping(0.9, 0.08, 68.0, 0.6), 0.025)
+    groove = sdf.subtract(face(32), dipping(0.9, 0.08, 68.0, 0.6), 0.025)
     out += mesh_regions(kit, "SM_MineCopperVeinSpent", sdf.union([groove] + rubble(34, 6, size=(0.03, 0.07))),
                         [rock, copper, stain], [(halo, 0.0, SLOT_HALO), (dipping(0.9, 0.1, 68.0), 0.0, SLOT_ORE)])
 
