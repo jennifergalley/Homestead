@@ -822,6 +822,30 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T19:40:33.356Z"
+    },
+    {
+      "id": "jenny-mv4iq00t-us4ndm",
+      "title": "[Balance UI] Drop the per-swing mining toast",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §2 copy (mine review, 2026-10-11). \"2 more swings.\" on every swing is noise; show progress on the face itself if anything.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-12T00:32:53.405Z"
+    },
+    {
+      "id": "jenny-mv4iq039-r54jz6",
+      "title": "[Balance UI] Copper ore icon needs copper colour",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §3 icons (mine review, 2026-10-11). The icon reads as a pale grey lump; add green and copper streaks so it cannot be mistaken for stone or quartz.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-12T00:32:53.493Z"
+    },
+    {
+      "id": "jenny-mv4iq03w-159yjt",
+      "title": "[Balance UI] \"Bring the lamp closer\" refusal",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §2 copy (mine review, 2026-10-11). When a lit lamp is more than 4 m from the face, say \"Too dark – bring the lamp closer.\" instead of \"Too dark to work.\".",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-12T00:32:53.516Z"
     }
   ]
 }
