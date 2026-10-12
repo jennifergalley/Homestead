@@ -90,7 +90,7 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   faintly readable, the way out findable).
 - 2026-10-11: Mine Gameplay v3 shots: Balance OK on numbers, copy, the lamp rule and the daylight
   pool. On v3's darker surfaces 0.05 is pitch black; recommended 0.1 (it looks like the 0.05 Jenny
-  approved on v2), with the final call Jenny's via the Orchestrator.
+  approved on v2), with the final call Jenny's via the Orchestrator. Jenny chose 0.1.
 - 2026-10-11: Mine Art (029d7c8b) house look check: the engine-house form is OK (Jenny chose it for
   D5). Blocking: green cast on the stone outside and on the limewash inside, mortar smears and the
   bare apron, the 25-stone pile unreadable, flowers at the wall foot and path. Cards to send after
