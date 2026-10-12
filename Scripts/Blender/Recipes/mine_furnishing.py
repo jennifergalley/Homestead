@@ -33,6 +33,8 @@ COLLISION = "convex"
 TRIANGLE_BUDGET = 500000
 PROVENANCE = "Original project-authored procedural geometry and materials; no third-party asset or texture."
 BAKE = {"size": 2048, "samples": 48}
+# The lid and its collar take the floor's plank photoscan in Unreal over metric UVs (plank_uvs); no bake.
+BAKE_MESHES = {"SM_MineTrapdoorLid": False, "SM_MineTrapdoorCollar": False, "*": True}
 BEAUTY = {"pose": (0, 0, 0), "ground": "origin", "views": ["hero", "detail"],
           "meshes": {"SM_MineDesk": {"focus": (0.0, 0.0, 0.6), "eye_distance": 3.2},
                      "SM_MineChair": {"focus": (0.0, 0.0, 0.5), "eye_distance": 2.4},
@@ -194,6 +196,48 @@ def trapdoor_collar(kit, wood):
     return parts
 
 
+def plank_uvs(obj, seed=3):
+    """UVs in metres, one layout per loose part (plank, ledge, kerb, post): each face is projected along its
+    dominant axis with U along the part's longest in-plane extent (the grain runs along the timber), and each
+    part gets its own random patch of the photograph, as the floorboards do (mine_house.photo_uvs)."""
+    import bmesh
+    rng = np.random.default_rng(seed)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    layer = bm.loops.layers.uv.active or bm.loops.layers.uv.new("UVMap")
+    seen = set()
+    for face in bm.faces:
+        if face.index in seen:
+            continue
+        part, stack = [], [face]
+        seen.add(face.index)
+        while stack:
+            f = stack.pop()
+            part.append(f)
+            for e in f.edges:
+                for o in e.link_faces:
+                    if o.index not in seen:
+                        seen.add(o.index)
+                        stack.append(o)
+        pts = np.array([v.co[:] for f in part for v in f.verts])
+        pts[:, 1] *= -1.0
+        extent = pts.max(axis=0) - pts.min(axis=0)
+        shift = rng.uniform(0.0, 4.0, 3)
+        for f in part:
+            n = np.abs(np.array(f.normal[:]))
+            axis = int(np.argmax(n))
+            plane = [a for a in range(3) if a != axis]
+            u, v = (plane if extent[plane[0]] >= extent[plane[1]] else plane[::-1])
+            for loop in f.loops:
+                c = np.array(loop.vert.co[:])
+                c[1] *= -1.0
+                c = c + shift
+                loop[layer].uv = (float(c[u]), float(c[v]))
+    bm.to_mesh(obj.data)
+    bm.free()
+    return obj
+
+
 def build(kit):
     rng = np.random.default_rng(77)
     pine = kit.mats.aged_wood("M_MineDeskPine", light=(0.24, 0.15, 0.08), dark=(0.08, 0.045, 0.025), roughness=0.62,
@@ -214,8 +258,8 @@ def build(kit):
            kit.join(chair(kit, elm, beech), "SM_MineChair", pivot="base"),
            kit.join(ledger(kit, leather, marbled, paper, stoneware), "SM_MineLedger", pivot="base")]
     out += rock_pile(kit, granite, rng)
-    out.append(kit.join(trapdoor_lid(kit, lid_wood, iron), "SM_MineTrapdoorLid", pivot=None))
+    out.append(plank_uvs(kit.join(trapdoor_lid(kit, lid_wood, iron), "SM_MineTrapdoorLid", pivot=None)))
     collar_wood = kit.mats.aged_wood("M_MineTrapdoorCollar", light=(0.20, 0.15, 0.10), dark=(0.06, 0.045, 0.03),
                                      saw=0.4, grime=0.75, seed=11.0)
-    out.append(kit.join(trapdoor_collar(kit, collar_wood), "SM_MineTrapdoorCollar", pivot=None))
+    out.append(plank_uvs(kit.join(trapdoor_collar(kit, collar_wood), "SM_MineTrapdoorCollar", pivot=None), seed=5))
     return out

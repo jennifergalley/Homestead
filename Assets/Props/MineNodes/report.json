@@ -6,16 +6,16 @@
   "triangle_budget": 900000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/mine_nodes.py",
-  "source_sha256": "96dc4841fa8e8b240d2eff6f38db027ad296bb02d17511ef35064d3a0f98ee1b",
+  "source_sha256": "f6c721a18c2d503fbdb11c7928ea1df4bbd9990731ed97e95b75da65cdeb7987",
   "provenance": "Original project-authored procedural geometry; surfaces from CC0 Poly Haven photoscans in Unreal (Assets/Props/MineSurfaces/CREDITS.json).",
   "meshes": {
     "SM_MineRockFace": {
-      "vertices": 81964,
-      "triangles": 163924,
+      "vertices": 93873,
+      "triangles": 187716,
       "size_cm": [
-        70.92,
-        160.58,
-        189.74
+        121.35,
+        158.84,
+        189.88
       ],
       "materials": [
         {
@@ -24,6 +24,15 @@
             0.3,
             0.29,
             0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
           ],
           "roughness": 0.85
         }
@@ -47,15 +56,15 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_MineRockFace.fbx",
-      "sha256": "e04b1906cc3bf111aa3ec2be2b4036ed9d7e6fc5b0a04ccad6791a8ee68b0fce"
+      "sha256": "6c68db1d996ef69ac20868a30f12fd8eafec6278e1a7c99cbbb9cf4c9c4e9042"
     },
     "SM_MineRockFace_LOD1": {
-      "vertices": 24590,
-      "triangles": 49176,
+      "vertices": 28172,
+      "triangles": 56314,
       "size_cm": [
-        70.93,
-        160.62,
-        189.76
+        121.32,
+        158.86,
+        189.85
       ],
       "materials": [
         {
@@ -64,6 +73,15 @@
             0.3,
             0.29,
             0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
           ],
           "roughness": 0.85
         }
@@ -81,15 +99,15 @@
         ]
       },
       "fbx": "SM_MineRockFace_LOD1.fbx",
-      "sha256": "0ceb9234157b5dab44675dd52a5de76ba48abe2ed40fe754196ba797c38d7728"
+      "sha256": "9d4fc7feeca0345ebb8cdbe91a6b2046324f34b06be6bcae508cfd7b36443615"
     },
     "SM_MineRockFace_LOD2": {
-      "vertices": 6558,
-      "triangles": 13112,
+      "vertices": 7520,
+      "triangles": 15016,
       "size_cm": [
-        70.9,
-        160.63,
-        189.84
+        121.33,
+        158.83,
+        189.91
       ],
       "materials": [
         {
@@ -98,6 +116,15 @@
             0.3,
             0.29,
             0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
           ],
           "roughness": 0.85
         }
@@ -115,15 +142,15 @@
         ]
       },
       "fbx": "SM_MineRockFace_LOD2.fbx",
-      "sha256": "71899474578448d8a16400f4fa6d0b377fd78931a54e243054dfe454a22dc9dc"
+      "sha256": "c8a906e209e59578acf2888956b525d8c83e96a2af90d571155ace93c67df451"
     },
     "SM_MineRockFaceSpent": {
-      "vertices": 94822,
-      "triangles": 189620,
+      "vertices": 94134,
+      "triangles": 188244,
       "size_cm": [
-        141.49,
-        161.8,
-        194.18
+        141.52,
+        161.6,
+        193.9
       ],
       "materials": [
         {
@@ -132,6 +159,15 @@
             0.3,
             0.29,
             0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
           ],
           "roughness": 0.85
         }
@@ -155,15 +191,15 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_MineRockFaceSpent.fbx",
-      "sha256": "200190f09d3c6fcca0fa580c002ee05c29150c4a298f515d674eec29ad290982"
+      "sha256": "3195aef997f90c0c6a4c8bb00659d08f684a226bbf57068051af1b24a5c0bc6a"
     },
     "SM_MineRockFaceSpent_LOD1": {
-      "vertices": 28455,
-      "triangles": 56886,
+      "vertices": 28248,
+      "triangles": 56472,
       "size_cm": [
-        141.51,
-        161.78,
-        194.16
+        141.54,
+        161.61,
+        193.93
       ],
       "materials": [
         {
@@ -172,6 +208,15 @@
             0.3,
             0.29,
             0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
           ],
           "roughness": 0.85
         }
@@ -189,15 +234,15 @@
         ]
       },
       "fbx": "SM_MineRockFaceSpent_LOD1.fbx",
-      "sha256": "3c95df2113e7a25775e01569c3f8b77bd144ca6f3e250850777cd96bbf65237d"
+      "sha256": "a624bdc51aa7210dfc4239dcc2a61fe9f7e3abf8ce3110d0efd5c3af5c36296c"
     },
     "SM_MineRockFaceSpent_LOD2": {
-      "vertices": 7596,
-      "triangles": 15168,
+      "vertices": 7541,
+      "triangles": 15058,
       "size_cm": [
-        141.54,
-        161.81,
-        194.2
+        141.59,
+        161.61,
+        193.93
       ],
       "materials": [
         {
@@ -206,6 +251,15 @@
             0.3,
             0.29,
             0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
           ],
           "roughness": 0.85
         }
@@ -223,7 +277,7 @@
         ]
       },
       "fbx": "SM_MineRockFaceSpent_LOD2.fbx",
-      "sha256": "88341cb03518efeb4111f07bf42260c297b3937ba8898a3e91c635d894869fb5"
+      "sha256": "ccc8a4427ff6b2d7bbab1df91d01747112de19bfd1b4803cc1ae6ccec069edf7"
     },
     "SM_MineCoalSeam": {
       "vertices": 81252,
@@ -272,7 +326,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_MineCoalSeam.fbx",
-      "sha256": "338ec1d4a9df78417dd4662f3382bbd59fbdf7de4fc91b9d094ca4e3e1f3ae89"
+      "sha256": "f7b2bea55721919b9ebdea9b2b441fd453b2b3089b4a1645772349f8690820d7"
     },
     "SM_MineCoalSeam_LOD1": {
       "vertices": 24377,
@@ -315,7 +369,7 @@
         ]
       },
       "fbx": "SM_MineCoalSeam_LOD1.fbx",
-      "sha256": "7b6dfc912909861e1aff982d50481694057cb96397ffbe57d62417b0e10b7ae3"
+      "sha256": "ea5e20f214af17d57c232f58f3dd5956658a01d41c5885adf69aa86ad533a6b7"
     },
     "SM_MineCoalSeam_LOD2": {
       "vertices": 6502,
@@ -358,7 +412,7 @@
         ]
       },
       "fbx": "SM_MineCoalSeam_LOD2.fbx",
-      "sha256": "f144341eb88fc93896b9edf72c4ac144caeb5fbe506489e1da66e2f7e197ce3b"
+      "sha256": "cb6dd2567f775ca06db2e73bf3bd732c0b74470cd5b7f95eb209a39518193c29"
     },
     "SM_MineCoalSeamSpent": {
       "vertices": 89644,
@@ -407,7 +461,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_MineCoalSeamSpent.fbx",
-      "sha256": "867d53b35ad011bbd7fcbfce85beb1f4de76c98b4126476c6c989a65189f47d7"
+      "sha256": "a68ae23c81c1549ad215e44714e3c5d9f214459a59ecfb8d9967ee73c7e33f9f"
     },
     "SM_MineCoalSeamSpent_LOD1": {
       "vertices": 26901,
@@ -450,7 +504,7 @@
         ]
       },
       "fbx": "SM_MineCoalSeamSpent_LOD1.fbx",
-      "sha256": "92d3aa79553d7dcf0a2335edacc8fa996dbfb1e21c81b34e12936cd2ae17f280"
+      "sha256": "735beab41f0a7e8d5f41829c9f4c261036a18fae6d7ae7c3ba61aa3c495bc812"
     },
     "SM_MineCoalSeamSpent_LOD2": {
       "vertices": 7182,
@@ -493,7 +547,7 @@
         ]
       },
       "fbx": "SM_MineCoalSeamSpent_LOD2.fbx",
-      "sha256": "d59e6cc506f4f8796d8370f36a4a047f708755c9b9ee4079d5f31e8ee933b14f"
+      "sha256": "5b4609116d5e6e623fb87504f7de357a203dff51a9ce35be197f85619df2a47b"
     },
     "SM_MineCopperVein": {
       "vertices": 78644,
@@ -551,7 +605,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_MineCopperVein.fbx",
-      "sha256": "e2540d8e9a7fa9aeebe72de30e3d9edcd9878b1e9bb981558b06e1f05db6cb14"
+      "sha256": "651d4dcd9cfd22dbcf936923bf2df7e5e3ad43660b56b0e80db53e463f89189e"
     },
     "SM_MineCopperVein_LOD1": {
       "vertices": 23594,
@@ -603,7 +657,7 @@
         ]
       },
       "fbx": "SM_MineCopperVein_LOD1.fbx",
-      "sha256": "6381b50cf04a4d821fb87a82f079a33b016e2e3f11c7a80a204960dd32ff9fdd"
+      "sha256": "5aabd1edf05eee8faeee377341d2b935e4f50d85dc0be3d5b1b9169b2f8948d7"
     },
     "SM_MineCopperVein_LOD2": {
       "vertices": 6293,
@@ -655,7 +709,7 @@
         ]
       },
       "fbx": "SM_MineCopperVein_LOD2.fbx",
-      "sha256": "68f995eef4c82744a68b0e7022d94cb061c2815575b97855f9ed620b3999c541"
+      "sha256": "c8d4ee319741e5070ff4d377a712fdd8ec3ca42204095d980171c84e96c40d2f"
     },
     "SM_MineCopperVeinSpent": {
       "vertices": 101596,
@@ -713,7 +767,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_MineCopperVeinSpent.fbx",
-      "sha256": "bc85899c0e5d5a3d3d519224e66af3bc626ad4336bcda9e6c1983bed95daf1dc"
+      "sha256": "886ec96cc9d415e36f2e0029de9b58e6b93c3faf580cceb8fcdd11ac89fc86df"
     },
     "SM_MineCopperVeinSpent_LOD1": {
       "vertices": 30490,
@@ -765,7 +819,7 @@
         ]
       },
       "fbx": "SM_MineCopperVeinSpent_LOD1.fbx",
-      "sha256": "f7680e5d3c9c10b58bc5a7ff7e9adcf840806fb450d99a3c482c77235e0d8e2d"
+      "sha256": "2a71d45bc3c2309857800a96578fb107e222db8bd4f7ea4dee13f1f95963bcf1"
     },
     "SM_MineCopperVeinSpent_LOD2": {
       "vertices": 8142,
@@ -817,7 +871,7 @@
         ]
       },
       "fbx": "SM_MineCopperVeinSpent_LOD2.fbx",
-      "sha256": "ec8a737bae01e996ca6641a3e14e511104da22df0c92a51a8c6a5b6ecd843d7f"
+      "sha256": "ee3fee4fd9772016e3f2f50cff598480918d6edea0d73c5f051d053ff23251aa"
     }
   },
   "warnings": [],

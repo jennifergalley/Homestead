@@ -31,6 +31,9 @@ TUNNELS, TUNNELS_BLOCKOUT = f"{PROPS}/MineTunnels/SM_MineTunnels", f"{PROPS}/Min
 FURNISHING_SET = f"{PROPS}/MineFurnishing"
 GLASS_MATERIAL = f"{PROPS}/OilLamp/MI_OilLampGlass"
 FLAME_MATERIAL = f"{PROPS}/OilLamp/MI_OilLampFlame"
+# The store's crate in the mine house wears the room's weathered plank wood (Jenny, review 10: "pale fuzzy wood like
+# fingerprint swirls. Use proper plank wood like the floor"; Scripts/Mine/mine_surfaces.py makes it).
+ACTOR_MATERIALS = {"MineCrate": f"{PROPS}/MineSurfaces/MI_MineSurf_CrateWood"}
 # A short reach: the lamp lights the table and the rock pile; past that, daylight. A 6.5 m reach washed the whole
 # limewashed room orange-yellow by day (Jenny and Balance: "the limewash reads yellow-green").
 DESK_LAMP_LIGHT = {"intensity_cd": 14.0, "radius_cm": 320.0, "temperature_k": 2100.0}
@@ -115,6 +118,9 @@ def main():
         comp.set_mobility(unreal.ComponentMobility.STATIC)
         for i in range(comp.get_num_materials()):
             comp.set_material(i, None)
+        if label in ACTOR_MATERIALS and exists(ACTOR_MATERIALS[label]):
+            for i in range(comp.get_num_materials()):
+                comp.set_material(i, unreal.load_asset(ACTOR_MATERIALS[label]))
         if label == "MineHouseGlass" and exists(GLASS_MATERIAL):
             comp.set_material(0, unreal.load_asset(GLASS_MATERIAL))
         if label in ("MineDeskOilLampGlass",) and exists(GLASS_MATERIAL):

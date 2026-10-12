@@ -80,29 +80,75 @@ INSTANCES = {
     # 2 cm texels and a grid slot; the photoscan reads true at the lamp's distance.
     "M_MineTunnelRock": ("Granite", dict(tiles=0.55, tint=(1.05, 0.98, 0.92), sat=0.1, vc=0.0, normal=1.3,
                                          rough=(0.85, -0.05), macro=0.45, grime=0.0, tri=1.0)),
-    "M_MineCollarTimber": ("Timber", dict(tiles=0.9, tint=(0.42, 0.33, 0.25), sat=0.7, vc=0.0, normal=1.1,
-                                          rough=(1.0, 0.0), macro=0.3, grime=0.0, tri=1.0)),
+    "M_MineCollarTimber": ("Boards", dict(tiles=0.6, tint=(0.85, 0.76, 0.66), sat=0.9, vc=0.0, normal=1.0,
+                                          rough=(1.0, 0.0), macro=0.35, grime=0.0)),
+    "M_MineLidBoards": ("Boards", dict(tiles=0.6, tint=(0.95, 0.85, 0.75), sat=0.9, vc=0.0, normal=1.0,
+                                       rough=(1.0, 0.0), macro=0.35, grime=0.0)),
+    # The store crate in the mine house (place_mine.ACTOR_MATERIALS): no metric UVs, so world-aligned, tiled finer.
+    "M_MineCrateWood": ("Boards", dict(tiles=1.5, tint=(0.9, 0.8, 0.7), sat=0.9, vc=0.0, normal=1.0,
+                                       rough=(1.0, 0.0), macro=0.3, grime=0.0, tri=1.0)),
     # Mine nodes (mine_nodes.py): the tunnel's own rock, the ore as a region of it.
-    "M_MineCoal": ("Slate", dict(tiles=1.2, tint=(0.17, 0.16, 0.155), sat=0.0, vc=0.0, normal=1.5,
-                                 rough=(0.3, -0.06), macro=0.3, grime=0.0, tri=1.0)),
+    # Jenny (review 10): "Coal reads as a hole/shadow: give the seam a glossy black sheen."
+    "M_MineCoal": ("Slate", dict(tiles=1.6, tint=(0.2, 0.19, 0.18), sat=0.0, vc=0.0, normal=1.8,
+                                 rough=(0.25, -0.12), macro=0.4, grime=0.0, tri=1.0)),
     "M_MineCopperOre": ("Granite", dict(tiles=1.0, tint=(0.55, 1.15, 0.85), sat=0.0, vc=0.0, normal=1.2,
                                         rough=(0.8, 0.0), macro=0.45, grime=0.0, tri=1.0)),
-    "M_MineCopperStain": ("Granite", dict(tiles=0.55, tint=(0.95, 1.05, 0.88), sat=0.1, vc=0.0, normal=1.3,
+    # Jenny: "a hint of copper-brown with the green would help": the halo is rusty copper-brown gossan.
+    "M_MineCopperStain": ("Granite", dict(tiles=0.55, tint=(1.55, 0.95, 0.62), sat=0.0, vc=0.0, normal=1.3,
                                           rough=(0.85, -0.05), macro=0.45, grime=0.0, tri=1.0)),
+    # Fresh breaks on a worked rock face: the same rock, paler, unweathered.
+    "M_MineFreshRock": ("Granite", dict(tiles=0.55, tint=(3.3, 3.2, 3.05), sat=0.0, vc=0.0, normal=1.2,
+                                        rough=(0.9, 0.0), macro=0.3, grime=0.0, tri=1.0)),
 }
 # Meshes whose every slot takes one instance (baked props that read better in the photoscans).
 WHOLE_MESHES = {"/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineDesk": "M_MineFurnitureWood",
                 "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineChair": "M_MineFurnitureWood",
                                 "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorCollar": "M_MineCollarTimber",
+                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorLid": {"M_MineTrapdoorWood": "M_MineLidBoards",
+                                                                           "M_MineTrapdoorIron": "M_MineHouseIron"},
                 "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineRockPile": "M_MinePileStone",
                 "/Game/SurvivalGame/Environment/Props/MineTunnels/SM_MineTunnels": "M_MineTunnelRock"}
 _NODE_SLOTS = {"M_MineNodeRock": "M_MineTunnelRock", "M_MineNodeCoal": "M_MineCoal", "M_MineNodeCopper": "M_MineCopperOre",
-               "M_MineNodeStain": "M_MineCopperStain"}
+               "M_MineNodeStain": "M_MineCopperStain", "M_MineNodeFresh": "M_MineFreshRock"}
 WHOLE_MESHES.update({f"/Game/SurvivalGame/Environment/Props/MineNodes/SM_Mine{n}{s}": _NODE_SLOTS
                      for n in ("RockFace", "CoalSeam", "CopperVein") for s in ("", "Spent")})
 MESHES = ["SM_MineHouseWallE", "SM_MineHouseWallW", "SM_MineHouseWallN", "SM_MineHouseWallS", "SM_MineHouseStack",
           "SM_MineHouseShaft", "SM_MineHouseRoof", "SM_MineHouseFloors", "SM_MineHouseJoinery"]
+FULL_PRECISION_UV_MESHES = ["/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorLid",
+                            "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorCollar"]
 MESH_DEST = "/Game/SurvivalGame/Environment/Props/MineHouse"
+
+
+# Balance (RT-on review): the granite read olive-green at a distance: "Cut the lichen layer's coverage to about a
+# third". Two thirds of the scan's lichen (pale or yellow-green pixels, chosen in large soft patches so what is left
+# is clustered, as real lichen grows) is replaced by the rock colour round it, keeping the fine grain.
+LICHEN_THIN = {"Granite": {"keep": 0.33, "seed": 7}}
+
+
+def thin_lichen(bgr, spec):
+    import cv2
+    import numpy as np
+    n = bgr.shape[0]
+    pad = n // 8
+
+    def blur(a, sigma):
+        big = np.pad(a, [(pad, pad), (pad, pad)] + [(0, 0)] * (a.ndim - 2), mode="wrap")
+        return cv2.GaussianBlur(big, (0, 0), sigma)[pad:-pad, pad:-pad]
+    hsv = cv2.cvtColor(bgr.astype(np.float32), cv2.COLOR_BGR2HSV)       # H in degrees, S and V 0..1
+    lum = bgr @ np.array([0.11, 0.59, 0.3], np.float32)
+    greenish = (hsv[..., 0] > 35) & (hsv[..., 0] < 110) & (hsv[..., 1] > 0.12)
+    pale = lum > np.quantile(lum, 0.8)
+    lichen = blur((greenish | pale).astype(np.float32), 2.0)
+    lichen = np.clip((lichen - 0.25) / 0.5, 0, 1)
+    rng = np.random.default_rng(spec["seed"])
+    noise = blur(rng.random((n // 16, n // 16)).astype(np.float32).repeat(16, 0).repeat(16, 1), n / 40)
+    noise = (noise - noise.min()) / max(noise.max() - noise.min(), 1e-6)
+    remove = lichen * np.clip((np.quantile(noise, spec["keep"]) - noise) / 0.08 + 0.5, 0, 1)
+    rock = 1.0 - lichen
+    base = blur(bgr * rock[..., None], 24) / np.maximum(blur(rock, 24), 1e-3)[..., None]
+    detail = (lum - blur(lum, 3.0))[..., None]
+    filled = base + detail * 0.6
+    return bgr * (1.0 - remove[..., None]) + filled * remove[..., None]
 
 
 # --------------------------------------------------------------------------- step 1: maps (system Python)
@@ -141,6 +187,8 @@ def prepare():
             raise RuntimeError(f"{ident}: no {keys} map in {textures}")
 
         colour = read(pick("diff", "col"))
+        if surface in LICHEN_THIN:
+            colour = thin_lichen(colour, LICHEN_THIN[surface])
         write(OUT / f"T_MineSurf_{surface}_basecolor.jpg", colour)
         mean = float((colour[..., :3] * np.array([0.11, 0.59, 0.3], np.float32)).sum(axis=-1).mean())   # BGR
         normal = read(pick("nor_gl"))
@@ -418,6 +466,14 @@ def apply(unreal):
                 mesh.set_material(index, instances[slot])
         LIB.save_loaded_asset(mesh, False)
         print(mesh_name, "slots", slots, "full-precision UVs set" if changed else "")
+    for path in FULL_PRECISION_UV_MESHES:
+        mesh = LIB.load_asset(path)
+        if mesh:
+            for lod in range(sub.get_lod_count(mesh)):
+                settings = sub.get_lod_build_settings(mesh, lod)
+                if not settings.get_editor_property("use_full_precision_u_vs"):
+                    settings.set_editor_property("use_full_precision_u_vs", True)
+                    sub.set_lod_build_settings(mesh, lod, settings)
     for path, slot in WHOLE_MESHES.items():
         mesh = LIB.load_asset(path)
         if not mesh:

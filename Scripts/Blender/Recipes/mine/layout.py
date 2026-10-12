@@ -253,8 +253,8 @@ def dressing():
     out.append(("MineLedger", f"{fur}/SM_MineLedger", "house", (DESK["centre"][0] - 0.18, -0.25, FLOOR_Z + DESK["size"][2]), 176.0))
     out.append(("MineRockPile", f"{fur}/SM_MineRockPile", "house", (*ROCK_PILE["centre"], FLOOR_Z), 0.0))
     out.append(("MineTrapdoorCollar", f"{fur}/SM_MineTrapdoorCollar", "house", (*TRAPDOOR["centre"], FLOOR_Z), 0.0))
-    # Store props by the door: a crate, a barrel and sacks (shared with the general store's kit).
+    # Store props by the door: a crate and a sack (shared with the general store's kit). The barrel went: its baked
+    # wood read pale and swirled against the floor (Jenny, review 10), and it can't take the plank photoscan.
     out.append(("MineCrate", f"{PROPS}/StoreCrate/SM_Store_Crate", "house", (IN_E - 0.55, IN_Y - 0.45, FLOOR_Z), 8.0))
-    out.append(("MineBarrel", f"{PROPS}/StoreBarrel/SM_Store_Barrel", "house", (IN_E - 1.35, IN_Y - 0.40, FLOOR_Z), 0.0))
     out.append(("MineSack", f"{PROPS}/StoreSack/SM_Store_Sack", "house", (IN_E - 0.55, -IN_Y + 0.45, FLOOR_Z), 120.0))
     return out

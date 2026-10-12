@@ -250,6 +250,15 @@ def dipping(centre_z, width, dip_deg, front=0.6, wave=0.0, seed=0):
     return sdf.displaced(box, lambda q: wave * sdf.fbm(q / 0.3, 3, seed=seed), wave) if wave else box
 
 
+def fresh_breaks(seed, share=0.45, cell=0.34):
+    """Faces on freshly broken rock: a share of the quarried facets (Voronoi cells of the face), facing out."""
+    def mask(c):
+        f1, f2, r1, r2, c1, c2 = rocks.voronoi(c, cell, seed)
+        e = np.sqrt((c[:, 1] / HALF_W) ** 2 + ((c[:, 2] - ZC) / HZ) ** 2)
+        return (r1 < share) & (e < 0.8) & (c[:, 0] > WALL_X - 0.06) | ((c[:, 2] < 0.15) & (c[:, 0] > WALL_X + 0.02))
+    return mask
+
+
 def mesh_regions(kit, name, field, materials, regions=(), extra=()):
     """Mesh ``field``; faces inside each region node (in order, later wins) take that region's slot."""
     obj = sdf.mesh(name, _clip(field), voxel=VOXEL, material=materials[0])
@@ -265,7 +274,9 @@ def mesh_regions(kit, name, field, materials, regions=(), extra=()):
         cent = np.add.reduceat(p[idx], starts) / counts[:, None]
         slot = np.zeros(len(polys), dtype=np.int32)
         for node, margin, index in regions:
-            slot[_eval(node, cent) < margin] = index
+            # A region is an SDF node (inside it) or a plain function of the face centres (a boolean mask).
+            inside = _eval(node, cent) < margin if hasattr(node, "lo") else np.asarray(node(cent), bool)
+            slot[inside] = index
         polys.foreach_set("material_index", slot)
     rocks.unwrap(obj, angle=55.0, buried=(0.0, 0.4))
     kit.subdivide(obj, levels=1)
@@ -288,12 +299,17 @@ def build(kit):
     coal = kit.material("M_MineNodeCoal", (0.02, 0.02, 0.022), roughness=0.25)
     copper = kit.material("M_MineNodeCopper", (0.12, 0.30, 0.22), roughness=0.6)
     stain = kit.material("M_MineNodeStain", (0.20, 0.27, 0.22), roughness=0.7)
+    fresh = kit.material("M_MineNodeFresh", (0.45, 0.43, 0.40), roughness=0.85)
     out = []
 
-    # Rock face: a quarried breast in big facets; spent: worked back flatter, finely pick-scarred, spalls at the foot.
-    out += mesh_regions(kit, "SM_MineRockFace", face(11, proud=0.07, cell=0.32, depth=0.035), [rock])
-    spent = sdf.union([face(12, proud=0.035, cell=0.13, depth=0.015)] + rubble(13, 10))
-    out += mesh_regions(kit, "SM_MineRockFaceSpent", spent, [rock])
+    # Rock face (Jenny, review 10: "invisible: it reads as any bit of wall. Make it a visibly fractured, quarried
+    # patch (fresh paler breaks, some spall at its foot)"): big broken blocks knocked back by different amounts,
+    # their fresh faces paler, spalls on the floor at its foot; spent: worked back flatter, finely pick-scarred.
+    breast = sdf.union([face(11, proud=0.13, cell=0.34, depth=0.11)] + rubble(14, 9, reach=(0.05, 0.45), spread=0.6,
+                                                                              size=(0.05, 0.12)))
+    out += mesh_regions(kit, "SM_MineRockFace", breast, [rock, fresh], [(fresh_breaks(11), 0, 1)])
+    spent = sdf.union([face(12, proud=0.05, cell=0.13, depth=0.025)] + rubble(13, 10))
+    out += mesh_regions(kit, "SM_MineRockFaceSpent", spent, [rock, fresh], [(fresh_breaks(12, share=0.25), 0, 1)])
 
     # Coal seam: a dark glossy band 0.4 m thick through the face, a little cleated; spent: the band cut out as a slot.
     lo, hi = 0.62, 1.02

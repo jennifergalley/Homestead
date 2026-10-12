@@ -6,7 +6,7 @@
   "triangle_budget": 500000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/mine_furnishing.py",
-  "source_sha256": "800fb583babbe86a1ba97b6f529f140a0fe0170307046a7a2b0733791cf728b8",
+  "source_sha256": "9a7e67d72894a465b0ced51b02fc63a4e221be12948579fae35b56e45757bb4a",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_MineDesk": {
@@ -59,7 +59,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_MineDesk.fbx",
-      "sha256": "cba2b3d83b0feb2fe4c067c12c9f64466f42ff0938ec2a8a1c52aa64ac34d2d5"
+      "sha256": "4b0db52eb0360297ef72ee4506bf6e9169afd10d16bb5b4dd844c2fb1b0ccc74"
     },
     "SM_MineChair": {
       "vertices": 824,
@@ -111,7 +111,7 @@
         "eye_distance": 2.4
       },
       "fbx": "SM_MineChair.fbx",
-      "sha256": "e8de8868abbacc42a998243e33f23a51164754766e6608034ad0d959fca39b9b"
+      "sha256": "7bca39949851033b253e4fcd70f6e35c8373bd926cc32242c38e39b3e07e9701"
     },
     "SM_MineLedger": {
       "vertices": 468,
@@ -163,7 +163,7 @@
         "eye_distance": 1.0
       },
       "fbx": "SM_MineLedger.fbx",
-      "sha256": "a258b9f203987bac3a6880ea7e84e3a217cc1ca607020d723581d07bcc6fb833"
+      "sha256": "283cddaa8fb7c5fb17d53b5429d002367bb5ff6dd8bead7561d4733ca697d925"
     },
     "SM_MineRockPile": {
       "vertices": 122860,
@@ -215,7 +215,7 @@
         "eye_distance": 3.5
       },
       "fbx": "SM_MineRockPile.fbx",
-      "sha256": "cfafb69f00fe66efbea8f429454eb82f25ec5091c8e899b82e8ad060fcb33ff2"
+      "sha256": "6048c28271ee628fd546798ca9e465e9db9a186963cfa099fa190c90320d8aa7"
     },
     "SM_MineRockPile_LOD1": {
       "vertices": 30092,
@@ -262,7 +262,7 @@
         ]
       },
       "fbx": "SM_MineRockPile_LOD1.fbx",
-      "sha256": "0c5283ac9102871b1604a0a6e05b12f7e69fe1f5961c5a67652bfa96f9d63f9f"
+      "sha256": "62102c4d35c80476c7e5fb0307fe3fada0a6e27af530e39750c52dc791e81459"
     },
     "SM_MineRockPile_LOD2": {
       "vertices": 7592,
@@ -309,7 +309,7 @@
         ]
       },
       "fbx": "SM_MineRockPile_LOD2.fbx",
-      "sha256": "59f693870e23c9c38b0eb0c2047340e94eb7e0f50d3478017701e76dd83e24ef"
+      "sha256": "44a298b59757ce7cda17615a75cb3544bb08bba9c361a23b9d5c29261f83e712"
     },
     "SM_MineTrapdoorLid": {
       "vertices": 1011,
@@ -321,27 +321,24 @@
       ],
       "materials": [
         {
-          "name": "M_MineTrapdoorLid",
-          "textures": {
-            "basecolor": "T_MineTrapdoorLid_basecolor.png",
-            "roughness": "T_MineTrapdoorLid_roughness.png",
-            "normal": "T_MineTrapdoorLid_normal.png"
-          },
-          "blend_method": "DITHERED"
+          "name": "M_MineTrapdoorWood",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineTrapdoorIron",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
         }
       ],
-      "bake": {
-        "size": 2048,
-        "samples": 48,
-        "device": "OPTIX",
-        "normal": "OpenGL",
-        "maps": {
-          "basecolor": "T_MineTrapdoorLid_basecolor.png",
-          "roughness": "T_MineTrapdoorLid_roughness.png",
-          "normal": "T_MineTrapdoorLid_normal.png",
-          "ao": "T_MineTrapdoorLid_ao.png"
-        }
-      },
       "review": {
         "pose": [
           0,
@@ -361,7 +358,7 @@
         "eye_distance": 2.5
       },
       "fbx": "SM_MineTrapdoorLid.fbx",
-      "sha256": "b9f5b8f409d82b70ce8edfa1271c8220287a7740aab630eae7b38106d1423ade"
+      "sha256": "ce581ff081be03c50bf3b4be25ef37eb77a76e925f796f389a7c9194a6bdb9e1"
     },
     "SM_MineTrapdoorCollar": {
       "vertices": 668,
@@ -374,26 +371,14 @@
       "materials": [
         {
           "name": "M_MineTrapdoorCollar",
-          "textures": {
-            "basecolor": "T_MineTrapdoorCollar_basecolor.png",
-            "roughness": "T_MineTrapdoorCollar_roughness.png",
-            "normal": "T_MineTrapdoorCollar_normal.png"
-          },
-          "blend_method": "DITHERED"
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
         }
       ],
-      "bake": {
-        "size": 2048,
-        "samples": 48,
-        "device": "OPTIX",
-        "normal": "OpenGL",
-        "maps": {
-          "basecolor": "T_MineTrapdoorCollar_basecolor.png",
-          "roughness": "T_MineTrapdoorCollar_roughness.png",
-          "normal": "T_MineTrapdoorCollar_normal.png",
-          "ao": "T_MineTrapdoorCollar_ao.png"
-        }
-      },
       "review": {
         "pose": [
           0,
@@ -407,29 +392,23 @@
         ]
       },
       "fbx": "SM_MineTrapdoorCollar.fbx",
-      "sha256": "88333270bf6cdd56bbace85772d2cfad217c8fca459550aa39aea0627a75af41"
+      "sha256": "a81664d6515c8fce276860a91c37b3f8133f64b4eb8e544c2293252654f645a4"
     }
   },
   "warnings": [],
   "pivot": "Each piece on the floor at its own centre (lid: hinge-line centre, closed along +X).",
   "textures": {
-    "T_MineDesk_basecolor.png": "58de97c58866c23a92f4116545f7cb7421c03192a8efb2c3cd6d13197a877724",
-    "T_MineDesk_roughness.png": "c4c17650d30d41b38d850e729ad10a651719390728d86a0762d95022720aa6ce",
-    "T_MineDesk_normal.png": "3533f12f8ad6783ae45b689e6ea218c4d7a291acbab9c83474078c57c427b5d4",
-    "T_MineChair_basecolor.png": "21d6e3656a1db4c3c3b15abb675d2ff174b229ab6bddc1cbee68e1471c55b01b",
-    "T_MineChair_roughness.png": "f5695f9e83f7e536c0587586310404bac36990cfd4fb2f37745800e9ec3ff18e",
-    "T_MineChair_normal.png": "42171ff87ac22c750e7ddb4639637e8baa9e78276848fd3d9aa24d576679f60f",
-    "T_MineLedger_basecolor.png": "74f8ce26c8df94bc54b098754bc25fabf883f074073af877a7dac0f624a2a36b",
-    "T_MineLedger_roughness.png": "4faec268984272ca1dd130d52aa99785205aedfe646662515d0aac1de3b43b76",
-    "T_MineLedger_normal.png": "52ce13c8cd77d109a49b6afb20113a860af6666e307e50d1398b4c42f3be01e4",
-    "T_MineRockPile_basecolor.png": "e25427ac537a9d43fe368a818f3d804f9f983d273546864e9f7e50dee957d2b2",
-    "T_MineRockPile_roughness.png": "f7829600fa65b616248559736f00de9ebb4d3875ef8b81d78bb5fdcb1f74f66f",
-    "T_MineRockPile_normal.png": "de0ba1a6d01eb30ed00688fc900ba28fe1bf2e24a78c010ed8119d4b0a688b0e",
-    "T_MineTrapdoorLid_basecolor.png": "c35f4760390f40448479cab5e5259be1af9af76e8929550fc8a3c15ec8fba264",
-    "T_MineTrapdoorLid_roughness.png": "8b1735febc00c1254ed23f7e52c48850bcdb26041b9a3dff0e30b29037992186",
-    "T_MineTrapdoorLid_normal.png": "c603051eea2a464af9718d80722778cfa15780fd043158465358dfa4e89bb54b",
-    "T_MineTrapdoorCollar_basecolor.png": "486303d5f84d35aca0f53c57afe83836f977175c2c2666cc7d94040e2e774fb9",
-    "T_MineTrapdoorCollar_roughness.png": "fbf0a223280fa8ebd659bff56c4be858234438dd9a299690c94907d27af4292d",
-    "T_MineTrapdoorCollar_normal.png": "d5e89c5de55615163e44a4e796f3bd824037443c1a55772e0034f16ebe190a87"
+    "T_MineDesk_basecolor.png": "7a50e4e0b2fd9999d5eb22bdfc785890320975c561bc46d059e682f7b73f46bd",
+    "T_MineDesk_roughness.png": "fd2bf870bf3cc58fa607b03883dacbff975e4a8bdb28cca2dcdac600302be49c",
+    "T_MineDesk_normal.png": "f50d355c74d3d8165af0f9d1748c4d791dbba484bb7be13416986f081fbd2db4",
+    "T_MineChair_basecolor.png": "ba9e5b1ac66af3483a46a1a91a5b81526af4b8ac2b8579f00ce0b2d2186780b5",
+    "T_MineChair_roughness.png": "77dde10b274696362024d2af9d510b2f784cacc02addbe81227278c7a5f87ed7",
+    "T_MineChair_normal.png": "1d88ae8af99f9dbb1051ff752c4676c3f06a157262de891e83267209efaf900f",
+    "T_MineLedger_basecolor.png": "cb88817c6f316345851907abe3ca74e129b1497be4f615b58cbe8c5b97b384ee",
+    "T_MineLedger_roughness.png": "789e373a59fb4ff5ae2c488f27119938196d66657e0a41e6d82db1484e17190e",
+    "T_MineLedger_normal.png": "73e0905fbe434589d93531ce7c3e00a79516aa8467254d819a3741a49e17f0cb",
+    "T_MineRockPile_basecolor.png": "7338ced44ac9ca3f589219065bb2efc7de8df14b000d4628c5812ee43f26deae",
+    "T_MineRockPile_roughness.png": "580bac7b4a1ffb5b8c0fbf63b6e1d7cbe4f87bee6aaa0247a69d049fb38b266b",
+    "T_MineRockPile_normal.png": "eccb10bf4d4dbe6fc6518ffa6a3def894d1a0353382273289e4371520528f0da"
   }
 }
