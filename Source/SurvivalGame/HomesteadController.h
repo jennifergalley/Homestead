@@ -396,6 +396,24 @@ public:
     // real counter, sell what she carries from a list like "Coal 3,CopperOre 2", open the shop screen
     // and log the purse delta and per-item prices to LogHomesteadPlaytest.
     UFUNCTION(Exec) void HomesteadSellAtStore(const FString& SellList);
+    // Agent test tools (HomesteadControllerTest*.cpp; the recipes are in .github\skills\homestead-test-tools).
+    // The one JSON object HomesteadState logs and get_play_state returns as "world" (works in packages).
+    FString BuildTestStateJson(int32 NearbyCount, float RadiusCm) const;
+    // Log the full state dump (time, weather, pack, hotbar, lamp, equipment, place, focus, nearby, open UI).
+    UFUNCTION(Exec) void HomesteadState(int32 NearbyCount = 12, float RadiusCm = 1500.0f);
+    // Stand her facing a target: a landmark (store, counter, mine, cove, square, gate, mill, farm, home),
+    // a placement id ("plot:3", "structure:2", "drop:7", or a bare resource id) or the nearest kind
+    // ("oak", "chest", "plot", "drop"). Waits for the ground to settle.
+    UFUNCTION(Exec) void HomesteadGoto(const FString& Target);
+    // Goto, then use: "HomesteadUse <target> [item]". With an item it selects it on the hotbar and uses the
+    // tool or food on what she faces; with none it presses Interact (E). Logs the focus and the outcome.
+    UFUNCTION(Exec) void HomesteadUse(const FString& TargetAndItem);
+    // Open or close one screen: inventory, craft, build, settings, map, appearance, shop, chest, close.
+    UFUNCTION(Exec) void HomesteadScreen(const FString& Name);
+    // Jump the clock to a rainy ("rain") or dry ("clear") moment; the weather is a function of the hour.
+    UFUNCTION(Exec) void HomesteadWeather(const FString& Kind);
+    // Put her back to a clean test footing: screens closed, full Energy and lamp oil, daylight.
+    UFUNCTION(Exec) void HomesteadReset();
     // Oil lamp (add-oil-lamp): fill the lamp from a flask (the flask's pack menu, or F / X in hand).
     void MenuRefillLamp();
     // Console playtest aid: set the lamp's oil in game hours (0-6), e.g. HomesteadLampOil 0.5.
@@ -465,12 +483,17 @@ private:
     // HomesteadSellAtStore: the sales wait here until the teleport's ground snap has settled.
     struct FTestShopSale { Homestead::Item Item = Homestead::Item::Count; int32 Quantity = 0; };
     TArray<FTestShopSale> TestShopSales;
-    FTimerHandle TestShopTimer;
-    double TestShopStartedAt = 0.0;
     int32 TestShopId = INDEX_NONE;
-    FRotator TestShopFacing = FRotator::ZeroRotator;
-    void TickTestShop();
     void FinishTestShop();
+    // Agent test tools (HomesteadControllerTest*.cpp, .github\skills\homestead-test-tools): teleport to
+    // X,Y with HomesteadTeleport, wait for the ground snap to settle, face her `Facing`, then run `Then`.
+    // False (and logged under `Tag`) when the teleport could not start.
+    bool BeginTestTeleport(double X, double Y, const FRotator& Facing, const TCHAR* Tag, TFunction<void()> Then);
+    FTimerHandle TestTeleportTimer;
+    // Resolves a Goto target (landmark, id or kind name) to where she should stand and face.
+    bool ResolveTestTarget(const FString& Target, double& StandX, double& StandY, FRotator& Facing, FString& Described) const;
+    // HomesteadUse: log what the swing or press did once its animation has had time to land.
+    FTimerHandle TestUseTimer;
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;

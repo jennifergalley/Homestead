@@ -305,6 +305,10 @@ FString UHomesteadAgentPlayLibrary::GetPlayState(int32 NearbyCount, float Radius
             Hotbar.Add(MakeShared<FJsonValueObject>(Entry));
         }
         Root->SetArrayField(TEXT("hotbar"), Hotbar);
+        // The full dump from the game module's HomesteadState tool: time, weather, pack, lamp, equipment, position, nearby, store, screen.
+        TSharedPtr<FJsonObject> World;
+        const TSharedRef<TJsonReader<>> WorldReader = TJsonReaderFactory<>::Create(HC->BuildTestStateJson(NearbyCount, RadiusCm));
+        if (FJsonSerializer::Deserialize(WorldReader, World) && World.IsValid()) Root->SetObjectField(TEXT("world"), World);
         Root->SetStringField(TEXT("bookTitle"), HC->BookTitle());
         Root->SetStringField(TEXT("bookSummary"), HC->BookSummary());
         Root->SetStringField(TEXT("bookFooter"), HC->BookFooter());

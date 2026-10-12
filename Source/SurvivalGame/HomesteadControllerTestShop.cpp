@@ -4,6 +4,7 @@
 // Works in Development builds as well as the editor. Items resolve by name or key, so goods added on
 // other branches work without changes here.
 #include "HomesteadController.h"
+#include "HomesteadPlaytestSupport.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadGeneralStore.h"
 #include "Simulation/HomesteadShops.h"
@@ -11,7 +12,7 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogHomesteadPlaytest, Log, All);
+DEFINE_LOG_CATEGORY(LogHomesteadPlaytest);
 
 namespace TestShop
 {
@@ -21,43 +22,15 @@ constexpr double OpenAtHourOfDay = 9.0;
 constexpr int32 MaxDaysToSkip = 7;
 // How far inside the door she stands, in cm from the counter; within Homestead::CounterReach (400).
 constexpr double StandFromCounterCm = 250.0;
-// How often the sale waits to see whether the teleport has settled, and how long it waits (real s).
-constexpr float PollIntervalSeconds = 0.25f;
-constexpr double TimeoutSeconds = 90.0;
-
-FString Compact(const FString& Text)
-{
-    return Text.Replace(TEXT(" "), TEXT("")).Replace(TEXT("-"), TEXT("")).Replace(TEXT("_"), TEXT(""));
+using HomesteadPlaytest::ToText;
 }
 
-FString ToText(const std::string& Value)
-{
-    return FString(UTF8_TO_TCHAR(Value.c_str()));
-}
-
-bool FindItem(const FString& Name, Homestead::Item& Found)
-{
-    const FString Wanted = Compact(Name);
-    if (Wanted.IsEmpty()) return false;
-    for (int32 Index = 0; Index < Homestead::ItemCount; ++Index)
-    {
-        const auto Candidate = static_cast<Homestead::Item>(Index);
-        const char* Key = Homestead::ItemKey(Candidate);
-        if (Compact(FString(UTF8_TO_TCHAR(Homestead::ItemName(Candidate)))).Equals(Wanted, ESearchCase::IgnoreCase)
-            || (Key && Compact(FString(UTF8_TO_TCHAR(Key))).Equals(Wanted, ESearchCase::IgnoreCase)))
-        {
-            Found = Candidate;
-            return true;
-        }
-    }
-    return false;
-}
-}
+using HomesteadPlaytest::FindItem;
 
 void AHomesteadController::HomesteadSellAtStore(const FString& SellList)
 {
     if (RejectPendingGroundSnapAction()) return;
-    GetWorldTimerManager().ClearTimer(TestShopTimer);
+    GetWorldTimerManager().ClearTimer(TestTeleportTimer);
     TestShopSales.Reset();
 
     const Homestead::Shop* Shop = Sim.FindShop(Homestead::ShopKind::GeneralStore);
@@ -96,7 +69,7 @@ void AHomesteadController::HomesteadSellAtStore(const FString& SellList)
         }
         const FString Name = FString::Join(Words, TEXT(" "));
         Homestead::Item Item = Homestead::Item::Count;
-        if (Quantity <= 0 || !TestShop::FindItem(Name, Item))
+        if (Quantity <= 0 || !FindItem(Name, Item))
         {
             UE_LOG(LogHomesteadPlaytest, Warning, TEXT("SELLAT: skipping \"%s\" (no item by that name, or quantity %d is not positive)."),
                 *Entry, Quantity);
@@ -128,50 +101,19 @@ void AHomesteadController::HomesteadSellAtStore(const FString& SellList)
     const double FacingRadians = FMath::DegreesToRadians(Shop->counterYaw);
     const double StandX = Shop->counterX + FMath::Cos(FacingRadians) * TestShop::StandFromCounterCm;
     const double StandY = Shop->counterY + FMath::Sin(FacingRadians) * TestShop::StandFromCounterCm;
-    TestShopFacing = FRotator(0.0, FMath::UnwindDegrees(Shop->counterYaw + 180.0), 0.0);
     TestShopId = Shop->id;
-    TestShopStartedAt = FPlatformTime::Seconds();
     UE_LOG(LogHomesteadPlaytest, Display, TEXT("SELLAT: General Store %d open (hour %.1f). Counter (%.0f, %.0f), standing at (%.0f, %.0f), %d item kinds to sell."),
         TestShopId, State().hour, Shop->counterX, Shop->counterY, StandX, StandY, TestShopSales.Num());
 
-    HomesteadTeleport(static_cast<float>(StandX), static_cast<float>(StandY));
-    if (!bPendingGroundSnap)
-    {
-        UE_LOG(LogHomesteadPlaytest, Error, TEXT("SELLAT: the teleport did not start."));
-        TestShopSales.Reset();
-        return;
-    }
-    GetWorldTimerManager().SetTimer(TestShopTimer, FTimerDelegate::CreateUObject(this, &AHomesteadController::TickTestShop),
-        TestShop::PollIntervalSeconds, true);
-}
-
-void AHomesteadController::TickTestShop()
-{
-    if (bPendingGroundSnap || GroundSnapStreamingActor)
-    {
-        if (FPlatformTime::Seconds() - TestShopStartedAt > TestShop::TimeoutSeconds)
-        {
-            UE_LOG(LogHomesteadPlaytest, Error, TEXT("SELLAT: gave up after %.0f s waiting for the teleport to settle."), TestShop::TimeoutSeconds);
-            GetWorldTimerManager().ClearTimer(TestShopTimer);
-            TestShopSales.Reset();
-        }
-        return;
-    }
-    GetWorldTimerManager().ClearTimer(TestShopTimer);
-    FinishTestShop();
+    const bool bStarted = BeginTestTeleport(StandX, StandY, FRotator(0.0, FMath::UnwindDegrees(Shop->counterYaw + 180.0), 0.0),
+        TEXT("SELLAT"), [this]() { FinishTestShop(); });
+    if (!bStarted) TestShopSales.Reset();
 }
 
 void AHomesteadController::FinishTestShop()
 {
     const TArray<FTestShopSale> Sales = MoveTemp(TestShopSales);
     TestShopSales.Reset();
-    if (AHomesteadCharacter* Heroine = Cast<AHomesteadCharacter>(GetPawn()))
-    {
-        Heroine->SetActorRotation(FRotator(0.0, TestShopFacing.Yaw, 0.0));
-        Heroine->SetRestingViewRotation(TestShopFacing);
-        Heroine->SnapCamera();
-    }
-    SetControlRotation(TestShopFacing);
 
     const Homestead::Shop* Shop = Sim.FindShop(TestShopId);
     if (const AHomesteadGeneralStore* Store = Stores.IsEmpty() ? nullptr : Stores[0].Get())
