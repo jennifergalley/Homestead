@@ -15,10 +15,14 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Configuration: Development
 - Ships:
 - Existing saves load in this build.
-- A mine house and shallow tunnel level open off the estate, reached through a trapdoor and ladder down a dark shaft.
-- Mining with the pickaxe yields random gems and ore; nodes refill over time and sell at the store.
-- The tunnels are dark except right at her face, with signs marking the way and grass squares clearing out near the entrance.
-- Foot placement on uneven mine floors no longer kerbs her toes through the ground.
+- A granite engine house stands at the mine site on open grassland, with a desk, a lamp that never goes out, a pile of stone to take, and a trapdoor in the floor.
+- The trapdoor and ladder lead down to a dark tunnel level where only her oil lamp lights the way.
+- Twenty rock faces give plenty of stone for the manor and come back every morning; coal seams and copper veins come back every few days.
+- Quartz and amethyst turn up at random while mining.
+- The general store buys coal, copper ore, quartz and amethyst.
+- Mining needs light at the face, from the lamp in her hand or one set down close by.
+- Running out of energy underground wakes her in the mine house, rested, with nothing lost.
+- A fingerpost by the manor now points "To the mine", and the signs share one style.
 - Admitted: Mine Art `1d9c16bf2`, Mine Gameplay `d26cccaae` (includes Test Tools' 4 mine-aware
   `goto` commits), plus the already-merged Test Tools agent tooling (`f86eb6d9b`, agent test
   tooling only, no gameplay/save change).
