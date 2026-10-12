@@ -39,14 +39,16 @@ SOURCES = {
 # Material instances: slot (Blender material name) -> surface and parameters.
 #   tiles: texture repeats a metre; tint: linear multiplier; vc: how much the per-piece tint applies;
 #   normal: normal-map strength; rough: (scale, bias); macro: low-frequency break-up; grime: foot band strength.
+# Tints lean a little away from green: the house stands in tall meadow grass, whose bounce light tinted the pale
+# limewash and granite yellow-green in review (Jenny, Balance: "too green", "limewash reads yellow-green").
 INSTANCES = {
-    "M_MineHouseStone": ("Granite", dict(tiles=0.9, tint=(1.0, 0.98, 0.95), sat=0.55, vc=1.0, normal=1.0,
+    "M_MineHouseStone": ("Granite", dict(tiles=0.9, tint=(1.85, 1.55, 1.58), sat=0.12, vc=1.0, normal=1.0,
                                          rough=(1.0, 0.0), macro=0.35, grime=0.45)),
-    "M_MineHouseShaftStone": ("Granite", dict(tiles=0.9, tint=(0.55, 0.53, 0.50), sat=0.4, vc=1.0, normal=1.0,
+    "M_MineHouseShaftStone": ("Granite", dict(tiles=0.9, tint=(0.55, 0.53, 0.50), sat=0.1, vc=1.0, normal=1.0,
                                               rough=(0.9, 0.0), macro=0.3, grime=0.0)),
-    "M_MineHouseMortar": ("Mortar", dict(tiles=1.2, tint=(0.46, 0.45, 0.43), sat=0.5, vc=0.0, normal=1.0,
+    "M_MineHouseMortar": ("Mortar", dict(tiles=1.2, tint=(0.62, 0.53, 0.56), sat=0.0, vc=0.0, normal=1.0,
                                          rough=(1.0, 0.05), macro=0.4, grime=0.6)),
-    "M_MineHouseLimewash": ("Limewash", dict(tiles=1.1, tint=(0.90, 0.89, 0.85), sat=0.35, vc=0.0, normal=1.0,
+    "M_MineHouseLimewash": ("Limewash", dict(tiles=1.1, tint=(0.82, 0.76, 0.96), sat=0.0, vc=0.0, normal=1.0,
                                              rough=(1.0, 0.0), macro=0.35, grime=0.5)),
     "M_MineHouseBrick": ("Brick", dict(tiles=2.5, tint=(1.15, 0.62, 0.45), sat=1.0, vc=1.0, normal=0.8,
                                        rough=(1.0, 0.0), macro=0.2, grime=0.0)),
@@ -61,22 +63,26 @@ INSTANCES = {
     "M_MineHouseBeams": ("Timber", dict(tiles=0.6, tint=(0.62, 0.54, 0.46), sat=0.8, vc=1.0, normal=1.0,
                                         rough=(1.0, 0.0), macro=0.3, grime=0.0)),
     # Joinery (kit primitives, no metric UVs): world-aligned triplanar.
-    "M_MineHousePaint": ("Limewash", dict(tiles=1.4, tint=(0.36, 0.11, 0.07), sat=1.0, vc=0.0, normal=0.7,
-                                          rough=(0.8, 0.1), macro=0.25, grime=0.3, tri=1.0)),
+    # Jenny: frames "bright orange-red like rusted metal; should be weathered or painted wood".
+    "M_MineHousePaint": ("Timber", dict(tiles=1.0, tint=(0.62, 0.50, 0.40), sat=0.45, vc=0.0, normal=1.0,
+                                         rough=(1.0, 0.0), macro=0.3, grime=0.3, tri=1.0)),
     "M_MineHouseWeatherboard": ("Timber", dict(tiles=0.8, tint=(0.80, 0.76, 0.70), sat=0.45, vc=0.0, normal=1.0,
                                                rough=(1.0, 0.0), macro=0.3, grime=0.3, tri=1.0)),
-    "M_MineHouseIron": ("Slate", dict(tiles=3.0, tint=(0.40, 0.26, 0.18), sat=1.0, vc=0.0, normal=0.6,
+    "M_MineHouseIron": ("Slate", dict(tiles=3.0, tint=(0.26, 0.21, 0.18), sat=1.0, vc=0.0, normal=0.6,
                                       rough=(0.7, 0.15), macro=0.2, grime=0.0, tri=1.0)),
     # The furnishing (whole meshes, see WHOLE_MESHES).
     "M_MineFurnitureWood": ("Boards", dict(tiles=1.3, tint=(0.80, 0.66, 0.52), sat=0.9, vc=0.0, normal=0.8,
                                            rough=(0.9, 0.0), macro=0.25, grime=0.0, tri=1.0)),
+    "M_MinePileStone": ("Granite", dict(tiles=1.4, tint=(1.85, 1.55, 1.58), sat=0.12, vc=0.0, normal=1.0,
+                                        rough=(1.0, 0.0), macro=0.3, grime=0.0, tri=1.0)),
     "M_MineLidBoards": ("Boards", dict(tiles=0.6, tint=(0.95, 0.85, 0.75), sat=0.9, vc=0.0, normal=1.0,
                                        rough=(1.0, 0.0), macro=0.35, grime=0.0, tri=1.0)),
 }
 # Meshes whose every slot takes one instance (baked props that read better in the photoscans).
 WHOLE_MESHES = {"/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineDesk": "M_MineFurnitureWood",
                 "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineChair": "M_MineFurnitureWood",
-                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorLid": "M_MineLidBoards"}
+                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorLid": "M_MineLidBoards",
+                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineRockPile": "M_MinePileStone"}
 MESHES = ["SM_MineHouseWallE", "SM_MineHouseWallW", "SM_MineHouseWallN", "SM_MineHouseWallS", "SM_MineHouseStack",
           "SM_MineHouseShaft", "SM_MineHouseRoof", "SM_MineHouseFloors", "SM_MineHouseJoinery"]
 MESH_DEST = "/Game/SurvivalGame/Environment/Props/MineHouse"
@@ -270,15 +276,17 @@ def build_parent(unreal):
     grime_colour.set_editor_property("parameter_name", "GrimeColor")
     grime_colour.set_editor_property("default_value", unreal.LinearColor(0.32, 0.27, 0.20, 1))
 
-    c1 = node(unreal.MaterialExpressionMultiply, -700, -900)
-    link(base, "", c1, "A")
-    link(tint, "", c1, "B")
+    # Desaturate the photo first, then tint, so the tint sets the hue (a tint applied before a strong
+    # desaturation only changed the brightness).
     saturated = custom("Saturation", SATURATION_CODE, ("C", "S"), unreal.CustomMaterialOutputType.CMOT_FLOAT3,
-                       -620, -1000)
-    link(c1, "", saturated, "C")
+                       -760, -1000)
+    link(base, "", saturated, "C")
     link(scalar("Saturation", 1.0, -1300), "", saturated, "S")
+    c1 = node(unreal.MaterialExpressionMultiply, -650, -900)
+    link(saturated, "", c1, "A")
+    link(tint, "", c1, "B")
     c2 = node(unreal.MaterialExpressionMultiply, -550, -900)
-    link(saturated, "", c2, "A")
+    link(c1, "", c2, "A")
     link(vc, "", c2, "B")
     c3 = node(unreal.MaterialExpressionMultiply, -400, -900)
     link(c2, "", c3, "A")

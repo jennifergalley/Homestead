@@ -31,7 +31,9 @@ TUNNELS, TUNNELS_BLOCKOUT = f"{PROPS}/MineTunnels/SM_MineTunnels", f"{PROPS}/Min
 FURNISHING_SET = f"{PROPS}/MineFurnishing"
 GLASS_MATERIAL = f"{PROPS}/OilLamp/MI_OilLampGlass"
 FLAME_MATERIAL = f"{PROPS}/OilLamp/MI_OilLampFlame"
-DESK_LAMP_LIGHT = {"intensity_cd": 18.0, "radius_cm": 650.0, "temperature_k": 2100.0}
+# A short reach: the lamp lights the table and the rock pile; past that, daylight. A 6.5 m reach washed the whole
+# limewashed room orange-yellow by day (Jenny and Balance: "the limewash reads yellow-green").
+DESK_LAMP_LIGHT = {"intensity_cd": 14.0, "radius_cm": 320.0, "temperature_k": 2100.0}
 
 
 def exists(path):

@@ -72,7 +72,10 @@ def keep_mask(rec):
     drop |= shrub & ((d_house < YARD_CLEAR_M * 0.85) | (d_path < PATH_CLEAR_M * 0.5))
     drop |= ~np.isin(kind, list(GRASS_KINDS)) & (d_house < GRASS_ONLY_M)
     inside = (np.abs(p[:, 0] - hx) < L.OUT_X / 2 + HOUSE_MARGIN_M) & (np.abs(p[:, 1] - hy) < L.OUT_Y / 2 + HOUSE_MARGIN_M)
-    return ~(drop | inside)
+    # Scripts/Mine/mine_flowers.py's wildflowers (tagged MF1) are the yard's own planting; keep them.
+    ours = rec["pad"] == np.frombuffer(b"MF1", dtype="u1")
+    ours = ours.all(axis=1) if ours.ndim == 2 else ours
+    return ~(drop | inside) | ours
 
 
 def main():

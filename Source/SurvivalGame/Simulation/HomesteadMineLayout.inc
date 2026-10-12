@@ -17,7 +17,7 @@ MINE_LADDER_FOOT(-40690.0, -72200.0, 800.0, 0.00)
 // The rock pile's centre on the floor (a one-time 25 stone).
 MINE_PILE(-41245.0, -72040.0, 5618.0)
 // The desk lamp's flame (it burns forever and can't be taken).
-MINE_DESK_LAMP(-41098.0, -72240.0, 5716.0)
+MINE_DESK_LAMP(-41098.0, -72155.0, 5716.0)
 // The top of the shaft above the ladder chamber (daylight comes down it by day).
 MINE_DAYLIGHT(-40800.0, -72200.0, 2140.0)
 // Nodes: id, kind, ground point of the face, yaw it faces, unit normal into the gallery.

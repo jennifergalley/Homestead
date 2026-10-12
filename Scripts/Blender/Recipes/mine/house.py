@@ -18,6 +18,7 @@ RING = 0.30                   # voussoir ring depth (m); the big bob-wall arch t
 RING_BIG = 0.42
 JAMB = (0.26, 0.42)           # jamb quoins, short and long (m)
 QUOIN = (0.42, 0.72)          # corner quoins, short and long (m)
+QUOIN_PROUD = 0.02            # corner quoins stand this far proud of the wall plane (m)
 SILL_H, SILL_PROUD = 0.12, 0.05
 MORTAR_RECESS = 0.028
 BOTTOM = -0.35                # buried footing course
@@ -159,14 +160,38 @@ def _cells(a, b, length, rng, joints_below, min_last=0.16):
     return cells
 
 
-def _stone(m, wall, ua, ub, za, zb, depth, normal, mat, rng, bulge=(0.004, 0.022), max_out=0.016):
-    angle = rng.normal(0.0, math.radians(2.0))
+# Jenny (review 3): "stones look like flat tiles stuck on smooth plaster, with far too much flat mortar between
+# them. Real rubble walls are packed stone with thin, recessed mortar joints (stones should have depth/relief;
+# use pinning stones in gaps)". So the stones fill their cells (squarer outlines, at most one spall cut, a finer
+# outline), stand proud of the recessed joints by 2-5 cm, and pinning stones plug the gaps where joints meet.
+STONE_BULGE = (0.014, 0.038)
+STONE_OUT = 0.04
+STONE_EXPONENT = (9.0, 16.0)
+PIN_CHANCE = 0.55
+
+
+def _stone(m, wall, ua, ub, za, zb, depth, normal, mat, rng, bulge=STONE_BULGE, max_out=STONE_OUT):
+    angle = rng.normal(0.0, math.radians(1.5))
     hu = (ub - ua) / 2 - JOINT / 2 - abs(angle) * (zb - za) * 0.5
-    hv = max((zb - za) / 2 - JOINT / 2 - rng.uniform(0.0, 0.01) - abs(angle) * (ub - ua) * 0.5, 0.03)
-    cz = za + JOINT / 2 + hv + rng.uniform(0.0, 0.004)
+    hv = max((zb - za) / 2 - JOINT / 2 - rng.uniform(0.0, 0.005) - abs(angle) * (ub - ua) * 0.5, 0.03)
+    cz = za + JOINT / 2 + hv + rng.uniform(0.0, 0.003)
     up = np.array([0.0, 0.0, 1.0]) * math.cos(angle) + wall.u_dir() * math.sin(angle)
     m.pillow(wall.p((ua + ub) / 2, cz, depth), normal, up, hu, hv, mat=mat, bulge=rng.uniform(*bulge),
-             max_out=max_out)
+             max_out=max_out, exponent=rng.uniform(*STONE_EXPONENT), cuts=(0, 1), sides=22, roll=0.008,
+             relief=0.012)
+
+
+def _pins(m, wall, joints, z0, z1, depth, normal, mat, rng):
+    """Pinning stones (spalls) driven into the joints where a course's vertical joints meet the bed joints."""
+    for u in joints:
+        for z, sign in ((z0, 1.0), (z1, -1.0)):
+            if rng.random() > PIN_CHANCE:
+                continue
+            hu, hv = rng.uniform(0.028, 0.055), rng.uniform(0.018, 0.034)
+            centre = wall.p(u + rng.normal(0.0, 0.01), z + sign * rng.uniform(0.0, 0.02), depth)
+            up = np.array([0.0, 0.0, 1.0])
+            m.pillow(centre, normal, up, hu, hv, mat=mat, bulge=rng.uniform(0.004, 0.012), max_out=0.012,
+                     recess=(-0.016, -0.006), cuts=(1, 2), sides=10, roll=0.004, skirt=0.03)
 
 
 def rubble(m, wall, z0, z1, intervals, rng, joints_below, inner=False):
@@ -188,6 +213,7 @@ def rubble(m, wall, z0, z1, intervals, rng, joints_below, inner=False):
                         _stone(m, wall, sa, sb, c, d, depth, normal, mat, rng)
             else:
                 _stone(m, wall, ua, ub, z0, z1, depth, normal, mat, rng)
+        _pins(m, wall, [ub for _, ub in cells[:-1]], z0, z1, depth, normal, mat, rng)
         out += [ub for _, ub in cells[:-1]]
     return out
 
@@ -210,8 +236,9 @@ def corner_quoins(m, wall, k, z0, z1, rng):
         along = corner_extent(wall, k, end)
         across = QUOIN[1] if k % 2 else QUOIN[0]
         s = wall.n[1]
-        x0, x1 = sorted((x_out, x_out - end * along))
-        y0, y1 = sorted((wall.outer, wall.outer - s * across))
+        # Dressed quoins stand a little proud of the rubble's general face, as the long-and-short work does.
+        x0, x1 = sorted((x_out + end * QUOIN_PROUD, x_out - end * along))
+        y0, y1 = sorted((wall.outer + s * QUOIN_PROUD, wall.outer - s * across))
         m.block(np.array([x0, y0, z0 + JOINT / 2]), np.array([x1, y1, z1 - JOINT / 2]), mat=MAT_STONE,
                 radius=0.02, relief=0.003, step=0.2, bulge=0.006 * rng.uniform(0.5, 1.0),
                 skip=(("z", -1), ("z", 1)))
@@ -278,8 +305,10 @@ def arch_band(m, wall, c, spring, r0, r1, mat, segs=28):
 def mortar_core(m, wall):
     """Lime-mortar core between the faces, recessed behind them, with the openings left open."""
     d0, d1 = MORTAR_RECESS, wall.t - MORTAR_RECESS
-    u0 = wall.u0 + (0.0 if wall.key in ("+Y", "-Y") else L.WALL)
-    u1 = wall.u1 - (0.0 if wall.key in ("+Y", "-Y") else L.WALL)
+    # The N/S cores stop the recess short of the corners: flush ends showed flat mortar through the quoins
+    # (Jenny: "the corners have no quoins: there's flat render where big dressed corner stones should be").
+    u0 = wall.u0 + (MORTAR_RECESS if wall.key in ("+Y", "-Y") else L.WALL)
+    u1 = wall.u1 - (MORTAR_RECESS if wall.key in ("+Y", "-Y") else L.WALL)
     if wall.key == "-X":
         u1 = stack_box()[2]
     if wall.key == "+Y":

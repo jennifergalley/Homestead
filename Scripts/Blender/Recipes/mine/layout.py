@@ -76,9 +76,9 @@ TRAPDOOR_LAP = 0.05                        # the lid overlaps the opening this m
 SHAFT_WALL = 0.40                          # the shaft lining round the opening (fills the holed quads)
 SHAFT_DEPTH_SHOWN = 6.0                    # the shaft drawn under the trapdoor before it fades to black
 DESK = {"centre": (-0.80, 0.0), "size": (0.80, 1.40, 0.78), "yaw": 0.0}   # free-standing, long side across the room
-LAMP_ON_DESK = (-0.98, -0.40, FLOOR_Z + 0.78)   # base of the desk lamp
+LAMP_ON_DESK = (-0.98, 0.45, FLOOR_Z + 0.78)    # base of the desk lamp, at the pile's end so it lights the heap (Balance)
 CHAIR = {"centre": (-1.55, 0.25), "yaw": 15.0}   # behind the desk, facing the door
-ROCK_PILE = {"centre": (IN_W + 0.75, IN_Y - 0.70), "radius": 0.85, "height": 0.95}
+ROCK_PILE = {"centre": (IN_W + 0.75, IN_Y - 0.70), "radius": 0.85, "height": 1.15}   # a clear heap (Balance)
 ROCK_PILE_PICKUP = (-1.45, 1.15)          # where she stands to take the stone (walkable)
 
 def house_to_world(x, y, z=0.0):
@@ -247,7 +247,7 @@ def dressing():
     fur = f"{PROPS}/MineFurnishing"
     out.append(("MineDesk", f"{fur}/SM_MineDesk", "house", (*DESK["centre"], FLOOR_Z), 180.0))
     out.append(("MineChair", f"{fur}/SM_MineChair", "house", (*CHAIR["centre"], FLOOR_Z), CHAIR["yaw"]))
-    out.append(("MineLedger", f"{fur}/SM_MineLedger", "house", (DESK["centre"][0] - 0.18, 0.2, FLOOR_Z + DESK["size"][2]), 176.0))
+    out.append(("MineLedger", f"{fur}/SM_MineLedger", "house", (DESK["centre"][0] - 0.18, -0.25, FLOOR_Z + DESK["size"][2]), 176.0))
     out.append(("MineRockPile", f"{fur}/SM_MineRockPile", "house", (*ROCK_PILE["centre"], FLOOR_Z), 0.0))
     # Store props by the door: a crate, a barrel and sacks (shared with the general store's kit).
     out.append(("MineCrate", f"{PROPS}/StoreCrate/SM_Store_Crate", "house", (IN_E - 0.55, IN_Y - 0.45, FLOOR_Z), 8.0))
