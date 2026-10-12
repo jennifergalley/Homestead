@@ -29,12 +29,16 @@ bool Simulation::LampLightsWork(Point point) const
 
 bool Simulation::SetDownLampLights(Point point) const
 {
-    const WorldDrop* lamp = SetDownLampDrop();
-    if (!lamp || state_.lampOilHours <= 0.0) return false;
+    if (state_.lampOilHours <= 0.0) return false;
     // The same floor of light the mine's lamp visibly pools to; beyond it the face is too dark to work.
     constexpr double WorkLightLux = 0.2;
     static const double reach = LampReachCm(MineOilLampLight, WorkLightLux);
-    return std::hypot(point.x - lamp->position.x, point.y - lamp->position.y) <= reach;
+    // Any set-down lamp will do, not just the first in the list.
+    for (const auto& drop : state_.worldDrops)
+        if (drop.wearableId == 0 && drop.item == Item::OilLamp && drop.quantity > 0
+            && std::hypot(point.x - drop.position.x, point.y - drop.position.y) <= reach)
+            return true;
+    return false;
 }
 
 void Simulation::BurnLamp(double hours, bool sleeping)

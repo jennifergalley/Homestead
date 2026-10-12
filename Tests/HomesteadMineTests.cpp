@@ -309,9 +309,10 @@ void TheHouseFootprintIsNotTheTunnels()
     CHECK(!Mine::InHouse({house.x, house.y}, layout.ladderFoot.z + 100.0));
     CHECK(Mine::IsUnderground({layout.ladderFoot.x, layout.ladderFoot.y}, layout.ladderFoot.z + 100.0)
         && !Mine::IsUnderground({house.x, house.y}, house.z + 150.0));
-    // Past the walls, on the yard, is not.
-    CHECK(!Mine::InHouse({house.x + Mine::HouseHalfLengthCm + 50.0, house.y}, house.z + 150.0));
-    CHECK(!Mine::InHouse({house.x, house.y + Mine::HouseHalfWidthCm + 50.0}, house.z + 150.0));
+    // Past the walls and the doorstep margin, on the yard, is not.
+    CHECK(Mine::InHouse({house.x + Mine::HouseHalfLengthCm + Mine::HouseSettleMarginCm - 10.0, house.y}, house.z + 150.0));
+    CHECK(!Mine::InHouse({house.x + Mine::HouseHalfLengthCm + Mine::HouseSettleMarginCm + 50.0, house.y}, house.z + 150.0));
+    CHECK(!Mine::InHouse({house.x, house.y + Mine::HouseHalfWidthCm + Mine::HouseSettleMarginCm + 50.0}, house.z + 150.0));
 }
 
 void StonePileIsOneTime()
@@ -496,6 +497,15 @@ void MiningRefusesAFaceBeyondTheSetDownLamp()
     CHECK(!dark.ok && dark.message == "Too dark \xE2\x80\x93 bring the lamp closer.");
     const int stone = sim.Count(Item::Stone);
     CHECK(!Swing(sim, rock).ok && sim.Count(Item::Stone) == stone);
+
+    // A second lamp set down beside the face lights it, whichever lamp was set down first.
+    CHECK(sim.GrantItems(Item::OilLamp, 1).ok);
+    Point near = At(rock);
+    near.x += 100.0;
+    CHECK(sim.SetDownLamp(near, near).ok);
+    sim.SetLampInHand(false);
+    CHECK(sim.LampLightsWork(At(rock)));
+    CHECK(Swing(sim, rock).ok);
 }
 }
 

@@ -32,6 +32,9 @@ constexpr double StuckBelowFloorCm = 300.0;       // Below the lowest floor by t
 // ground floor (boards sit 18 cm above the house z) up through the roof.
 constexpr double HouseHalfLengthCm = 450.0;
 constexpr double HouseHalfWidthCm = 300.0;
+// The doorstep boards run past the walls over holed landscape, so the settle treats a margin round the footprint
+// as the house too (the threshold at the east gable sat 10 cm outside the bare footprint and held a teleport 80 s).
+constexpr double HouseSettleMarginCm = 120.0;
 constexpr double HouseBelowCm = 100.0;
 constexpr double HouseAboveCm = 600.0;
 // Too tired to swing even the cheapest node (a worn-pickaxe coal seam costs 2.0 on top of the Reserve): she is

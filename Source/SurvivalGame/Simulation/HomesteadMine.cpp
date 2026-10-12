@@ -150,7 +150,8 @@ bool InHouse(Point p, double z)
 {
     const Spot& house = GetLayout().house;
     if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(z)) return false;
-    return std::abs(p.x - house.x) <= HouseHalfLengthCm && std::abs(p.y - house.y) <= HouseHalfWidthCm
+    return std::abs(p.x - house.x) <= HouseHalfLengthCm + HouseSettleMarginCm
+        && std::abs(p.y - house.y) <= HouseHalfWidthCm + HouseSettleMarginCm
         && z >= house.z - HouseBelowCm && z <= house.z + HouseAboveCm;
 }
 
