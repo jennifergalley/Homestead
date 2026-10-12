@@ -123,6 +123,8 @@ Prefer `goto <name or id>` over these numbers.
 ## Gotchas
 
 - `HomesteadTeleport` and its wrappers refuse while a ground snap is pending. `goto`/`use`/`sellat` now log `refused: still being placed ... (pending for N s)` instead of silently doing nothing; Interact and hotbar keys pressed during a snap are dropped with only the "Still finding your footing" toast, so wait for `arrived` first.
+- Underground work needs light at the face: `use "node:N Pickaxe"` returns `Too dark to work` (toast) while the lamp is not lit. Set the lamp down first with `use "node:N OilLamp"` (it stays lit on the floor beside her), then swing the pickaxe; a worn pickaxe takes 3 swings on a rock face (verified: Stone +5, then `Nothing left here until it comes back`). `state.lamp` shows `lit`.
+- `goto` to a surface point where the settle never completes (inside the mine house) takes the full 90 s and then logs `FAILED: ended at (...)`; the wrapper returns that line. Don't wait on it twice: stand in the yard (`goto mine`) and walk in.
 - `goto` waits up to 90 s for the area to stream in. If the snap is abandoned (she is put back where she started) it logs `FAILED: ended at ... not the target` rather than `arrived`; never trust a `goto` whose result line you did not read.
 - The teleport settle needs both floor collision and landscape collision (underground it needs only the tunnel floor). A target inside a surface building with a holed landscape never settles (`HOMESTEAD_GROUND_HOLD floor=1 landscape=0` in the log): stand outside (`goto mine`) and walk in, until the settle treats that footprint like the sea cave.
 - Don't use `walk_to` for testing: it stops ~150 cm short and sticks on walls, doors and trees, and an open field book blocks it.

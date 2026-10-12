@@ -117,16 +117,20 @@ bool AHomesteadController::BeginTestTeleport(double X, double Y, const FRotator&
         const FRotator Face = Facing;
         const TFunction<void()> Next = Then;
         const TFunction<void()> OnFailed = Failed;
+        const FString Label = TagText;
+        const double TargetX = X;
+        const double TargetY = Y;
+        const bool bNeedsUnderground = bUnderground;
         GetWorldTimerManager().ClearTimer(TestTeleportTimer);
         // An abandoned ground snap puts her back where she started: that is a failed trip, not an arrival.
         const Homestead::Point Now = PlayerPoint();
         const APawn* Avatar = GetPawn();
-        const bool bPlaced = FMath::Sqrt(FMath::Square(Now.x - X) + FMath::Square(Now.y - Y)) <= TestGoto::ArrivalToleranceCm
-            && (!bUnderground || (Avatar && Homestead::Mine::IsUnderground(Now, Avatar->GetActorLocation().Z)));
+        const bool bPlaced = FMath::Sqrt(FMath::Square(Now.x - TargetX) + FMath::Square(Now.y - TargetY)) <= TestGoto::ArrivalToleranceCm
+            && (!bNeedsUnderground || (Avatar && Homestead::Mine::IsUnderground(Now, Avatar->GetActorLocation().Z)));
         if (!bPlaced)
         {
             UE_LOG(LogHomesteadPlaytest, Error, TEXT("%s: FAILED: ended at (%.0f, %.0f, z %.0f), not the target (%.0f, %.0f)%s. The ground snap was abandoned (look for HOMESTEAD_GROUND_TIMEOUT in the log), so she is back where she started."),
-                *TagText, Now.x, Now.y, Avatar ? Avatar->GetActorLocation().Z : 0.0, X, Y, bUnderground ? TEXT(" underground") : TEXT(""));
+                *Label, Now.x, Now.y, Avatar ? Avatar->GetActorLocation().Z : 0.0, TargetX, TargetY, bNeedsUnderground ? TEXT(" underground") : TEXT(""));
             if (OnFailed) OnFailed();
             return;
         }
