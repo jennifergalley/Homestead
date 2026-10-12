@@ -88,6 +88,10 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   them all (MineFill 0.075), so the cards were withdrawn; the unlit re-shot is due at its v3 pass.
   Jenny then chose MineFill 0.05: judge the re-shot at 0.05 (outlines of walls, timbers and rails
   faintly readable, the way out findable).
+- 2026-10-11: Mine Art (029d7c8b) house look check: the engine-house form is OK (Jenny chose it for
+  D5). Blocking: green cast on the stone outside and on the limewash inside, mortar smears and the
+  bare apron, the 25-stone pile unreadable, flowers at the wall foot and path. Cards to send after
+  its re-shots: yard dressing, wood-brown frames, homely interior props.
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
