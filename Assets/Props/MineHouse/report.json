@@ -1,0 +1,1415 @@
+{
+  "schema": 1,
+  "name": "MineHouse",
+  "description": "Granite engine house (mine house): rubble walls with dressed quoins and arches, bob wall, corner stack, slate roof, boarded floors with the trapdoor's opening, the shaft below, joinery and glass.",
+  "collision": "none",
+  "triangle_budget": 3500000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/mine_house.py",
+  "source_sha256": "8e24d7c922dd9a7748c2cfa2cea8a34384dc8b801594ac0c300ebebca5f2f291",
+  "provenance": "Original project-authored procedural geometry; surfaces from CC0 Poly Haven photoscans (Assets/Props/MineSurfaces/CREDITS.json) or, with HOMESTEAD_MINE_PHOTO=0, procedural bakes.",
+  "meshes": {
+    "SM_MineHouseWallE": {
+      "vertices": 86931,
+      "triangles": 154701,
+      "size_cm": [
+        80.91,
+        628.15,
+        1226.71
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallE.fbx",
+      "sha256": "e265184f71ed590beb08e6a0864dfa1702c567f178a9d4d63438847d644b5de2"
+    },
+    "SM_MineHouseWallE_LOD1": {
+      "vertices": 32935,
+      "triangles": 54144,
+      "size_cm": [
+        80.82,
+        628.15,
+        1226.71
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallE_LOD1.fbx",
+      "sha256": "c0edfd1da44f09c992b347ad83d97295f855b61af511330ce24b883a4500929b"
+    },
+    "SM_MineHouseWallE_LOD2": {
+      "vertices": 12700,
+      "triangles": 18564,
+      "size_cm": [
+        80.71,
+        628.2,
+        1226.48
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallE_LOD2.fbx",
+      "sha256": "9d8c33dd41aa4c05780ff0fc4c12fa9cc233fc3ab884dc5d101745811f9585c5"
+    },
+    "SM_MineHouseWallW": {
+      "vertices": 73675,
+      "triangles": 131042,
+      "size_cm": [
+        135.74,
+        628.44,
+        1225.6
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallW.fbx",
+      "sha256": "a50127b37b8ee1f16036bb00b6ef51907aa6a8a7fdd4a984812e8144f9bffc28"
+    },
+    "SM_MineHouseWallW_LOD1": {
+      "vertices": 27865,
+      "triangles": 45864,
+      "size_cm": [
+        135.74,
+        628.44,
+        1225.56
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallW_LOD1.fbx",
+      "sha256": "53a503a8b85b147234577765d8c3a86d8170a8a5aed02b799a37a391548207b1"
+    },
+    "SM_MineHouseWallW_LOD2": {
+      "vertices": 10634,
+      "triangles": 15725,
+      "size_cm": [
+        135.61,
+        628.53,
+        1225.7
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallW_LOD2.fbx",
+      "sha256": "8c148bf291ec25f577d49966dab7aa380de325a546e72c2edcf7da8a8c01c0bc"
+    },
+    "SM_MineHouseWallN": {
+      "vertices": 119886,
+      "triangles": 212009,
+      "size_cm": [
+        772.29,
+        77.46,
+        988.54
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallN.fbx",
+      "sha256": "40885747a36f616f2476a3e7a872598d2575f325bb365eebab672476b5e1a41c"
+    },
+    "SM_MineHouseWallN_LOD1": {
+      "vertices": 45548,
+      "triangles": 74203,
+      "size_cm": [
+        772.24,
+        77.46,
+        988.54
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallN_LOD1.fbx",
+      "sha256": "0761b4a1a7bba57b565356fc3871a1bd8bc42eacc8501740b3c64756359b097c"
+    },
+    "SM_MineHouseWallN_LOD2": {
+      "vertices": 17676,
+      "triangles": 25440,
+      "size_cm": [
+        772.07,
+        76.93,
+        988.56
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallN_LOD2.fbx",
+      "sha256": "09f9e9a9bbd7459840a43fe62bb4f7ec0ce5f8bf536ac7640def2da117be6efd"
+    },
+    "SM_MineHouseWallS": {
+      "vertices": 131510,
+      "triangles": 232109,
+      "size_cm": [
+        904.4,
+        77.41,
+        988.64
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallS.fbx",
+      "sha256": "cd6b2852f83da205ac00c7f177af1399913887608aa6f7aea5fa5ead841bbf54"
+    },
+    "SM_MineHouseWallS_LOD1": {
+      "vertices": 50180,
+      "triangles": 81238,
+      "size_cm": [
+        904.39,
+        77.4,
+        988.42
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallS_LOD1.fbx",
+      "sha256": "a3a002b330655874dfd67a831ebefd1327fea583b901ba6790d31ab7f56b265a"
+    },
+    "SM_MineHouseWallS_LOD2": {
+      "vertices": 19607,
+      "triangles": 27852,
+      "size_cm": [
+        904.24,
+        76.79,
+        988.3
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseWallS_LOD2.fbx",
+      "sha256": "06cc1b065ed1a43fd914310752409fe4dc9cf4ed3e9efb23c08b3f3407ac1abd"
+    },
+    "SM_MineHouseStack": {
+      "vertices": 87044,
+      "triangles": 150885,
+      "size_cm": [
+        163.59,
+        163.57,
+        1737.18
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseStack.fbx",
+      "sha256": "faea3e7efc49181873e61cd84fc033113210c39f98805f3221f673c77ff34190"
+    },
+    "SM_MineHouseStack_LOD1": {
+      "vertices": 34727,
+      "triangles": 52808,
+      "size_cm": [
+        163.64,
+        163.59,
+        1737.17
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseStack_LOD1.fbx",
+      "sha256": "ed6a5b7b7d176fdeac764c74d82ac48e088bd37441c7c70e7839267dad97751a"
+    },
+    "SM_MineHouseStack_LOD2": {
+      "vertices": 14584,
+      "triangles": 18106,
+      "size_cm": [
+        163.57,
+        163.82,
+        1737.1
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseLimewash",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBrick",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseStack_LOD2.fbx",
+      "sha256": "c5b1af7a6fa0bd84b206d21cd137390e7b955435bea079b520571051d31ec876"
+    },
+    "SM_MineHouseRoof": {
+      "vertices": 48556,
+      "triangles": 92088,
+      "size_cm": [
+        933.4,
+        659.74,
+        308.03
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseSlate",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseDeck",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseRidge",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseRoof.fbx",
+      "sha256": "8b94695540e6b5813b83cb52e556a489145de9d9b479c36bdf02639dc8d41e1c"
+    },
+    "SM_MineHouseRoof_LOD1": {
+      "vertices": 18627,
+      "triangles": 32230,
+      "size_cm": [
+        933.4,
+        659.66,
+        308.09
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseSlate",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseDeck",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseRidge",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseRoof_LOD1.fbx",
+      "sha256": "6292c4de3e8ed91b044e74851c8d553a4363c6587e3f13b9c82475014ec41d8b"
+    },
+    "SM_MineHouseRoof_LOD2": {
+      "vertices": 8037,
+      "triangles": 11050,
+      "size_cm": [
+        933.4,
+        659.03,
+        308.49
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseSlate",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseDeck",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseRidge",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.92
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseRoof_LOD2.fbx",
+      "sha256": "4867630d1c0b931ff01eee1c054f304220f4c0e79ec615e4ecb7b92ad9a268ec"
+    },
+    "SM_MineHouseFloors": {
+      "vertices": 16272,
+      "triangles": 32100,
+      "size_cm": [
+        700.11,
+        490.18,
+        746.87
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseBoards",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBeams",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseTarredDeck",
+          "color": [
+            0.012,
+            0.01,
+            0.008
+          ],
+          "roughness": 0.95
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseFloors.fbx",
+      "sha256": "6c96ca49515dea618259908336c1e2f915bb3b405b3543d43b05031dcec30c6c"
+    },
+    "SM_MineHouseFloors_LOD1": {
+      "vertices": 5839,
+      "triangles": 11234,
+      "size_cm": [
+        700.1,
+        490.18,
+        746.86
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseBoards",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBeams",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseTarredDeck",
+          "color": [
+            0.012,
+            0.01,
+            0.008
+          ],
+          "roughness": 0.95
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseFloors_LOD1.fbx",
+      "sha256": "b69162b0a852e6913793b8cf55b49045f5dc709dd46441691de0a48807a953d1"
+    },
+    "SM_MineHouseFloors_LOD2": {
+      "vertices": 2148,
+      "triangles": 3852,
+      "size_cm": [
+        699.97,
+        490.13,
+        746.85
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseBoards",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseBeams",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseTarredDeck",
+          "color": [
+            0.012,
+            0.01,
+            0.008
+          ],
+          "roughness": 0.95
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseFloors_LOD2.fbx",
+      "sha256": "1a462f516001a28158b8c5c689520e1f1880748363b981cf89c16ccd806ab097"
+    },
+    "SM_MineHouseShaft": {
+      "vertices": 18151,
+      "triangles": 32203,
+      "size_cm": [
+        128.76,
+        128.44,
+        605.0
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseShaftStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseShaft.fbx",
+      "sha256": "801c8501266820fc77bd073e2aaad991155923d1623a8c577d0294b2c2ffa09a"
+    },
+    "SM_MineHouseShaft_LOD1": {
+      "vertices": 7182,
+      "triangles": 11270,
+      "size_cm": [
+        128.75,
+        128.44,
+        605.0
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseShaftStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseShaft_LOD1.fbx",
+      "sha256": "5c9775d6e3f4c8e8442e36909f6f2b9c7f1f249b6723bb04b89242735de75969"
+    },
+    "SM_MineHouseShaft_LOD2": {
+      "vertices": 2803,
+      "triangles": 3864,
+      "size_cm": [
+        128.58,
+        128.75,
+        605.0
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseShaftStone",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseMortar",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseShaft_LOD2.fbx",
+      "sha256": "e2581b0f70b7c6e58c6c440bbe5c26f3450861b405dad6768bbcacd990df3fc2"
+    },
+    "SM_MineHouseJoinery": {
+      "vertices": 7255,
+      "triangles": 14004,
+      "size_cm": [
+        856.5,
+        577.0,
+        946.22
+      ],
+      "materials": [
+        {
+          "name": "M_MineHousePaint",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseWeatherboard",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MineHouseIron",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseJoinery.fbx",
+      "sha256": "af8b9079ed44c94da21adcf601093aaf733425558bbf2a626d58363d1374146d"
+    },
+    "SM_MineHouseGlass": {
+      "vertices": 207,
+      "triangles": 189,
+      "size_cm": [
+        603.0,
+        568.0,
+        856.0
+      ],
+      "materials": [
+        {
+          "name": "M_MineHouseGlass",
+          "color": [
+            0.02,
+            0.025,
+            0.025
+          ],
+          "roughness": 0.05
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseGlass.fbx",
+      "sha256": "1ca2b07e25b2065afecc81211fed193c2f70222fa82a763953e598b2315bd52c"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "detail_textures": [
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_basecolor.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_normal.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_roughness.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_height.png"
+    ]
+  },
+  "nanite": true,
+  "pivot": "House origin on the mine yard (Anchor::MineEntrance); Unreal frame, yaw 0.",
+  "unreal_frame": "Authored in Unreal axes; Blender Y is negated."
+}

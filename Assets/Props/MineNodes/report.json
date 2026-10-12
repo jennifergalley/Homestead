@@ -1,0 +1,893 @@
+{
+  "schema": 1,
+  "name": "MineNodes",
+  "description": "Mine nodes: rock face, coal seam and copper vein, each with a spent state; pivot on the floor at the node socket, +X out of the wall.",
+  "collision": "box",
+  "triangle_budget": 900000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/mine_nodes.py",
+  "source_sha256": "f6c721a18c2d503fbdb11c7928ea1df4bbd9990731ed97e95b75da65cdeb7987",
+  "provenance": "Original project-authored procedural geometry; surfaces from CC0 Poly Haven photoscans in Unreal (Assets/Props/MineSurfaces/CREDITS.json).",
+  "meshes": {
+    "SM_MineRockFace": {
+      "vertices": 93873,
+      "triangles": 187716,
+      "size_cm": [
+        121.35,
+        158.84,
+        189.88
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
+          ],
+          "roughness": 0.85
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineRockFace.fbx",
+      "sha256": "6c68db1d996ef69ac20868a30f12fd8eafec6278e1a7c99cbbb9cf4c9c4e9042"
+    },
+    "SM_MineRockFace_LOD1": {
+      "vertices": 28172,
+      "triangles": 56314,
+      "size_cm": [
+        121.32,
+        158.86,
+        189.85
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
+          ],
+          "roughness": 0.85
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFace_LOD1.fbx",
+      "sha256": "9d4fc7feeca0345ebb8cdbe91a6b2046324f34b06be6bcae508cfd7b36443615"
+    },
+    "SM_MineRockFace_LOD2": {
+      "vertices": 7520,
+      "triangles": 15016,
+      "size_cm": [
+        121.33,
+        158.83,
+        189.91
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
+          ],
+          "roughness": 0.85
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFace_LOD2.fbx",
+      "sha256": "c8a906e209e59578acf2888956b525d8c83e96a2af90d571155ace93c67df451"
+    },
+    "SM_MineRockFaceSpent": {
+      "vertices": 94134,
+      "triangles": 188244,
+      "size_cm": [
+        141.52,
+        161.6,
+        193.9
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
+          ],
+          "roughness": 0.85
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineRockFaceSpent.fbx",
+      "sha256": "3195aef997f90c0c6a4c8bb00659d08f684a226bbf57068051af1b24a5c0bc6a"
+    },
+    "SM_MineRockFaceSpent_LOD1": {
+      "vertices": 28248,
+      "triangles": 56472,
+      "size_cm": [
+        141.54,
+        161.61,
+        193.93
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
+          ],
+          "roughness": 0.85
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFaceSpent_LOD1.fbx",
+      "sha256": "a624bdc51aa7210dfc4239dcc2a61fe9f7e3abf8ce3110d0efd5c3af5c36296c"
+    },
+    "SM_MineRockFaceSpent_LOD2": {
+      "vertices": 7541,
+      "triangles": 15058,
+      "size_cm": [
+        141.59,
+        161.61,
+        193.93
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeFresh",
+          "color": [
+            0.45,
+            0.43,
+            0.4
+          ],
+          "roughness": 0.85
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineRockFaceSpent_LOD2.fbx",
+      "sha256": "ccc8a4427ff6b2d7bbab1df91d01747112de19bfd1b4803cc1ae6ccec069edf7"
+    },
+    "SM_MineCoalSeam": {
+      "vertices": 81252,
+      "triangles": 162500,
+      "size_cm": [
+        70.68,
+        161.92,
+        193.75
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCoal",
+          "color": [
+            0.02,
+            0.02,
+            0.022
+          ],
+          "roughness": 0.25
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCoalSeam.fbx",
+      "sha256": "f7b2bea55721919b9ebdea9b2b441fd453b2b3089b4a1645772349f8690820d7"
+    },
+    "SM_MineCoalSeam_LOD1": {
+      "vertices": 24377,
+      "triangles": 48750,
+      "size_cm": [
+        70.69,
+        161.9,
+        193.75
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCoal",
+          "color": [
+            0.02,
+            0.02,
+            0.022
+          ],
+          "roughness": 0.25
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeam_LOD1.fbx",
+      "sha256": "ea5e20f214af17d57c232f58f3dd5956658a01d41c5885adf69aa86ad533a6b7"
+    },
+    "SM_MineCoalSeam_LOD2": {
+      "vertices": 6502,
+      "triangles": 13000,
+      "size_cm": [
+        70.73,
+        161.84,
+        193.78
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCoal",
+          "color": [
+            0.02,
+            0.02,
+            0.022
+          ],
+          "roughness": 0.25
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeam_LOD2.fbx",
+      "sha256": "cb6dd2567f775ca06db2e73bf3bd732c0b74470cd5b7f95eb209a39518193c29"
+    },
+    "SM_MineCoalSeamSpent": {
+      "vertices": 89644,
+      "triangles": 179264,
+      "size_cm": [
+        131.85,
+        157.59,
+        191.97
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCoal",
+          "color": [
+            0.02,
+            0.02,
+            0.022
+          ],
+          "roughness": 0.25
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCoalSeamSpent.fbx",
+      "sha256": "a68ae23c81c1549ad215e44714e3c5d9f214459a59ecfb8d9967ee73c7e33f9f"
+    },
+    "SM_MineCoalSeamSpent_LOD1": {
+      "vertices": 26901,
+      "triangles": 53778,
+      "size_cm": [
+        131.87,
+        157.58,
+        191.99
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCoal",
+          "color": [
+            0.02,
+            0.02,
+            0.022
+          ],
+          "roughness": 0.25
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeamSpent_LOD1.fbx",
+      "sha256": "735beab41f0a7e8d5f41829c9f4c261036a18fae6d7ae7c3ba61aa3c495bc812"
+    },
+    "SM_MineCoalSeamSpent_LOD2": {
+      "vertices": 7182,
+      "triangles": 14340,
+      "size_cm": [
+        131.88,
+        157.59,
+        191.98
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCoal",
+          "color": [
+            0.02,
+            0.02,
+            0.022
+          ],
+          "roughness": 0.25
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCoalSeamSpent_LOD2.fbx",
+      "sha256": "5b4609116d5e6e623fb87504f7de357a203dff51a9ce35be197f85619df2a47b"
+    },
+    "SM_MineCopperVein": {
+      "vertices": 78644,
+      "triangles": 157284,
+      "size_cm": [
+        70.71,
+        160.14,
+        177.73
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCopper",
+          "color": [
+            0.12,
+            0.3,
+            0.22
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineNodeStain",
+          "color": [
+            0.2,
+            0.27,
+            0.22
+          ],
+          "roughness": 0.7
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCopperVein.fbx",
+      "sha256": "651d4dcd9cfd22dbcf936923bf2df7e5e3ad43660b56b0e80db53e463f89189e"
+    },
+    "SM_MineCopperVein_LOD1": {
+      "vertices": 23594,
+      "triangles": 47184,
+      "size_cm": [
+        70.72,
+        160.13,
+        177.72
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCopper",
+          "color": [
+            0.12,
+            0.3,
+            0.22
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineNodeStain",
+          "color": [
+            0.2,
+            0.27,
+            0.22
+          ],
+          "roughness": 0.7
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVein_LOD1.fbx",
+      "sha256": "5aabd1edf05eee8faeee377341d2b935e4f50d85dc0be3d5b1b9169b2f8948d7"
+    },
+    "SM_MineCopperVein_LOD2": {
+      "vertices": 6293,
+      "triangles": 12582,
+      "size_cm": [
+        70.73,
+        160.1,
+        177.88
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCopper",
+          "color": [
+            0.12,
+            0.3,
+            0.22
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineNodeStain",
+          "color": [
+            0.2,
+            0.27,
+            0.22
+          ],
+          "roughness": 0.7
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVein_LOD2.fbx",
+      "sha256": "c8d4ee319741e5070ff4d377a712fdd8ec3ca42204095d980171c84e96c40d2f"
+    },
+    "SM_MineCopperVeinSpent": {
+      "vertices": 101596,
+      "triangles": 203160,
+      "size_cm": [
+        138.88,
+        167.19,
+        189.06
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCopper",
+          "color": [
+            0.12,
+            0.3,
+            0.22
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineNodeStain",
+          "color": [
+            0.2,
+            0.27,
+            0.22
+          ],
+          "roughness": 0.7
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.1,
+          0.0,
+          0.9
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_MineCopperVeinSpent.fbx",
+      "sha256": "886ec96cc9d415e36f2e0029de9b58e6b93c3faf580cceb8fcdd11ac89fc86df"
+    },
+    "SM_MineCopperVeinSpent_LOD1": {
+      "vertices": 30490,
+      "triangles": 60948,
+      "size_cm": [
+        138.91,
+        167.19,
+        189.06
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCopper",
+          "color": [
+            0.12,
+            0.3,
+            0.22
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineNodeStain",
+          "color": [
+            0.2,
+            0.27,
+            0.22
+          ],
+          "roughness": 0.7
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVeinSpent_LOD1.fbx",
+      "sha256": "2a71d45bc3c2309857800a96578fb107e222db8bd4f7ea4dee13f1f95963bcf1"
+    },
+    "SM_MineCopperVeinSpent_LOD2": {
+      "vertices": 8142,
+      "triangles": 16252,
+      "size_cm": [
+        138.92,
+        167.26,
+        189.07
+      ],
+      "materials": [
+        {
+          "name": "M_MineNodeRock",
+          "color": [
+            0.3,
+            0.29,
+            0.27
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineNodeCopper",
+          "color": [
+            0.12,
+            0.3,
+            0.22
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineNodeStain",
+          "color": [
+            0.2,
+            0.27,
+            0.22
+          ],
+          "roughness": 0.7
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MineCopperVeinSpent_LOD2.fbx",
+      "sha256": "ee3fee4fd9772016e3f2f50cff598480918d6edea0d73c5f051d053ff23251aa"
+    }
+  },
+  "warnings": [],
+  "pivot": "Node socket on the floor; +X faces into the gallery (place with the socket's yaw).",
+  "extent_m": {
+    "x": [
+      -0.75,
+      0.35
+    ],
+    "y": [
+      -1.0,
+      1.0
+    ],
+    "z": [
+      -0.06,
+      1.9
+    ]
+  }
+}

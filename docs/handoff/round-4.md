@@ -87,8 +87,14 @@ Plan: `openspec/changes/open-estate-mine-shallow-level` (decisions D1-D5 in its 
 | Balance Agent | `ceb1109b-f156-451c-b890-ca91fa92f1c1` | Claude Opus 5.5 / high | — | review only |
 | Integration Agent | `09ae4063-4f60-475e-bb88-7c6d6a7bbc7c` | Claude Sonnet 5 / medium | reserved slot | merge, package, promote |
 
-- Placement ids: Mine Art and Mine Gameplay share 588000-588199 (lanes record their use here).
+- Placement ids: Mine Art and Mine Gameplay share 588000-588199 (lanes record their use here). Mine Art: 588000-588099 (588000 rock pile, 588001 trapdoor, 588002 ladder foot, 588010-588029 rock faces, 588030-588035 coal, 588040-588043 copper, 588050-588052 gems; generated into `HomesteadMineLayout.inc` by `Scripts/Mine/mine_layout_inc.py`). Mine Gameplay: 588100-588199.
 - Heavy slots: slot 1 Mine Art, slot 2 Mine Gameplay; Integration takes priority when it builds.
 - Queued for Next once a slot frees: Quests, compost bin, [Balance] currants easier to spot, [Balance UI] dim price on Owned clothing, remove the building menu and wooden buildings, remove the controls hint bar (`jenny-mv448c92`).
 - Jenny wants frequent progress shots: lanes send `[progress] <milestone> <folder>`; Mine Art stops for her approval after the house blockout.
 | Test Tools Agent | `979b7777-3fce-47ab-9cb7-6b83b4410c7b` | Claude Sonnet 5.5 / high | — (no slot; Mine Gameplay builds/verifies) | open-store teleport-and-sell test helper |
+
+### Overnight delegation (Jenny, 2026-10-11 22:28)
+
+- Jenny: "Don't let perfect be the enemy of good enough - I'd rather have something shipped that I can play tomorrow and iterate on than wait until it's absolutely flawless before we integrate it into the game."
+- The Orchestrator approves review media on her behalf (ready evidence: "Orchestrator approved for Jenny, 2026-10-11 overnight"). Mine Art gets one timeboxed fix round on review 10; leftovers become follow-up cards.
+- Integration merges Mine Gameplay (with Test Tools' mine-aware goto commits) and Mine Art, then packages Development and promotes it as an interim delivery of the Next build. The other Next cards stay in Next.

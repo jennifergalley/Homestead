@@ -261,6 +261,9 @@ class Masonry:
         for attr_name, parts in self.extras.items():
             attr = mesh.attributes.new(attr_name, "FLOAT", "POINT")
             attr.data.foreach_set("value", np.concatenate(parts).astype(np.float32))
+        # Which add() call (stone, block, slate...) each vertex came from, for per-piece UV layouts.
+        attr = mesh.attributes.new("piece", "INT", "POINT")
+        attr.data.foreach_set("value", np.concatenate([np.full(len(v), i, np.int32) for i, v in enumerate(self.verts)]))
         for mat in materials:
             mesh.materials.append(mat)
         mesh.polygons.foreach_set("material_index", np.array(self.face_mats, dtype=np.int32))

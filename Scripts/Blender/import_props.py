@@ -271,7 +271,18 @@ COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "comple
                        # A box round SM_FarmGateway would wall off the open gateway.
                        "FarmFence": "complex", "VillageWell": "complex",
                        # She walks into, round and out of the sea cave on its own rock.
-                       "SeaCave": "complex"}
+                       "SeaCave": "complex",
+                       # She walks in through the mine house's door and along the mine's galleries.
+                       "MineHouseBlockout": "complex", "MineTunnelsBlockout": "complex", "MineTunnels": "complex",
+                       "MineHouse": "complex",
+                       # A hull round a timber set closed the gallery it frames (Mine Gameplay, 2026-10-11).
+                       "MineKit": "complex",
+                       # The trapdoor's collar frames an opening; the desk and chair are walked round, not hulls.
+                       "MineFurnishing": "complex",
+                       # Nodes stand into the gallery; a box would block her before she reaches the face.
+                       "MineNodes": "convex"}
+# Meshes with no collision at all, whatever their prop's kind (the mine's sump: she wades, not walks on it).
+NO_COLLISION_MESHES = {"SM_MineSumpWater"}
 # Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.
 COLLISION_LOD = {"StoneDoorway": 1}
 # Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.
@@ -655,11 +666,14 @@ def import_prop(name, parent):
         mesh = import_mesh(source, dest, mesh_name)
         slots = [str(s.get_editor_property("material_slot_name")) for s in
                  mesh.get_editor_property("static_materials")]
-        if sorted(slots) != sorted(instances):
+        # Interchange drops a material slot no face uses (masonry meshes list every kit material), so the mesh may
+        # have fewer slots than the report; any slot it has must be one of the report's.
+        if not slots or not set(slots) <= set(instances):
             raise RuntimeError(f"{mesh_name} material slots {slots} != report {sorted(instances)}")
         for index, slot in enumerate(slots):
             mesh.set_material(index, instances[slot])
-        add_collision(mesh, COLLISION_OVERRIDES.get(name, report.get("collision", "box")), report)
+        add_collision(mesh, "none" if mesh_name in NO_COLLISION_MESHES else
+                      COLLISION_OVERRIDES.get(name, report.get("collision", "box")), report)
         if nanite:
             enable_nanite(mesh, foliage=bool(report.get("wind")))
         save(mesh)

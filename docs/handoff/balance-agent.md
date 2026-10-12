@@ -82,6 +82,23 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-11: filled `open-estate-mine-shallow-level` design §7 (mine numbers and manor stone
   budget) and §8 views; summary in `balance.md` §8b. Waiting on Jenny's D1–D5 answers; re-check
   the numbers before the mine lanes' [ready].
+- 2026-10-11: Mine Gameplay (d3cc45c6) pre-[ready]: numbers match §7. Blocking: MineFill 0.03 is
+  pitch black, so asked for 0.07–0.08 (awaiting a re-shot). Carded: the per-swing toast, the copper
+  ore icon colour, "bring the lamp closer" copy, and matching fingerpost arms. The lane adopted
+  them all (MineFill 0.075), so the cards were withdrawn; the unlit re-shot is due at its v3 pass.
+  Jenny then chose MineFill 0.05: judge the re-shot at 0.05 (outlines of walls, timbers and rails
+  faintly readable, the way out findable).
+- 2026-10-11: Mine Gameplay v3 shots: Balance OK on numbers, copy, the lamp rule and the daylight
+  pool. On v3's darker surfaces 0.05 is pitch black; recommended 0.1 (it looks like the 0.05 Jenny
+  approved on v2), with the final call Jenny's via the Orchestrator. Jenny chose 0.1.
+- 2026-10-11: Mine Art (029d7c8b) house look check: the engine-house form is OK (Jenny chose it for
+  D5). Blocking: green cast on the stone outside and on the limewash inside, mortar smears and the
+  bare apron, the 25-stone pile unreadable, flowers at the wall foot and path. Cards to send after
+  its re-shots: yard dressing, wood-brown frames, homely interior props. Re-shots: cohesion OK,
+  on condition the packaged/RT-on shots in Jenny's [review] show no green cast; iron trapdoor
+  hardware suggested. The three cards were sent to the Orchestrator.
+- 2026-10-11: Jenny dropped gem nodes (now 7 coal, 6 copper). Set gem drops at 3% per rock face
+  and 10% per vein, 85/15 quartz/amethyst, one roll per mined node (design §7, `balance.md` §8b).
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /

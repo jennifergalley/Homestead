@@ -14,6 +14,7 @@ role, model or standing session changes. Model settings are **required for futur
 | **Docs Agent** | Records verified findings in canonical docs (skills, `docs/setup.md`, `docs/handoff/`). Spawned when needed; Integration covers it otherwise. | Claude Haiku 4.5 / medium |
 | **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, icons, menu/HUD look). Consulted at planning and before `[ready]`; doesn't edit game code. | Claude Opus 5.5 / high |
 | **Cleanup Agent** | One bounded disk sweep per day after a delivery. | existing session |
+| **Test Tools Agent** | Spawned on demand (Jenny, 2026-10-11). Owns agent test tooling: finds where lanes fumble in PIE (state, navigation, interaction, UI), builds Exec/MCP helpers, and keeps the `homestead-test-tools` skill current. Lanes ask the Orchestrator for it when a test is slow or awkward. Its tooling can merge to `main` ahead of a build, because it's dev-only. | Claude Sonnet 5.5 / high |
 
 Feature lanes (Gameplay/UI, Environment, Art and so on) are spawned fresh per build and
 archived when their work ships. Never archive a session whose worktree holds something still needed.

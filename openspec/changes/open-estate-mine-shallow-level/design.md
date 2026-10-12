@@ -38,8 +38,9 @@ alongside, and the mine reuses it.
 ## 3. The shallow level's layout
 
 A fixed, hand-built network about the size of the manor grounds. The ladder chamber opens onto a
-main gallery that loops back on itself, with three or four short side drifts, timber sets spaced
-well apart, no rails or ore carts (ore was hauled out by hand, as in Poldark; Jenny 2026-10-11) and a dripping sump. Walking from the ladder to the far end takes about 30-45 s.
+main gallery that loops back on itself, with three or four short side drifts, a few timber sets only where
+the rock needs support, and a dripping sump. There are no rails or ore carts: the rock went out by hand,
+in baskets and barrows (Jenny, 2026-10-11, after the greybox). Walking from the ladder to the far end takes about 30-45 s.
 There are no dead ends that hide the way back, and the floors are flat enough that she can never
 fall somewhere she can't climb out of. Ambient sound: drips, creaking timber and a low draught.
 
@@ -48,9 +49,11 @@ fall somewhere she can't climb out of. Ambient sound: drips, creaking timber and
 | Node (`ResourceKind`, appended) | Tool | Yields | Comes back |
 | --- | --- | --- | --- |
 | Rock face | pickaxe, worn or better | Stone, a lot of it | every morning at 6:00 |
-| Coal seam | pickaxe | Coal | every **(Balance)** days |
-| Copper vein | pickaxe | Copper ore | every **(Balance)** days |
-| Gem pocket | pickaxe | Quartz (common) or amethyst (rare) | every **(Balance)** days |
+| Coal seam | pickaxe | Coal | every 2 days (§7) |
+| Copper vein | pickaxe | Copper ore | every 3 days (§7) |
+
+There are no gem nodes (Jenny, 2026-10-11): quartz and amethyst turn up at random when she mines a
+rock face or a vein (§7).
 
 - Rock faces are the bulk. There are many of them, each taking a few swings, and they're laid out
   so one lamp's worth of oil (6 game hours) mines far more stone than her pack would otherwise
@@ -89,14 +92,28 @@ the worn pickaxe. Stone stays at 5 coins.
 | Node | Count | Swings (worn / iron / steel) | Energy (worn) | Yield | Comes back |
 | --- | --- | --- | --- | --- | --- |
 | Rock face | 20 | 3 / 2 / 2 | 2.5 | 5–7 stone (6 on average) | every morning at 6:00 |
-| Coal seam | 6 | 2 / 1 / 1 | 2.0 | 2–3 coal | every 2 days |
-| Copper vein | 4 | 3 / 2 / 2 | 3.0 | 2 copper ore | every 3 days |
-| Gem pocket | 3 | 4 / 3 / 2 | 3.0 | 80%: 1–2 quartz; 20%: 1 amethyst (rolled each time it comes back) | every 5 days |
+| Coal seam | 7 | 2 / 1 / 1 | 2.0 | 2–3 coal | every 2 days |
+| Copper vein | 6 | 3 / 2 / 2 | 3.0 | 2 copper ore | every 3 days |
+
+**Gems (no gem nodes; Jenny, 2026-10-11).** Each time a node is mined out, it rolls once for a gem,
+on its yield and not per swing:
+
+| Node mined | Chance of a gem | Which gem |
+| --- | --- | --- |
+| Rock face | 3% | 85% quartz, 15% amethyst; always 1 gem |
+| Coal seam or copper vein | 10% | 85% quartz, 15% amethyst; always 1 gem |
+
+- That's about 1.15 gems a day on a full clear (0.6 from faces, 0.55 from veins): about one quartz
+  a day, and an amethyst about once a week.
+- The toast names it plainly: "+6 Stone, +1 Amethyst".
+- Roll it deterministically per node and refill (like `OgRoll`), so reloading a save can't fish
+  for gems.
 
 - Spread the 20 rock faces through the main gallery and the side drifts, about 8–10 m apart, so she
   mines her way round the loop rather than standing at one wall.
-- Space the ore and gems more thinly, in the side drifts, so finding a vein feels like a small
-  discovery.
+- The three gem-pocket spots became one coal seam and two copper veins (ids 588036, 588044, 588045;
+  588050-588052 were never shipped and aren't reused).
+- Space the veins more thinly, in the side drifts, so finding a vein feels like a small discovery.
 - The refill cadences are per node, counted from when she mined it, and they reset at 6:00, like
   the beach.
 
@@ -107,7 +124,7 @@ the worn pickaxe. Stone stays at 5 coins.
 | Coal | 10 | "A lump of coal from the seam. The smithy pays well for it." |
 | Copper ore | 25 | "Green-streaked ore from a copper vein. Worth more once it's smelted." |
 | Quartz | 35 | "A clear quartz crystal. Pretty on a mantelpiece." |
-| Amethyst | 150 | "A violet amethyst from a gem pocket. Rare and lovely." |
+| Amethyst | 150 | "A violet amethyst found in the rock. Rare and lovely." |
 
 **Refusal copy:** "Too dark to work." when she has no lit lamp, and "Needs a pickaxe." when she has
 no pickaxe.
@@ -130,15 +147,15 @@ the mine house is 33 s, and a loop of the level takes 30–45 s.
 | Trip | Stone | Ore (average) | Energy, worn / iron / steel | Lamp oil | Real time, door to door |
 | --- | --- | --- | --- | --- | --- |
 | Quick trip (10 faces) | about 60 | a seam or two | 25 / 21 / 18 | about 1 game hour | about 4 min |
-| Full clear (20 faces plus whatever ore is back) | about 120 | about 185 coins' worth a day | about 62 / 53 / 43 | about 2.5 game hours | about 8 min |
+| Full clear (20 faces plus whatever ore is back) | about 120 | about 250 coins' worth a day (coal 87, copper 100, gems 60) | about 62 / 53 / 43 | about 2.5 game hours | about 8 min |
 
 - **Energy is the real limit, gently.** A full clear with the worn pickaxe takes about 60% of a
   fresh bar, a solid morning's work, and one cooked meal tops her back up. The iron pickaxe (2,000
   coins) saves about 15% a day; the payoff she'll feel more is the fewer swings.
 - **The lamp is never the limit.** One full lamp (6 game hours) covers about two full clears, and a
   flask costs 15 coins.
-- **Income:** if she sold all of it, a full clear is worth about 600 coins of stone plus about 185
-  of ore a day, roughly fishing's rate per minute. In practice the manor takes the stone, and the
+- **Income:** if she sold all of it, a full clear is worth about 600 coins of stone plus about 250
+  of ore and gems a day, roughly fishing's rate per minute. In practice the manor takes the stone, and the
   sale price only matters for surplus.
 - **Other stone** still counts: beach pebbles (12 a day), loose stones, rubble and surface boulders
   add about 10–20 a day. So a typical day of mixed play gives about 120–140 stone.
@@ -204,7 +221,7 @@ Two heavy lanes, spawned together in dependency order, use the two heavy-job slo
 
 1. **Mine Art Agent** (Claude Opus 5.5, Blender + Unreal). Owns the mine house (exterior, the
    furnished ground-floor room, the trapdoor and ladder shaft) and a modular tunnel kit: walls, timber
-   sets, sump, and rock face, coal, copper and gem node meshes in the sea cave's granite.
+   sets, sump, and rock face, coal and copper node meshes in the sea cave's granite.
    It assembles the shallow level and places it under the mine site. Files: `Scripts/Blender/Recipes/mine_*.py`,
    `Content/SurvivalGame/Mine/**`, the level's placement script.
 2. **Mine Gameplay Agent** (Claude Sonnet 5.5). Owns the simulation: item and resource-kind appends,
