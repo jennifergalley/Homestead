@@ -904,13 +904,20 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{16, 20}, {26, 15}}, Cream, 1.4f);
         break;
     case EKind::CopperOre:
-        // Grey rock threaded with green-blue copper streaks.
-        P.Shape({{8, 35}, {13, 20}, {27, 11}, {43, 17}, {49, 36}, {36, 45}, {18, 44}}, StoneGray);
-        P.Shape({{13, 21}, {27, 12}, {34, 25}, {22, 32}, {9, 35}}, StoneGray * 1.25f);
-        P.Line({{16, 38}, {26, 31}, {33, 36}, {44, 28}}, FLinearColor(0.30f, 0.62f, 0.45f), 3.2f);
-        P.Line({{20, 22}, {28, 26}, {31, 17}}, FLinearColor(0.30f, 0.62f, 0.45f), 2.4f);
-        P.Disc(38, 38, 2.6f, FLinearColor(0.72f, 0.42f, 0.24f));
+    {
+        // Dark brown-grey rock laced with bright copper-orange and green verdigris veins, so it can't be
+        // mistaken for the pale Stone or the icy Quartz.
+        const FLinearColor Verdigris(0.22f, 0.72f, 0.50f);
+        const FLinearColor Copper(0.86f, 0.44f, 0.20f);
+        P.Shape({{8, 35}, {13, 20}, {27, 11}, {43, 17}, {49, 36}, {36, 45}, {18, 44}}, FLinearColor(0.20f, 0.17f, 0.15f));
+        P.Shape({{13, 21}, {27, 12}, {34, 25}, {22, 32}, {9, 35}}, FLinearColor(0.30f, 0.25f, 0.21f));
+        P.Line({{12, 38}, {24, 30}, {32, 37}, {46, 27}}, Copper, 3.6f);
+        P.Line({{18, 22}, {28, 27}, {32, 16}}, Verdigris, 3.0f);
+        P.Line({{20, 42}, {30, 40}, {40, 43}}, Verdigris, 2.4f);
+        P.Disc(38, 36, 3.0f, Copper);
+        P.Disc(21, 33, 2.2f, Verdigris);
         break;
+    }
     case EKind::Quartz:
     {
         // Three tall, pointed prisms fanned from one base: icy cyan with white facets and dark-blue edges,

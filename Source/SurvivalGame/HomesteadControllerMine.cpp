@@ -159,9 +159,6 @@ void AHomesteadController::LandMineSwing(bool bMoreComing)
     if (SwingsLanded < Needed)
     {
         PlayStrikeCue(SwingTool, SwingsLanded, false);
-        if (bMoreComing) return;
-        const int32 Left = Needed - SwingsLanded;
-        Notify(FString::Printf(TEXT("%d more %s."), Left, Left == 1 ? TEXT("swing") : TEXT("swings")));
         return;
     }
     const auto Result = Sim.MineNode(SwingNode, SwingTool, Position, Avatar->GetActorLocation().Z);

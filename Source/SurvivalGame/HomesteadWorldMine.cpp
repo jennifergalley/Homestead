@@ -76,7 +76,7 @@ constexpr float FillHeightAboveFeetCm = 150.0f;
 constexpr float FillFalloffExponent = 2.0f;
 // A drop this near her underground lies on her floor, not on the surface terrain overhead.
 constexpr float DropNearPawnCm = 1500.0f;
-TAutoConsoleVariable<float> CVarMineFill(TEXT("homestead.MineFill"), 0.03f,
+TAutoConsoleVariable<float> CVarMineFill(TEXT("homestead.MineFill"), 0.075f,
     TEXT("Intensity (lamp units: the lamp is about 4) of the faint fill light that follows her underground, so tunnel outlines show without the lamp."));
 }
 

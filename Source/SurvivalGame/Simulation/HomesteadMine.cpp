@@ -172,7 +172,8 @@ Result Simulation::CheckMine(int nodeId, Item tool, Point player, double playerZ
         || std::abs(playerZ - spot->z) > Mine::ReachZCm)
         return MineBad("Move closer to mine this.");
     if (node->readyAtHour > state_.hour) return MineBad("Nothing left here until it comes back.");
-    if (!LampLightsWork(node->position)) return MineBad("Too dark to work.");
+    if (!LampLightsWork(node->position))
+        return MineBad(IsLampLit() ? "Too dark - bring the lamp closer." : "Too dark to work.");
     if (tool != Item::Pickaxe || Count(Item::Pickaxe) == 0) return MineBad("Needs a pickaxe.");
     return CheckExertion(MineCost(nodeId));
 }
