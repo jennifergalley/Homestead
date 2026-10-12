@@ -23,7 +23,7 @@ Results of the Execs go to the log category `LogHomesteadPlaytest`; `plog` print
 | `use "<target> [item]"` | `HomesteadUse` | `goto`, settle, then `Interact()` (no item) or select the item on the hotbar and use it. ~3.5 s later logs `USE:` with toast, pack, energy and focus. |
 | `hotbar [item]` | (key press) | Prints the bar; `hotbar OilLamp` / `hotbar Pickaxe` presses that item's number key. |
 | `screen <name>` | `HomesteadScreen` | `close`, `inventory`, `craft`, `build`, `settings`, `appearance`, `map`, `shop`, `chest`. Logs `SCREEN:` with what it shows. |
-| `weather rain\|clear` | `HomesteadWeather` | Skips the clock to a rain spell (inside it) or to a clear dry hour. Logs `WEATHER:`. |
+| `weather rain\|clear` | `HomesteadWeather` | Skips the clock forward to a rain spell (inside it) or a clear dry hour; it can jump days (rain skipped ~6.5 days in testing), so set the weather last. Logs `WEATHER:`. |
 | `reset` | `HomesteadReset` | Full energy, full lamp oil, screens and held action closed, morning if it is night. Pack, purse and placements stay. |
 | `sellat "Name N,Name N"` | `HomesteadSellAtStore` | Opens the General Store's hours, stands her at its real counter, sells the list through the real sell path, opens the shop. Logs `SOLD` lines, the purse delta and `SELLAT: shop screen open=`. |
 | `plog [n] [pattern]` | | Last `n` `LogHomesteadPlaytest` lines of this worktree's editor log. |

@@ -174,7 +174,12 @@ function sellat([string]$items = 'Coal 3,CopperOre 2,Quartz 2,Amethyst 1') {
 function plog([int]$n = 12, [string]$pattern = 'LogHomesteadPlaytest') {
     $log = Join-Path $script:McpRoot 'Saved\Logs\SurvivalGame.log'
     if (-not (Test-Path $log)) { return "No $log (is this worktree's editor running?)" }
-    $lines = [IO.File]::ReadAllLines($log) | Where-Object { $_ -match $pattern }
+    $stream = [IO.File]::Open($log, 'Open', 'Read', 'ReadWrite, Delete')
+    try {
+        $reader = New-Object IO.StreamReader($stream)
+        $text = $reader.ReadToEnd()
+    } finally { $stream.Dispose() }
+    $lines = $text -split "`r?`n" | Where-Object { $_ -match $pattern }
     $lines | Select-Object -Last $n
 }
 
