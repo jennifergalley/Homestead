@@ -70,6 +70,21 @@ function st([int]$n = 6) {
     (($o | ConvertFrom-Json).content[0].text | ConvertFrom-Json).returnValue | ConvertFrom-Json
 }
 
+# hotbar: the hotbar as the player sees it (key, item, count, selected). `hotbar OilLamp` (or `hotbar Pickaxe`)
+# presses that item's number key and shows the hotbar after.
+function hotbar([string]$item = '') {
+    $cells = (st).hotbar
+    if ($item) {
+        $cell = $cells | Where-Object { $_.item -like "*$item*" } | Select-Object -First 1
+        if (-not $cell) { Write-Warning "No hotbar cell holds '$item'."; return $cells | Format-Table index, key, item, count, selected }
+        $names = @{ '1' = 'One'; '2' = 'Two'; '3' = 'Three'; '4' = 'Four'; '5' = 'Five'; '6' = 'Six'; '7' = 'Seven'; '8' = 'Eight'; '9' = 'Nine'; '0' = 'Zero' }
+        hk tap_key (@{ key = $names[$cell.key] } | ConvertTo-Json -Compress) | Out-Null
+        Start-Sleep -Milliseconds 400
+        $cells = (st).hotbar
+    }
+    $cells | Format-Table index, key, item, count, selected
+}
+
 function py([string]$code, [int]$timeout = 600) {
     $o = mcp $script:TsPython run_python @{ code = $code } $timeout | Out-String
     try {

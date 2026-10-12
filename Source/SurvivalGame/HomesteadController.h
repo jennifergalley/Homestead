@@ -82,6 +82,8 @@ struct FHomesteadHotbarSlot
     bool Material = false;
     // A garment carried in the cell (Tool stays Item::Count).
     bool Garment = false;
+    // The item's display name ("Oil lamp"), for the agent's play-state readout.
+    FString Name;
     FName Icon;
     // A level shown as a thin bar along the slot's foot (the lamp's oil), 0-1; negative for none.
     float Fill = -1.0f;

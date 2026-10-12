@@ -292,6 +292,19 @@ FString UHomesteadAgentPlayLibrary::GetPlayState(int32 NearbyCount, float Radius
         Root->SetNumberField(TEXT("bookPage"), HC->BookPage());
         Root->SetNumberField(TEXT("selectedRow"), HC->SelectedRow());
         Root->SetNumberField(TEXT("hotbarSlot"), HC->SelectedHotbarIndex());
+        // The hotbar as the player sees it: "key" is the number key that selects the cell (1-9, then 0).
+        TArray<TSharedPtr<FJsonValue>> Hotbar;
+        for (const FHomesteadHotbarSlot& Cell : HC->HotbarSnapshot())
+        {
+            const TSharedRef<FJsonObject> Entry = MakeShared<FJsonObject>();
+            Entry->SetNumberField(TEXT("index"), Cell.Index);
+            Entry->SetStringField(TEXT("key"), FString::FromInt((Cell.Index + 1) % 10));
+            Entry->SetStringField(TEXT("item"), Cell.Garment ? FString(TEXT("garment")) : Cell.Name);
+            Entry->SetNumberField(TEXT("count"), Cell.Count);
+            Entry->SetBoolField(TEXT("selected"), Cell.Selected);
+            Hotbar.Add(MakeShared<FJsonValueObject>(Entry));
+        }
+        Root->SetArrayField(TEXT("hotbar"), Hotbar);
         Root->SetStringField(TEXT("bookTitle"), HC->BookTitle());
         Root->SetStringField(TEXT("bookSummary"), HC->BookSummary());
         Root->SetStringField(TEXT("bookFooter"), HC->BookFooter());
