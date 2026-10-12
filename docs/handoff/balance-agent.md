@@ -102,7 +102,9 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   Mine Gameplay applied it (native test: rock 8/400, coal 45/400); Balance OK.
 - 2026-10-11: Mine Art RT-on shots: the interior and trapdoor hardware are OK. Still blocking: the
   exterior lichen reads olive-green, and the trapdoor, crate and barrel are pale, untextured wood.
-  Awaiting re-shots 02 and 23.
+  Awaiting re-shots 02 and 23. Fix round: Balance OK for [ready] (lichen cut to a third, the
+  trapdoor in floor wood, the barrel removed); a lighter-granite card only if packaged shots still
+  look olive.
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
