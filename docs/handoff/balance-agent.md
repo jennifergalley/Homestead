@@ -97,6 +97,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   its re-shots: yard dressing, wood-brown frames, homely interior props. Re-shots: cohesion OK,
   on condition the packaged/RT-on shots in Jenny's [review] show no green cast; iron trapdoor
   hardware suggested. The three cards were sent to the Orchestrator.
+- 2026-10-11: Jenny dropped gem nodes (now 7 coal, 6 copper). Set gem drops at 3% per rock face
+  and 10% per vein, 85/15 quartz/amethyst, one roll per mined node (design §7, `balance.md` §8b).
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /

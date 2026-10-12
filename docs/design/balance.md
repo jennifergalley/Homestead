@@ -267,9 +267,10 @@ Planned numbers, not yet built. The source of truth is the design's §7.
 
 - **Rock faces:** 20, each 3 swings and 2.5 energy (worn) for about 6 stone, back every morning. A
   full clear gives about 120 stone for about 62 energy, and about 8 real minutes door to door.
-- **Ore:** coal (6 seams, 2–3 coal, every 2 days, 10 coins), copper ore (4 veins, 2 ore, every 3
-  days, 25 coins), and gem pockets (3, quartz 35 or amethyst 150, every 5 days). That's about 185
-  coins of ore a day.
+- **Ore:** coal (7 seams, 2–3 coal, every 2 days, 10 coins) and copper ore (6 veins, 2 ore, every 3
+  days, 25 coins). There are no gem nodes (Jenny): each mined node rolls once for a gem, 3% for a
+  rock face and 10% for a vein, split 85% quartz (35) and 15% amethyst (150). That's about one
+  quartz a day and an amethyst about once a week, and about 250 coins of ore and gems a day.
 - **No limits beyond pack room;** the lamp oil is never binding. There's a one-time pile of 25
   stone upstairs in the mine house. Without the lamp the tunnels are near-dark (fill 0.1, Jenny's
     pick on the v3 tunnels), and mining needs a lit lamp within about 4 m.
