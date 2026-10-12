@@ -271,7 +271,8 @@ Planned numbers, not yet built. The source of truth is the design's §7.
   days, 25 coins), and gem pockets (3, quartz 35 or amethyst 150, every 5 days). That's about 185
   coins of ore a day.
 - **No limits beyond pack room;** the lamp oil is never binding. There's a one-time pile of 25
-  stone upstairs in the mine house.
+  stone upstairs in the mine house. Without the lamp the tunnels are near-dark (fill 0.05, Jenny's
+  pick), and mining needs a lit lamp within about 4 m.
 - **Manor:** 5 stages (great hall, kitchen, bedchamber, upper floor, roof and chimneys) cost 1,500
   stone, 215 timber and 7,000 coins in total. That's about 12 game days of mixed play, with the
   stages growing from 200 to 450 stone.

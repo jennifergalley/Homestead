@@ -86,6 +86,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   pitch black, so asked for 0.07–0.08 (awaiting a re-shot). Carded: the per-swing toast, the copper
   ore icon colour, "bring the lamp closer" copy, and matching fingerpost arms. The lane adopted
   them all (MineFill 0.075), so the cards were withdrawn; the unlit re-shot is due at its v3 pass.
+  Jenny then chose MineFill 0.05: judge the re-shot at 0.05 (outlines of walls, timbers and rails
+  faintly readable, the way out findable).
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
