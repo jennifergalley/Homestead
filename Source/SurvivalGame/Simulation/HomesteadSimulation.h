@@ -886,6 +886,10 @@ public:
     const WorldDrop* SetDownLampDrop() const;
     // Lit in her hand (selected, awake) or set down, while it has oil.
     bool IsLampLit(bool sleeping = false) const;
+    // Whether the set-down lamp is close enough to a point to work by (within the mine lamp's light radius).
+    // She can work a face at `point` by the lit lamp in her hand or a lit set-down lamp within its light radius.
+    bool LampLightsWork(Point point) const;
+    bool SetDownLampLights(Point point) const;
     // Spends a flask to fill the lamp in her pack.
     Result RefillLamp();
     // Sets the carried lamp on dry ground within reach; it keeps burning there.

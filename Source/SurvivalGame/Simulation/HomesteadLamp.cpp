@@ -1,5 +1,7 @@
 #include "HomesteadLamp.h"
 
+#include "HomesteadLampLight.h"
+
 #include <algorithm>
 #include <cmath>
 #include <istream>
@@ -18,6 +20,21 @@ bool Simulation::IsLampLit(bool sleeping) const
 {
     if (state_.lampOilHours <= 0.0) return false;
     return SetDownLampDrop() || (!sleeping && IsLampInHand());
+}
+
+bool Simulation::LampLightsWork(Point point) const
+{
+    return IsLampLit() && (IsLampInHand() || SetDownLampLights(point));
+}
+
+bool Simulation::SetDownLampLights(Point point) const
+{
+    const WorldDrop* lamp = SetDownLampDrop();
+    if (!lamp || state_.lampOilHours <= 0.0) return false;
+    // The same floor of light the mine's lamp visibly pools to; beyond it the face is too dark to work.
+    constexpr double WorkLightLux = 0.2;
+    static const double reach = LampReachCm(MineOilLampLight, WorkLightLux);
+    return std::hypot(point.x - lamp->position.x, point.y - lamp->position.y) <= reach;
 }
 
 void Simulation::BurnLamp(double hours, bool sleeping)

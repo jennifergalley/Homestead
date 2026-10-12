@@ -416,6 +416,51 @@ void MineLampPoolsAFewMetres()
     CHECK(LampReachCm(MineOilLampLight, 0.2) > 300.0);
     CHECK(LampReachCm(MineOilLampLight, 0.2) < LampReachCm(OilLampLight, 0.2));
 }
+
+void MiningNeedsLightAtTheFace()
+{
+    Mined mined = NewMine();
+    Simulation& sim = mined.sim;
+    const int rock = NodeOfKind(Mine::NodeKind::Rock);
+    const auto check = [&] { return sim.CheckMine(rock, Item::Pickaxe, At(rock), ZOf(rock)); };
+    const double reach = LampReachCm(MineOilLampLight, 0.2);
+
+    // Held and lit: allowed. Held without oil: too dark.
+    Light(sim);
+    CHECK(check().ok);
+    sim.SetLampOil(0.0);
+    CHECK(check().message == "Too dark to work.");
+    sim.SetLampOil(1000.0);
+
+    // Set down within the light radius of the face: allowed, with the lamp out of her hand.
+    Point near = At(rock);
+    near.x += reach - 50.0;
+    CHECK(sim.SetDownLamp(near, near).ok);
+    sim.SetLampInHand(false);
+    CHECK(sim.LampLightsWork(At(rock)) && check().ok);
+
+    // A lit lamp that has burned dry gives no light at the face.
+    sim.SetLampOil(0.0);
+    CHECK(!sim.LampLightsWork(At(rock)) && check().message == "Too dark to work.");
+}
+
+void MiningRefusesAFaceBeyondTheSetDownLamp()
+{
+    Mined mined = NewMine();
+    Simulation& sim = mined.sim;
+    const int rock = NodeOfKind(Mine::NodeKind::Rock);
+    Light(sim);
+    Point far = At(rock);
+    far.x += LampReachCm(MineOilLampLight, 0.2) + 100.0;
+    CHECK(sim.SetDownLamp(far, far).ok);
+    sim.SetLampInHand(false);
+    // Lit, but the face is outside its light.
+    CHECK(sim.IsLampLit());
+    const auto dark = sim.CheckMine(rock, Item::Pickaxe, At(rock), ZOf(rock));
+    CHECK(!dark.ok && dark.message == "Too dark to work.");
+    const int stone = sim.Count(Item::Stone);
+    CHECK(!Swing(sim, rock).ok && sim.Count(Item::Stone) == stone);
+}
 }
 
 int main()
@@ -436,6 +481,8 @@ int main()
     SaveRoundTripKeepsMinedNodes();
     AimedMineNodeFollowsFacingAndLevel();
     MineLampPoolsAFewMetres();
+    MiningNeedsLightAtTheFace();
+    MiningRefusesAFaceBeyondTheSetDownLamp();
     std::cout << "Mine tests passed (" << MineChecks << " checks)\n";
     return 0;
 }

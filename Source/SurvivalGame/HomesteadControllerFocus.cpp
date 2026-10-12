@@ -289,7 +289,8 @@ FString AHomesteadController::FocusActions() const
                 {
                     if (Node.readyAtHour > State().hour) return FString();
                     if (!ToolAvailable || SelectedTool != Homestead::Item::Pickaxe) return FString();
-                    return Sim.IsLampLit() ? Use + TEXT(" Mine") : FString(TEXT("Too dark to work. Light your lamp."));
+                    if (Sim.LampLightsWork(Node.position)) return Use + TEXT(" Mine");
+                    return FString(Sim.IsLampLit() ? TEXT("Too dark to work. Set the lamp closer.") : TEXT("Too dark to work. Light your lamp."));
                 }
                 if (Node.readyAtHour > State().hour) return FString();
                 // Trees are felled with the axe on the tool button; nothing else is offered on them.
