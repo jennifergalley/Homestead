@@ -84,7 +84,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   the numbers before the mine lanes' [ready].
 - 2026-10-11: Mine Gameplay (d3cc45c6) pre-[ready]: numbers match §7. Blocking: MineFill 0.03 is
   pitch black, so asked for 0.07–0.08 (awaiting a re-shot). Carded: the per-swing toast, the copper
-  ore icon colour, "bring the lamp closer" copy, and matching fingerpost arms.
+  ore icon colour, "bring the lamp closer" copy, and matching fingerpost arms. The lane adopted
+  them all (MineFill 0.075), so the cards were withdrawn; the unlit re-shot is due at its v3 pass.
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
