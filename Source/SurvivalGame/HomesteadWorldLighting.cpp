@@ -11,6 +11,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Components/SkyAtmosphereComponent.h"
 #include "Components/SkyLightComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Engine/World.h"
 #include "HAL/IConsoleManager.h"
 #include "Materials/MaterialParameterCollection.h"
@@ -142,7 +143,9 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // it (Homestead::Overcast), the rain swells and eases (Homestead::RainAmount), at any hour.
     if (Weather) Weather->Update(State, Daylight);
     const float Cloud = Weather ? Weather->GetOvercast() : 0.0f;
+    const float Mine = GetMineMix();
     if (SeaCave) SeaCave->SetSky(Daylight, Cloud);
+    if (MineShaft) MineShaft->SetIntensity(MineShaftIntensity * Daylight * FMath::Lerp(1.0f, 0.45f, Cloud));
     const float Shower = Weather ? Weather->GetRain() : 0.0f;
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
     // With ray-traced sun shadows, follow the sun every refresh (about 0.025 degrees at normal game
@@ -165,7 +168,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     }
     // Under cloud the sun is a dim, broad glow: little direct light and soft, faint shadows; the sky
     // light carries the scene instead.
-    Sun->SetIntensity(FMath::Lerp(0.0f, 46000.0f, Daylight) * FMath::Lerp(1.0f, OvercastSunScale, Cloud));
+    Sun->SetIntensity(FMath::Lerp(0.0f, 46000.0f, Daylight) * FMath::Lerp(1.0f, OvercastSunScale, Cloud) * (1.0f - Mine));
     const float SourceAngle = FMath::Lerp(0.5357f, OvercastSunSourceAngle, Cloud);
     if (FMath::Abs(SourceAngle - AppliedSunSourceAngle) > 0.25f)
     {
@@ -185,7 +188,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     NightTuning.nightSky = CVarNightSky.GetValueOnGameThread();
     NightTuning.nightMinExposureEV = CVarNightMinExposure.GetValueOnGameThread();
     const Homestead::NightLight Night = Homestead::NightLightAt(Hour, NightTuning);
-    Moon->SetIntensity(static_cast<float>(Night.moonLux) * FMath::Lerp(1.0f, OvercastMoonScale, Cloud));
+    Moon->SetIntensity(static_cast<float>(Night.moonLux) * FMath::Lerp(1.0f, OvercastMoonScale, Cloud) * (1.0f - Mine));
     // Only while she is inside a roofed room (her position, eased), so the outdoors keeps its sky fill when
     // the camera passes a doorway or an overhang.
     const float IndoorDay = GetRoomMix() * Daylight;
@@ -194,20 +197,21 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // By day the cloud lifts the sky light (the sun's light scattered); by night it keeps the night floor.
     Sky->SetIntensity(static_cast<float>(Night.skyScale) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud * Daylight)
         * FMath::Lerp(1.0f, CVarIndoorDaySky.GetValueOnGameThread(), IndoorDay)
-        * FMath::Lerp(1.0f, CaveDaySkyScale, CaveDay));
+        * FMath::Lerp(1.0f, CaveDaySkyScale, CaveDay) * FMath::Lerp(1.0f, MineAmbientSky, Mine));
     // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
     // back towards a neutral grey overcast.
     Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
-    Exposure->Settings.AutoExposureMinBrightness = static_cast<float>(Night.minExposureEV);
+    Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(static_cast<float>(Night.minExposureEV), MineExposureEV, Mine);
+    Exposure->Settings.AutoExposureMaxBrightness = FMath::Lerp(16.0f, MineExposureEV, Mine);
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
     // The overcast hold only by day: at night the exposure already sits on its floor, and lower would go black.
-    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud * Daylight
-        + IndoorDayExposureBias * IndoorDay + CaveDayExposureBias * CaveDay;
+    Exposure->Settings.AutoExposureBias = FMath::Lerp(-0.15f + OvercastExposureBias * Cloud * Daylight
+        + IndoorDayExposureBias * IndoorDay + CaveDayExposureBias * CaveDay, 0.0f, Mine);
     const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
     Exposure->Settings.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.0f);
     const float ClearFog = FMath::Lerp(0.016f, 0.007f, Daylight);
     // Deep in the sea cave the haze is the sky's colour scattered through rock that hides it: clear it there.
-    Fog->SetFogDensity((FMath::Lerp(ClearFog, 0.022f, Cloud) + 0.016f * Shower) * (1.0f - GetCaveMix()));
+    Fog->SetFogDensity((FMath::Lerp(ClearFog, 0.022f, Cloud) + 0.016f * Shower) * (1.0f - GetCaveMix()) * (1.0f - Mine));
     Fog->SetFogHeightFalloff(FMath::Lerp(0.3f, 0.12f, Cloud));
     const FLinearColor ClearHaze = FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight);
     Fog->SetFogInscatteringColor(FMath::Lerp(ClearHaze, FLinearColor(0.43f, 0.47f, 0.5f) * FMath::Lerp(0.15f, 1.0f, Daylight), Cloud));

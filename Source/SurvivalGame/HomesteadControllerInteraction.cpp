@@ -9,6 +9,7 @@
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadGatherPose.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "UI/SHomesteadMenu.h"
 
@@ -97,6 +98,8 @@ void AHomesteadController::Interact()
         // A standing tree is felled with the axe on the tool button, never on E / A (Jenny 2026-09-30:
         // no crossover between interacting and using a tool).
         if (Tree) break;
+        // Rock faces, seams, veins and gem pockets are worked with the pickaxe on the tool button.
+        if (Homestead::Mine::IsMineNodeKind(Kind)) break;
         const auto* Feller = Cast<AHomesteadCharacter>(GetPawn());
         const bool bFell = Tree && Feller && Feller->CanFell();
         // Weeds and nettles are pulled on both knees and only count once the second root is out.
@@ -243,6 +246,7 @@ void AHomesteadController::Interact()
     case EFocus::Chest: OpenChestStorage(FocusId); break;
     // The pail is filled with the tool button (UseSelectedTool), not on E / A.
     case EFocus::Water: break;
+    case EFocus::Trapdoor: ClimbMineLadder(); break;
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::SceneryTree: StartSceneryFell(); break;
     case EFocus::SceneryStump: StartSceneryStumpClear(); break;

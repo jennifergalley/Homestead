@@ -22,6 +22,10 @@ constexpr LampLightProfile LegacyOilLampLight{1400.0, 1000.0, 8.0, true};
 // fading to nothing at 20 m. Inverse-square at 16 times the intensity would reach as far but put 140 lux on
 // her dress, and the night's auto exposure would take the reach straight back.
 constexpr LampLightProfile OilLampLight{4.0, 2000.0, 5.0, false};
+// Underground (Jenny's mine review: "pools a few metres round her and the far tunnel stays black"): a 7 m
+// window with a steeper falloff, 0.2 lux by about 4.8 m, so the next bend of the gallery stays dark.
+// HomesteadLampLook.cpp blends to it with the player's mine mix.
+constexpr LampLightProfile MineOilLampLight{5.0, 700.0, 3.0, false};
 
 // The ground a lamp lights reads against moonlit ground (HomesteadNightLight: 0.2 lux at full night).
 constexpr double LampReachLux = 0.2;

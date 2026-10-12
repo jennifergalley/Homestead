@@ -181,7 +181,7 @@ void UHomesteadMapComponent::RefreshModel()
         Next->Parcels.Add(MoveTemp(Shape));
     }
     const FLandmarkInfo Places[] = {
-        {Homestead::Anchor::MineEntrance, TEXT("Mine ruin"), TEXT("The family mine's engine house on the clifftop, long flooded."), EHomesteadMapGlyph::Mine},
+        {Homestead::Anchor::MineEntrance, TEXT("The mine"), TEXT("The family mine, on the clifftop. A trapdoor in the old house leads down."), EHomesteadMapGlyph::Mine},
         {Homestead::Anchor::CoveBeach, TEXT("The cove"), TEXT("Your own little beach where the river meets the sea."), EHomesteadMapGlyph::Cove},
         {Homestead::Anchor::MillSite, TEXT("Mill site"), TEXT("The old water mill's footings, by the ford."), EHomesteadMapGlyph::Mill},
         {Homestead::Anchor::EstateGateway, TEXT("Estate gateway"), TEXT("Where the estate drive meets the old road."), EHomesteadMapGlyph::Gateway},

@@ -398,6 +398,11 @@ void AHomesteadController::UseSelectedTool()
                 if (Result.ok && Avatar) PresentFelling(Cleared, Target, true);
                 return;
             }
+    if (Tool == Homestead::Item::Pickaxe && IsUnderground())
+    {
+        SwingAtMine(Tool);
+        return;
+    }
     if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Billhook
         || Tool == Homestead::Item::Scythe || Tool == Homestead::Item::Pickaxe)
     {

@@ -4,6 +4,7 @@
 #include "HomesteadController.h"
 #include "HomesteadFishingPresentation.h"
 #include "Animation/AnimInstanceProxy.h"
+#include "AnimationRuntime.h"
 #include "Animation/AnimNode_SequencePlayer.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimNodeSpaceConversions.h"
@@ -16,6 +17,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/IConsoleManager.h"
@@ -549,6 +551,11 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     float RightGroundHeight = 0;
     float LeftBallHeight = 0;
     float RightBallHeight = 0;
+    // Ball-from-ankle offsets (component space, flat) from the reference pose; filled on first use.
+    FVector LeftBallOffset = FVector::ZeroVector;
+    FVector RightBallOffset = FVector::ZeroVector;
+    bool bLeftBallOffset = false;
+    bool bRightBallOffset = false;
     float PelvisDrop = 0;
     FQuat LeftTilt = FQuat::Identity;
     FQuat RightTilt = FQuat::Identity;
@@ -636,19 +643,45 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
                 if (Normal) *Normal = Hit.ImpactNormal;
                 return true;
             };
-            auto Trace = [&](FName Ankle, FName Ball, float& Height, float& BallHeight, FQuat& Tilt)
+            // The ball is probed where the standing reference foot puts it, ahead of the ankle, not where the posed
+            // ball is: the IK lifts and tilts the foot, which moves the posed ball over or off a kerb edge and flips
+            // its ground height, which lifts the foot again (a 3-frame, 12 cm flutter on the mine house kerb).
+            auto BallOffset = [&](FName Ankle, FName Ball, FVector& Cached, bool& bCached)
+            {
+                if (!bCached)
+                {
+                    bCached = true;
+                    Cached = FVector::ZeroVector;
+                    if (const USkeletalMesh* Asset = Mesh->GetSkeletalMeshAsset())
+                    {
+                        const FReferenceSkeleton& Reference = Asset->GetRefSkeleton();
+                        const int32 AnkleIndex = Reference.FindBoneIndex(Ankle), BallIndex = Reference.FindBoneIndex(Ball);
+                        if (AnkleIndex != INDEX_NONE && BallIndex != INDEX_NONE)
+                        {
+                            Cached = FAnimationRuntime::GetComponentSpaceTransformRefPose(Reference, BallIndex).GetLocation()
+                                - FAnimationRuntime::GetComponentSpaceTransformRefPose(Reference, AnkleIndex).GetLocation();
+                            Cached.Z = 0;
+                        }
+                    }
+                }
+                return Cached;
+            };
+            auto Trace = [&](FName Ankle, FName Ball, FVector& BallOffsetCache, bool& bBallOffsetCached,
+                float& Height, float& BallHeight, FQuat& Tilt)
             {
                 FVector Normal;
-                if (!Ground(Mesh->GetSocketLocation(Ankle), Height, &Normal)) return;
-                if (!Ground(Mesh->GetSocketLocation(Ball), BallHeight, nullptr)) BallHeight = Height;
+                const FVector AnkleAt = Mesh->GetSocketLocation(Ankle);
+                if (!Ground(AnkleAt, Height, &Normal)) return;
+                const FVector BallAt = AnkleAt + ToWorld.TransformVector(BallOffset(Ankle, Ball, BallOffsetCache, bBallOffsetCached));
+                if (!Ground(BallAt, BallHeight, nullptr)) BallHeight = Height;
                 const FQuat Full = FQuat::FindBetweenNormals(FVector::UpVector,
                     ToWorld.InverseTransformVectorNoScale(Normal).GetSafeNormal());
                 const float Angle = Full.GetAngle();
                 const float Limit = FMath::DegreesToRadians(25.0f);
                 Tilt = Angle > Limit ? FQuat::Slerp(FQuat::Identity, Full, Limit / Angle) : Full;
             };
-            Trace(TEXT("foot_l"), TEXT("ball_l"), LeftTarget, LeftBallTarget, LeftTiltTarget);
-            Trace(TEXT("foot_r"), TEXT("ball_r"), RightTarget, RightBallTarget, RightTiltTarget);
+            Trace(TEXT("foot_l"), TEXT("ball_l"), LeftBallOffset, bLeftBallOffset, LeftTarget, LeftBallTarget, LeftTiltTarget);
+            Trace(TEXT("foot_r"), TEXT("ball_r"), RightBallOffset, bRightBallOffset, RightTarget, RightBallTarget, RightTiltTarget);
         }
         const float Ease = FMath::Clamp(DeltaSeconds * 14.0f, 0.0f, 1.0f);
         LeftGroundHeight = FMath::Lerp(LeftGroundHeight, LeftTarget, Ease);

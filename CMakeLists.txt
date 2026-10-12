@@ -47,6 +47,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.cpp
     Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.cpp
     Source/SurvivalGame/Simulation/HomesteadSeaCave.cpp
+    Source/SurvivalGame/Simulation/HomesteadMine.cpp
     Source/SurvivalGame/Simulation/HomesteadReservedLand.cpp
     Source/SurvivalGame/Simulation/HomesteadPlayableBounds.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
@@ -245,6 +246,15 @@ else()
     target_compile_options(HomesteadBeachTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
 endif()
 add_test(NAME HomesteadBeachTests COMMAND HomesteadBeachTests)
+
+add_executable(HomesteadMineTests Tests/HomesteadMineTests.cpp)
+target_link_libraries(HomesteadMineTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadMineTests PRIVATE /W4 /WX /EHs-c-)
+else()
+    target_compile_options(HomesteadMineTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
+endif()
+add_test(NAME HomesteadMineTests COMMAND HomesteadMineTests)
 
 # Not a test: prints the placement table for Scripts/Terrain/compact_placements.py.
 add_executable(HomesteadPlacementDump Tests/Tools/HomesteadPlacementDump.cpp)

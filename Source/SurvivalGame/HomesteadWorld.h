@@ -24,6 +24,9 @@ class UProceduralMeshComponent;
 class USceneComponent;
 class UDirectionalLightComponent;
 class USkyLightComponent;
+class USpotLightComponent;
+class UPointLightComponent;
+class UAudioComponent;
 class UExponentialHeightFogComponent;
 class UPostProcessComponent;
 class AHomesteadRoadEndGate;
@@ -341,6 +344,19 @@ private:
     static constexpr float CaveDayExposureBias = -0.75f;
     // 0 outside .. 1 deep in the sea cave, eased (UHomesteadWeather::GetCaveMix).
     float GetCaveMix() const;
+    // 0 outside .. 1 in the mine's tunnel level, eased (UHomesteadWeather::GetMineMix). Underground the sun, moon, sky
+    // and haze are cut to MineAmbientSky, and the exposure holds still at MineExposureEV (UpdateLighting), so her oil
+    // lamp is the only real light; the shaft light at the ladder foot is MineDaylight, scaled by the day.
+    float GetMineMix() const;
+    // The faint share of the sky fill that still reaches the tunnels, so she can make out outlines and walk back
+    // out of the dark with no lamp (Jenny's design D2). Tuned in PIE.
+    static constexpr float MineAmbientSky = 0.012f;
+    static constexpr float MineExposureEV = -0.5f;
+    // The tunnel's daylight shaft at the ladder foot (candela at full day) and its cone, from the shaft's top.
+    static constexpr float MineShaftIntensity = 1200.0f;
+    // A narrow cone (14 degrees) with shadows blacks the pool out inside the capped shaft; the ceiling hole
+    // trims the beam to the same patch of floor with a wide one (PIE 2026-10-11, layout v3).
+    static constexpr float MineShaftOuterConeDegrees = 40.0f;
     // The hearth as a settled low fire: a warm key low in front of the opening, oil-lamp strength
     // (HomesteadLampLook's lamp is 1400 / 1000 cm), rather than a floodlight filling the room.
     static constexpr float HearthIntensity = 2600.0f;
@@ -418,6 +434,40 @@ private:
     bool bCoveRouteBuilt = false;
     UPROPERTY()
     FHomesteadWorldVisual CoveRouteVisual;
+    // The estate mine (HomesteadWorldMine.cpp), built once with the estate scenery from Simulation/HomesteadMine:
+    // the "To the mine" fingerpost arm, the trapdoor lid, the daylight shaft and mine ambience, and a greybox
+    // house and tunnel shell until the Mine Art Agent's level actors (tagged HomesteadMine) are in the map.
+    void BuildMine();
+    // One mine node's depleted base (bProduceOnly false) or its full rock, coal, ore or gems (true).
+    void BuildMineResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
+    bool bMineBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual MineVisual;
+    // The daylight shaft down the mine's ladder well; UpdateLighting scales it with the day.
+    UPROPERTY()
+    TObjectPtr<USpotLightComponent> MineShaft;
+    // A faint, shadowless fill that follows her underground so outlines show with no lamp (CVar homestead.MineFill).
+    UPROPERTY()
+    TObjectPtr<UPointLightComponent> MineFill;
+    // The trapdoor lid's hinge pivot (its mesh is a child), opened and shut as she climbs (SetMineTrapdoorOpen).
+    UPROPERTY()
+    TObjectPtr<USceneComponent> MineTrapdoorPivot;
+    UPROPERTY()
+    TObjectPtr<UStaticMeshComponent> MineTrapdoorLid;
+    // Drips and creaks along the galleries, heard only underground (volume follows GetMineMix).
+    UPROPERTY()
+    TArray<TObjectPtr<UAudioComponent>> MineSounds;
+    TArray<float> MineSoundGains;
+    float MineSoundMix = -1.0f;
+    float MineLidOpen = 0.0f;
+    float MineLidTarget = 0.0f;
+public:
+    // Opens (true) or shuts the trapdoor lid; it swings over about half a second (TickMine).
+    void SetMineTrapdoorOpen(bool bOpen) { MineLidTarget = bOpen ? 1.0f : 0.0f; }
+    void TickMine(float DeltaSeconds);
+    // When she is underground and the drop lies near her, the floor she stands on (the surface terrain is 44 m up).
+    bool FindMineFloorZ(const Homestead::Point& At, float& OutZ) const;
+private:
     // The sea cave in the cove's west cliff (HomesteadSeaCaveScenery, HomesteadWorldSeaCave.cpp), placed once with
     // the estate scenery; UpdateLighting feeds its fissure the sky.
     void BuildSeaCave();

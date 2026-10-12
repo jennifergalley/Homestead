@@ -540,7 +540,11 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("grilled-perch")), EKind::GrilledPerch},
         {FName(TEXT("steamed-mussels")), EKind::SteamedMussels},
         {FName(TEXT("mussel-potato-broth")), EKind::MusselPotatoBroth},
-        {FName(TEXT("fried-laver")), EKind::FriedLaver}
+        {FName(TEXT("fried-laver")), EKind::FriedLaver},
+        {FName(TEXT("coal")), EKind::Coal},
+        {FName(TEXT("copper-ore")), EKind::CopperOre},
+        {FName(TEXT("quartz")), EKind::Quartz},
+        {FName(TEXT("amethyst")), EKind::Amethyst}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -890,6 +894,54 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         for (const FVector2D& Crisp : {FVector2D(16, 29), FVector2D(30, 27), FVector2D(41, 32.5f)})
             P.Line({{Crisp.X - 2.5f, Crisp.Y}, {Crisp.X, Crisp.Y - 1.2f}, {Crisp.X + 2.5f, Crisp.Y}}, HayGold * 0.75f, 1.0f);
         PaintMealSteam(P, 24, 21);
+        break;
+    case EKind::Coal:
+        // A dark, faceted lump with a sheen on its top edge.
+        P.Shape({{9, 36}, {14, 22}, {26, 13}, {40, 16}, {48, 29}, {44, 42}, {28, 47}, {14, 44}}, Charcoal);
+        P.Shape({{14, 23}, {26, 14}, {33, 21}, {23, 29}, {11, 33}}, Charcoal * 2.2f);
+        P.Line({{33, 21}, {41, 18}}, StoneGray, 1.5f);
+        P.Line({{23, 29}, {27, 40}}, Charcoal * 0.5f, 1.5f);
+        P.Line({{16, 20}, {26, 15}}, Cream, 1.4f);
+        break;
+    case EKind::CopperOre:
+    {
+        // Dark brown-grey rock laced with bright copper-orange and green verdigris veins, so it can't be
+        // mistaken for the pale Stone or the icy Quartz.
+        const FLinearColor Verdigris(0.22f, 0.72f, 0.50f);
+        const FLinearColor Copper(0.86f, 0.44f, 0.20f);
+        P.Shape({{8, 35}, {13, 20}, {27, 11}, {43, 17}, {49, 36}, {36, 45}, {18, 44}}, FLinearColor(0.20f, 0.17f, 0.15f));
+        P.Shape({{13, 21}, {27, 12}, {34, 25}, {22, 32}, {9, 35}}, FLinearColor(0.30f, 0.25f, 0.21f));
+        P.Line({{12, 38}, {24, 30}, {32, 37}, {46, 27}}, Copper, 3.6f);
+        P.Line({{18, 22}, {28, 27}, {32, 16}}, Verdigris, 3.0f);
+        P.Line({{20, 42}, {30, 40}, {40, 43}}, Verdigris, 2.4f);
+        P.Disc(38, 36, 3.0f, Copper);
+        P.Disc(21, 33, 2.2f, Verdigris);
+        break;
+    }
+    case EKind::Quartz:
+    {
+        // Three tall, pointed prisms fanned from one base: icy cyan with white facets and dark-blue edges,
+        // a tall spiky silhouette against the round, grey-green Stone.
+        const FLinearColor Ice(0.55f, 0.86f, 0.98f);
+        const FLinearColor IceDeep(0.22f, 0.52f, 0.78f);
+        const FLinearColor Edge(0.10f, 0.26f, 0.46f);
+        P.Shape({{9, 47}, {11, 28}, {15, 17}, {21, 30}, {22, 47}}, IceDeep);
+        P.Shape({{35, 47}, {35, 30}, {42, 20}, {48, 31}, {47, 47}}, IceDeep);
+        P.Shape({{18, 47}, {18, 24}, {28, 5}, {38, 24}, {38, 47}}, Ice);
+        P.Shape({{28, 5}, {38, 24}, {38, 47}, {30, 47}, {30, 20}}, FLinearColor(0.34f, 0.68f, 0.90f));
+        P.Shape({{20, 26}, {28, 8}, {27, 24}, {22, 44}}, FLinearColor(1.0f, 1.0f, 1.0f));
+        P.Line({{18, 47}, {18, 24}, {28, 5}, {38, 24}, {38, 47}}, Edge, 1.2f);
+        P.Line({{11, 28}, {15, 17}, {21, 30}}, Edge, 1.0f);
+        P.Line({{35, 30}, {42, 20}, {48, 31}}, Edge, 1.0f);
+        break;
+    }
+    case EKind::Amethyst:
+        // The same cluster, deep violet.
+        P.Shape({{20, 46}, {17, 26}, {24, 10}, {32, 26}, {30, 46}}, FLinearColor(0.56f, 0.30f, 0.70f));
+        P.Shape({{24, 10}, {32, 26}, {26, 30}}, FLinearColor(0.78f, 0.58f, 0.88f));
+        P.Shape({{30, 46}, {32, 30}, {40, 20}, {46, 30}, {43, 46}}, FLinearColor(0.44f, 0.22f, 0.58f));
+        P.Shape({{10, 46}, {11, 35}, {16, 29}, {19, 38}, {18, 46}}, FLinearColor(0.50f, 0.26f, 0.64f));
+        P.Line({{24, 12}, {20, 28}}, FLinearColor(0.90f, 0.80f, 0.96f), 1.2f);
         break;
     case EKind::SeedRoots:
         PaintSeedPacket(P, Wood);

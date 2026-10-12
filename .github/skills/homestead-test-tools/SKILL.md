@@ -19,13 +19,13 @@ Results of the Execs go to the log category `LogHomesteadPlaytest`; `plog` print
 | Helper | Exec | What it does |
 | --- | --- | --- |
 | `state [n]` | (get_play_state `world`) | Whole game picture in one call, see "Reading state". `st` is the raw play state (also has `hotbar`, `nearbyResources`). |
-| `goto <target>` | `HomesteadGoto` | Teleports her onto the ground next to the target, facing it. Logs `GOTO:` and what she is now focused on. |
-| `use "<target> [item]"` | `HomesteadUse` | `goto`, settle, then `Interact()` (no item) or select the item on the hotbar and use it. ~3.5 s later logs `USE:` with toast, pack, energy and focus. |
+| `goto <target>` | `HomesteadGoto` | Teleports her onto the ground (or the tunnel floor) next to the target, facing it. **Waits and returns the `GOTO:` lines**: `arrived at (x, y, z ...) ... Focus: ...`, or `FAILED` / `refused` / `no target`. |
+| `use "<target> [item]"` | `HomesteadUse` | `goto`, settle, then `Interact()` (no item) or select the item on the hotbar and use it. Waits and returns the `USE:` lines ending with the outcome (toast, pack, energy, focus) or the failure. |
 | `hotbar [item]` | (key press) | Prints the bar; `hotbar OilLamp` / `hotbar Pickaxe` presses that item's number key. |
 | `screen <name>` | `HomesteadScreen` | `close`, `inventory`, `craft`, `build`, `settings`, `appearance`, `map`, `shop`, `chest`. Logs `SCREEN:` with what it shows. |
 | `weather rain\|clear` | `HomesteadWeather` | Skips the clock forward to a rain spell (inside it) or a clear dry hour; it can jump days (rain skipped ~6.5 days in testing), so set the weather last. Logs `WEATHER:`. |
 | `reset` | `HomesteadReset` | Full energy, full lamp oil, screens and held action closed, morning if it is night. Pack, purse and placements stay. |
-| `sellat "Name N,Name N"` | `HomesteadSellAtStore` | Opens the General Store's hours, stands her at its real counter, sells the list through the real sell path, opens the shop. Logs `SOLD` lines, the purse delta and `SELLAT: shop screen open=`. |
+| `sellat "Name N,Name N"` | `HomesteadSellAtStore` | Opens the General Store's hours, stands her at its real counter, sells the list through the real sell path, opens the shop. Waits and returns the `SOLD` lines, the purse delta and `SELLAT: shop screen open=`. |
 | `plog [n] [pattern]` | | Last `n` `LogHomesteadPlaytest` lines of this worktree's editor log. |
 | `tp x y [z]` | `HomesteadTeleport` | Raw teleport (all of the above are built on it). |
 | `con "HomesteadGive Item N"` | `HomesteadGive` | Adds items (name by item key, e.g. `Coal`, `ScrapIron`, `OilLamp`). |
@@ -36,9 +36,16 @@ Results of the Execs go to the log category `LogHomesteadPlaytest`; `plog` print
 
 ### `goto` / `use` targets
 
-- Landmarks: `store` (General Store door), `counter` (inside, in front of the shop counter), `mine`, `cove`/`beach`,
+- Landmarks: `store` (General Store door), `counter` (inside, in front of the shop counter), `cove`/`beach`,
   `square`/`town`, `gate`, `mill`, `farm`, `home`/`spawn` (standing room); any landmark name or part of one.
-- Raw point: `-9570,-36300` (no spaces).
+- The mine: `mine` (also `mine-house`, `mine-door`) stands her in the **yard in front of the mine house door**, facing it
+  (not inside the house); `mine-ladder` (also `underground`, `tunnel`, `ladder-foot`) puts her **underground** on the tunnel
+  floor at the ladder foot. Both work on every layout: they read the door and ladder foot from `Mine::GetLayout()`.
+- Underground nodes: `node:588011` (any mine node id from `state.nearby` or the layout) stands her on the tunnel floor in
+  front of that face, looking at it, at the tunnel's own height; `coal`, `copper`, `gem`, `rock face` and the like resolve
+  to the nearest node by true 3D distance, so a face under the yard is not "2 m away".
+- Raw point: `-9570,-36300` (no spaces). Surface only: a point inside a building, or where the landscape under it
+  is holed, may never settle (see Gotchas). `goto` then reports `FAILED`, not `arrived`.
 - Ids exactly as `state` lists them: `node:520001` (also `resource:`), `structure:N` / `piece:N`, `plot:N`, `drop:N`.
   A bare number searches resources, structures, plots, then drops.
 - Nearest of a kind: any resource name (`Stone`, `Tree`, `Hay`...), piece name (`Chest`, `Bed`...), `plot` or `drop`.
@@ -56,9 +63,9 @@ Results of the Execs go to the log category `LogHomesteadPlaytest`; `plog` print
 | `pack`, `packSummary` | Every item and count. |
 | `hotbar[]`, `selectedHotbarIndex` | Index, key, item, count, selected, lamp fill. |
 | `toolTiers`, `lamp`, `equipment` | Axe/Hoe/Pail/... tier; lamp carried / in hand / lit / oil hours; worn clothes. |
-| `position` | x, y, z, yaw, area, indoors, underground. |
+| `position` | `x`, `y`, `z`, `facingYaw`, `underground`, `level` (`surface`/`underground`), `sheltered`, `nearFire`, `nearWater`, `nearestLandmark`, `worldReady`, `groundSnapPending` (+ `groundSnapPendingSeconds`). |
 | `focus` | What she would interact with now, and its prompt. |
-| `nearby[]` | Closest things with `kind`, `id`, `name`, `distanceCm`, `bearingDeg`, `x`, `y`, `note`; `nearbyTotalInRadius` says if the list was cut. |
+| `nearby[]` | Closest things with `kind`, `id`, `name`, `distanceCm`, `level`, `bearingDeg`, `x`, `y`, `note`; `nearbyTotalInRadius` says if the list was cut. Same-level distances are 2D; across levels (yard vs tunnel) the height counts. |
 | `generalStore` | Open now, hours, door and counter positions. |
 | `screen` | `open` is `none`, `shop`, `chest`, `book:<page>` or `placement`, plus what is on it (shop rows with prices, chest contents). |
 | `toast`, `gamepadPrompts` | Last toast; whether prompts show gamepad (the last device used). |
@@ -88,7 +95,7 @@ check `focus` before the next interaction; the axe has a ~3.5 s recovery.
 ### Check darkness, lighting or lamp
 
 1. `con "HomesteadMorning 22"` (night; adds a day if already past) or `HomesteadMorning 12` for noon.
-2. `goto mine` for underground, `goto home` for indoors. `(state).position` confirms `underground` / `indoors`.
+2. `goto mine-ladder` for underground (or `goto node:<id>` at a tunnel face), `goto home` for indoors. `(state).position.underground` / `.level` confirm where she is.
 3. `con "HomesteadGive OilLamp 1"`, `hotbar OilLamp` to hold it, `con "HomesteadLampOil 6"` for full oil. `(state).lamp` shows carried / inHand / lit / oilHours.
 4. `hshot` for the 3D view. Compare with and without the lamp, and day vs night.
 
@@ -115,11 +122,15 @@ Prefer `goto <name or id>` over these numbers.
 
 ## Gotchas
 
-- `HomesteadTeleport` and its wrappers refuse while a ground snap is pending; wait a moment and retry. `goto` waits up to 90 s for the area to stream in, then gives up and logs it.
+- `HomesteadTeleport` and its wrappers refuse while a ground snap is pending. `goto`/`use`/`sellat` now log `refused: still being placed ... (pending for N s)` instead of silently doing nothing; Interact and hotbar keys pressed during a snap are dropped with only the "Still finding your footing" toast, so wait for `arrived` first.
+- Underground work needs light at the face: `use "node:N Pickaxe"` returns `Too dark to work` (toast) while the lamp is not lit. Set the lamp down first with `use "node:N OilLamp"` (it stays lit on the floor beside her), then swing the pickaxe; a worn pickaxe takes 3 swings on a rock face (verified: Stone +5, then `Nothing left here until it comes back`). `state.lamp` shows `lit`.
+- `goto` to a surface point where the settle never completes (inside the mine house) takes the full 90 s and then logs `FAILED: ended at (...)`; the wrapper returns that line. Don't wait on it twice: stand in the yard (`goto mine`) and walk in.
+- `goto` waits up to 90 s for the area to stream in. If the snap is abandoned (she is put back where she started) it logs `FAILED: ended at ... not the target` rather than `arrived`; never trust a `goto` whose result line you did not read.
+- The teleport settle needs both floor collision and landscape collision (underground it needs only the tunnel floor). A target inside a surface building with a holed landscape never settles (`HOMESTEAD_GROUND_HOLD floor=1 landscape=0` in the log): stand outside (`goto mine`) and walk in, until the settle treats that footprint like the sea cave.
 - Don't use `walk_to` for testing: it stops ~150 cm short and sticks on walls, doors and trees, and an open field book blocks it.
 - Tool swings are dropped while she moves; `use` settles first. `UseSelectedTool` needs the hotbar showing; `Interact` needs the world ready (`state` works only after `worldReady`).
 - If `con` reports nothing, PIE isn't running (`pie`, then poll `st`).
-- Read results from `plog` (not from the call's return value); the helper returns the command string it ran.
+- Read the result in the lines the wrapper returns (`goto`, `use`, `sellat` wait for them); `plog [n] [pattern]` shows older lines. Other wrappers return the command string they ran, and their results are in the log.
 - The Execs exist only once the editor module with `HomesteadControllerTest*.cpp` is built and the editor restarted (Live Coding can't add Exec declarations to the header).
 
 ## Adding to the kit
