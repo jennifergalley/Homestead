@@ -92,3 +92,9 @@ Plan: `openspec/changes/open-estate-mine-shallow-level` (decisions D1-D5 in its 
 - Queued for Next once a slot frees: Quests, compost bin, [Balance] currants easier to spot, [Balance UI] dim price on Owned clothing, remove the building menu and wooden buildings, remove the controls hint bar (`jenny-mv448c92`).
 - Jenny wants frequent progress shots: lanes send `[progress] <milestone> <folder>`; Mine Art stops for her approval after the house blockout.
 | Test Tools Agent | `979b7777-3fce-47ab-9cb7-6b83b4410c7b` | Claude Sonnet 5.5 / high | — (no slot; Mine Gameplay builds/verifies) | open-store teleport-and-sell test helper |
+
+### Overnight delegation (Jenny, 2026-10-11 22:28)
+
+- Jenny: "Don't let perfect be the enemy of good enough - I'd rather have something shipped that I can play tomorrow and iterate on than wait until it's absolutely flawless before we integrate it into the game."
+- The Orchestrator approves review media on her behalf (ready evidence: "Orchestrator approved for Jenny, 2026-10-11 overnight"). Mine Art gets one timeboxed fix round on review 10; leftovers become follow-up cards.
+- Integration merges Mine Gameplay (with Test Tools' mine-aware goto commits) and Mine Art, then packages Development and promotes it as an interim delivery of the Next build. The other Next cards stay in Next.
