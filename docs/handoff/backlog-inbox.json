@@ -862,6 +862,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-12T01:39:19.462Z"
+    },
+    {
+      "id": "jenny-mv4uzvy7-ed6a8k",
+      "title": "[Follow-up] Coal seam still reads like a hole",
+      "description": "From the mine build (Orchestrator overnight review, 2026-10-11): the coal seam is a dark lens that reads as a hole or shadow under lamp light; give it a glossier black band through the rock. Mine Art review 15-fix-round.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-12T06:16:30.079Z"
+    },
+    {
+      "id": "jenny-mv4uzvzh-ssitiv",
+      "title": "[Follow-up] Verify mine polish in play",
+      "description": "From the mine build: not yet seen live: the open trapdoor showing a dark shaft in game (Mine Gameplay animates the lid), the spent-node z-fight fix, a random gem drop toast, and the copper icon at hotbar size. Check in the packaged build and file anything off.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-12T06:16:30.125Z"
     }
   ]
 }
