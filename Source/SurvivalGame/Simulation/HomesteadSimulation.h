@@ -807,7 +807,7 @@ public:
 
     // The estate mine (HomesteadMine.cpp). `playerZ` is her height in cm: the simulation is 2D, and the
     // tunnels lie directly under the surface, so a node only answers to someone standing at its level.
-    // CheckMine refuses with the player-facing reason: "Too dark to work." without a lit lamp,
+    // CheckMine refuses with the player-facing reason: "Too dark to work." without light at the face (LampLightsWork),
     // "Needs a pickaxe." without one, and "Nothing left here until it comes back." while it's bare.
     Result CheckMine(int nodeId, Item tool, Point player, double playerZ) const;
     // Swings her pickaxe tier needs to work the node (the last one commits), and the Energy that costs.

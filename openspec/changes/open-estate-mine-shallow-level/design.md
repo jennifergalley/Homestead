@@ -109,8 +109,9 @@ the worn pickaxe. Stone stays at 5 coins.
 | Quartz | 35 | "A clear quartz crystal. Pretty on a mantelpiece." |
 | Amethyst | 150 | "A violet amethyst from a gem pocket. Rare and lovely." |
 
-**Refusal copy:** "Too dark to work." when she has no lit lamp, and "Needs a pickaxe." when she has
-no pickaxe.
+**Refusal copy:** "Too dark to work." when there is no light at the face, and "Needs a pickaxe." when she has
+no pickaxe. Light at the face means the lit lamp in her hand, or a lit set-down lamp within its light
+radius (about 4 m) of the node (Jenny, 2026-10-11: a lamp left far behind gives no light to work by).
 
 ### Stack size and the pile upstairs
 
