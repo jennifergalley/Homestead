@@ -33,7 +33,8 @@ enum class Item : int
     FishSoup, FishAndPotatoes, HerbedCarp, MackerelChowder,
     // add-beach-gathering: beach finds and the dishes made from them.
     Seashell, Driftwood, Mussels, Laver, SteamedMussels, MusselPotatoBroth, FriedLaver,
-    Count
+        Coal, CopperOre, Quartz, Amethyst,
+        Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);
 

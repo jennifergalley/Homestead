@@ -38,8 +38,9 @@ alongside, and the mine reuses it.
 ## 3. The shallow level's layout
 
 A fixed, hand-built network about the size of the manor grounds. The ladder chamber opens onto a
-main gallery that loops back on itself, with three or four short side drifts, timber sets spaced
-well apart, no rails or ore carts (ore was hauled out by hand, as in Poldark; Jenny 2026-10-11) and a dripping sump. Walking from the ladder to the far end takes about 30-45 s.
+main gallery that loops back on itself, with three or four short side drifts, a few timber sets only where
+the rock needs support, and a dripping sump. There are no rails or ore carts: the rock went out by hand,
+in baskets and barrows (Jenny, 2026-10-11, after the greybox). Walking from the ladder to the far end takes about 30-45 s.
 There are no dead ends that hide the way back, and the floors are flat enough that she can never
 fall somewhere she can't climb out of. Ambient sound: drips, creaking timber and a low draught.
 
@@ -110,6 +111,8 @@ on its yield and not per swing:
 
 - Spread the 20 rock faces through the main gallery and the side drifts, about 8–10 m apart, so she
   mines her way round the loop rather than standing at one wall.
+- The three gem-pocket spots became one coal seam and two copper veins (ids 588036, 588044, 588045;
+  588050-588052 were never shipped and aren't reused).
 - Space the veins more thinly, in the side drifts, so finding a vein feels like a small discovery.
 - The refill cadences are per node, counted from when she mined it, and they reset at 6:00, like
   the beach.
@@ -123,8 +126,9 @@ on its yield and not per swing:
 | Quartz | 35 | "A clear quartz crystal. Pretty on a mantelpiece." |
 | Amethyst | 150 | "A violet amethyst found in the rock. Rare and lovely." |
 
-**Refusal copy:** "Too dark to work." when she has no lit lamp, and "Needs a pickaxe." when she has
-no pickaxe.
+**Refusal copy:** "Too dark to work." when there is no light at the face, and "Needs a pickaxe." when she has
+no pickaxe. Light at the face means the lit lamp in her hand, or a lit set-down lamp within its light
+radius (about 4 m) of the node (Jenny, 2026-10-11: a lamp left far behind gives no light to work by).
 
 ### Stack size and the pile upstairs
 
@@ -218,7 +222,7 @@ Two heavy lanes, spawned together in dependency order, use the two heavy-job slo
 
 1. **Mine Art Agent** (Claude Opus 5.5, Blender + Unreal). Owns the mine house (exterior, the
    furnished ground-floor room, the trapdoor and ladder shaft) and a modular tunnel kit: walls, timber
-   sets, sump, and rock face, coal, copper and gem node meshes in the sea cave's granite.
+   sets, sump, and rock face, coal and copper node meshes in the sea cave's granite.
    It assembles the shallow level and places it under the mine site. Files: `Scripts/Blender/Recipes/mine_*.py`,
    `Content/SurvivalGame/Mine/**`, the level's placement script.
 2. **Mine Gameplay Agent** (Claude Sonnet 5.5). Owns the simulation: item and resource-kind appends,

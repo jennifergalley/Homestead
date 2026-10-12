@@ -4,6 +4,7 @@
 #include "HomesteadWorldCommon.h"
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadRuinDebris.h"
 
@@ -86,6 +87,11 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
 {
     if (Node.cleared)
     {
+        return;
+    }
+    if (Homestead::Mine::IsMineNodeKind(Node.kind) || Node.kind == Homestead::ResourceKind::MinePile)
+    {
+        BuildMineResource(Visual, Node, bProduceOnly);
         return;
     }
     const FVector Base = AtGround(Node.position.x, Node.position.y);

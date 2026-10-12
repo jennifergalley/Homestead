@@ -51,7 +51,9 @@ private:
         StrawberryCompote, RootVegetableHotpot, RawFishSlices, GrilledTrout, GrilledPerch,
         ScoopTank, CropTop, SkinnyJeans, Leggings, BikerJacket, Sneakers, AnkleBoots, DarkJeans,
         // add-beach-gathering: after the seed kinds, so the >= SeedRoots glyph-first rule draws them as ink dishes.
-        SteamedMussels, MusselPotatoBroth, FriedLaver
+        SteamedMussels, MusselPotatoBroth, FriedLaver,
+        // open-estate-mine-shallow-level: the mine's finds, glyph-first like the dishes above.
+        Coal, CopperOre, Quartz, Amethyst
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};

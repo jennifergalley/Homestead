@@ -5,12 +5,16 @@
 #include "Engine/StaticMesh.h"
 #include "HomesteadEstateGround.h"
 #include "HomesteadEstateTerrain.h"
+#include "Simulation/HomesteadMine.h"
 #include "Materials/MaterialInterface.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGrassField, Log, All);
 
 namespace
 {
+// The mine house's 900 x 600 cm outer footprint, covered by two 600 x 600 bare squares (cm).
+constexpr double MineHouseSquareHalfCm = 300.0;
+constexpr double MineHouseSquareOffsetCm = 150.0;
 // Clear radius (cm) round each kind of interactable, so the meadow never hides one.
 float GrassClearRadius(Homestead::ResourceKind Kind)
 {
@@ -133,6 +137,11 @@ void UHomesteadGrassField::RebuildObstacles(const Homestead::State& State)
     }
     for (const auto& Structure : State.structures)
         Blocks.Add(Homestead::StructureFootprint(State, Structure));
+    // The mine house (900 x 600 cm outer, yaw 0) is two bare squares side by side, so blades clip at
+    // its walls without a wide bare apron round it.
+    const Homestead::Mine::Spot& House = Homestead::Mine::GetLayout().house;
+    Add(House.x - MineHouseSquareOffsetCm, House.y, -MineHouseSquareHalfCm);
+    Add(House.x + MineHouseSquareOffsetCm, House.y, -MineHouseSquareHalfCm);
 }
 
 uint64 UHomesteadGrassField::ChunkObstacleSignature(FIntPoint Chunk) const

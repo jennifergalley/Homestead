@@ -40,6 +40,9 @@ enum class ResourceKind : int
     // add-beach-gathering: beach finds that come back every morning, and the beach campfire she lights
     // with driftwood (its readyAtHour is the hour it burns out; HomesteadBeach.h).
     Seashells, Driftwood, BeachPebbles, MusselBed, LaverRocks, BeachCampfire,
+    // open-estate-mine-shallow-level: the mine's nodes (struck with the pickaxe by Simulation::MineNode; their
+    // readyAtHour is when they next hold ore) and the one-time rock pile in the mine house (hand pickup).
+    MineRockFace, MineCoalSeam, MineCopperVein, MineGemPocket, MinePile,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
@@ -802,6 +805,27 @@ public:
     static double ScytheArcRadius(ToolTier tier);
     static double ScytheArcHalfAngle(ToolTier tier);
 
+    // The estate mine (HomesteadMine.cpp). `playerZ` is her height in cm: the simulation is 2D, and the
+    // tunnels lie directly under the surface, so a node only answers to someone standing at its level.
+    // CheckMine refuses with the player-facing reason: "Too dark to work." without light at the face (LampLightsWork),
+    // "Needs a pickaxe." without one, and "Nothing left here until it comes back." while it's bare.
+    Result CheckMine(int nodeId, Item tool, Point player, double playerZ) const;
+    // Swings her pickaxe tier needs to work the node (the last one commits), and the Energy that costs.
+    int MineSwings(int nodeId) const;
+    double MineCost(int nodeId) const;
+    // The mine node she's aimed at: within reach in the plane and at her level, inside the aim cone
+    // (Overgrowth::AimHalfAngleDegrees), nearest first; -1 for none. Bare nodes still count so the
+    // prompt can say they're bare.
+    int FindAimedMine(Point player, double playerZ, Point facing) const;
+    // Whether the node is bare until its refill morning.
+    bool MineDepleted(int nodeId) const;
+    // Works the node once: spends Energy, grants its yield (overflow is left on the ground) and leaves
+    // it bare until its refill morning.
+    Result MineNode(int nodeId, Item tool, Point player, double playerZ);
+    // Exhaustion underground: she sleeps it off (Exertion::DozeHours), wakes fully rested with her pack
+    // untouched, and the game carries her to the mine house's ground floor. Fails when she isn't underground.
+    Result WakeAtMine(Point player, double playerZ);
+
     void Advance(double realSeconds, Point player, bool paused = false);
     void AdvanceGameHours(double hours, Point player);
     // Playtest aid: jump the clock forward to the next occurrence of hourOfDay (0-24) without
@@ -862,6 +886,10 @@ public:
     const WorldDrop* SetDownLampDrop() const;
     // Lit in her hand (selected, awake) or set down, while it has oil.
     bool IsLampLit(bool sleeping = false) const;
+    // Whether the set-down lamp is close enough to a point to work by (within the mine lamp's light radius).
+    // She can work a face at `point` by the lit lamp in her hand or a lit set-down lamp within its light radius.
+    bool LampLightsWork(Point point) const;
+    bool SetDownLampLights(Point point) const;
     // Spends a flask to fill the lamp in her pack.
     Result RefillLamp();
     // Sets the carried lamp on dry ground within reach; it keeps burning there.

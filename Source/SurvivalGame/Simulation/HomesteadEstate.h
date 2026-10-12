@@ -101,7 +101,8 @@ const EstateLayout& ProvisionalEstateLayout();
 // clear-out near the manor 570000-579999 (clearing), field mushrooms 580000-580999 (seasons), public roadside
 // forage 581000-581099 and more estate brambles 582100-582299 (water, Scripts/Terrain/forage.py), lake-trail forage 582300-582399 (water,
 // Scripts/Terrain/lake_path_plants.py), woodland forage 583000-583199 (Upkeep, Scripts/Terrain/woodland_forage.py),
-// beach finds and the beach campfire 586000-586099 (Beach, Scripts/Terrain/beach_detritus.py) and
+// beach finds and the beach campfire 586000-586099 (Beach, Scripts/Terrain/beach_detritus.py),
+// the estate mine 588000-588199 (HomesteadMine.h; 588000-588099 are the mine art's sockets, 588100-588199 the gameplay lane's) and
 // dormant windfall branch spots 584000-584199 (Upkeep, Scripts/Terrain/windfall_spots.py; placed last). Order matters: later sections yield to earlier
 // ones (keep clear of what's already placed), so add sections in id order: berries, then the farm,
 // then the clear-out. Farm-first skipped a quarter of the brambles and failed the simulation tests.

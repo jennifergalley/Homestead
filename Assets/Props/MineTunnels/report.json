@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "MineTunnels",
+  "description": "The mine's shallow level: blasted granite galleries, side drifts, ladder chamber, shaft and sump as one Nanite shell seen from inside; LOD1/LOD2 fallback, LOD2 collision.",
+  "collision": "none",
+  "triangle_budget": 2600000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/mine_tunnels.py",
+  "source_sha256": "fb062f0b5965867ad1be33c4bceb7018fea050ae0305a32e90e4e84abf94bb03",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_MineTunnels": {
+      "vertices": 1210585,
+      "triangles": 2420916,
+      "size_cm": [
+        7867.49,
+        4749.63,
+        1421.97
+      ],
+      "materials": [
+        {
+          "name": "M_MineTunnels",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_MineTunnels_normal.png",
+            "mask": "T_MineTunnels_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MineTunnels_basecolor.png",
+          "roughness": "T_MineTunnels_roughness.png",
+          "normal": "T_MineTunnels_normal.png",
+          "ao": "T_MineTunnels_ao.png",
+          "mask": "T_MineTunnels_mask.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          8.0,
+          0.0,
+          1.5
+        ],
+        "ground": "origin",
+        "views": [
+          "hero"
+        ],
+        "eye_distance": 90.0
+      },
+      "fbx": "SM_MineTunnels.fbx",
+      "sha256": "8f2a1cf62431bd897c5be72dce0da020920a864f40f4e9c747d9dcc549c73d82"
+    },
+    "SM_MineTunnels_LOD1": {
+      "vertices": 180110,
+      "triangles": 359998,
+      "size_cm": [
+        7867.43,
+        4749.71,
+        1421.75
+      ],
+      "materials": [
+        {
+          "name": "M_MineTunnels_Procedural",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          8.0,
+          0.0,
+          1.5
+        ],
+        "ground": "origin",
+        "views": [
+          "hero"
+        ],
+        "eye_distance": 90.0
+      },
+      "fbx": "SM_MineTunnels_LOD1.fbx",
+      "sha256": "22c904fdd711c941b8ce3829da190d13cab7b21cb012d83e0b3504bf48a10943"
+    },
+    "SM_MineTunnels_LOD2": {
+      "vertices": 55101,
+      "triangles": 109999,
+      "size_cm": [
+        7867.36,
+        4750.56,
+        1421.08
+      ],
+      "materials": [
+        {
+          "name": "M_MineTunnels_Procedural",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          8.0,
+          0.0,
+          1.5
+        ],
+        "ground": "origin",
+        "views": [
+          "hero"
+        ],
+        "eye_distance": 90.0
+      },
+      "fbx": "SM_MineTunnels_LOD2.fbx",
+      "sha256": "9cf295a3b9a51bd074f84d526bdc02f9d5b9c4089c503a93a94daf7b56d371ef"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "frame": "Tunnel frame (layout.tunnel_world()); Unreal axes after import.",
+    "collision": "Complex-as-simple on LOD2: the floor is flat below FLOOR_KEEP (no facets), so she walks it.",
+    "material": "Macro bake + GraniteDetail tiling layer (as the sea cave).",
+    "detail_textures": [
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_basecolor.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_normal.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_roughness.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_height.png"
+    ]
+  },
+  "nanite": true,
+  "pivot": "Tunnel frame origin: the floor under the trapdoor's centre; place at layout.tunnel_world(), yaw 0.",
+  "textures": {
+    "T_MineTunnels_basecolor.png": "0c58cfe6154be6484a39d4a0a6fb7c70e72027b5cfa3795bad590d2b2e4ab00f",
+    "T_MineTunnels_roughness.png": "2359d911c784815f7d5df1cae62bb0a50f11393cb58575b88872e1238927bd4f",
+    "T_MineTunnels_normal.png": "68fbdf3a42c0cb3870c667f26d9662938e1193b0e4efa9c7a1ea68505d18d244",
+    "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
+    "T_MineTunnels_mask.png": "cf8ac9921b968f0ab912a09dc28b4c1b25da3e95f06b29cdb2b20d4ec1e48d44",
+    "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
+    "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
+  }
+}

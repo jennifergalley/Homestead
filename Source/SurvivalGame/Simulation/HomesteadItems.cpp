@@ -189,8 +189,17 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Food, "mussel-potato-broth", 39, NoBuyers, 35.0, 35.0, "Cookfire", false, "bowls of mussel and potato broth", FoodClass::Meal},
     {Item::FriedLaver, "fried-laver", "Fried laver", "Laver crisped in the pan until it smells of the sea.",
         ItemCategory::Food, "fried-laver", 11, NoBuyers, 19.0, 19.0, "Cookfire", false, nullptr, FoodClass::Meal},
-};
-static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
+            // The estate mine's finds (open-estate-mine-shallow-level, design 7).
+            {Item::Coal, "coal", "Coal", "A lump of coal from the seam. The smithy pays well for it.",
+                ItemCategory::Material, "coal", 10, StoreBuys, 0.0, 0.0, "Coal seams in the mine"},
+            {Item::CopperOre, "copper-ore", "Copper ore", "Green-streaked ore from a copper vein. Worth more once it's smelted.",
+                ItemCategory::Material, "copper-ore", 25, StoreBuys, 0.0, 0.0, "Copper veins in the mine"},
+            {Item::Quartz, "quartz", "Quartz", "A clear quartz crystal. Pretty on a mantelpiece.",
+                ItemCategory::Material, "quartz", 35, StoreBuys, 0.0, 0.0, "Now and then in the mine's stone and ore"},
+            {Item::Amethyst, "amethyst", "Amethyst", "A violet amethyst, found in the rock. Rare and lovely.",
+                ItemCategory::Material, "amethyst", 150, StoreBuys, 0.0, 0.0, "Rarely in the mine's stone and ore"},
+        };
+        static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 
 constexpr bool CatalogueInOrder()
 {

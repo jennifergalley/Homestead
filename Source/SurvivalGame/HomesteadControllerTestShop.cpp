@@ -29,7 +29,7 @@ using HomesteadPlaytest::FindItem;
 
 void AHomesteadController::HomesteadSellAtStore(const FString& SellList)
 {
-    if (RejectPendingGroundSnapAction()) return;
+    if (RejectTestWhileSnapping(TEXT("SELLAT"))) return;
     GetWorldTimerManager().ClearTimer(TestTeleportTimer);
     TestShopSales.Reset();
 
@@ -106,7 +106,7 @@ void AHomesteadController::HomesteadSellAtStore(const FString& SellList)
         TestShopId, State().hour, Shop->counterX, Shop->counterY, StandX, StandY, TestShopSales.Num());
 
     const bool bStarted = BeginTestTeleport(StandX, StandY, FRotator(0.0, FMath::UnwindDegrees(Shop->counterYaw + 180.0), 0.0),
-        TEXT("SELLAT"), [this]() { FinishTestShop(); });
+        TEXT("SELLAT"), [this]() { FinishTestShop(); }, [this]() { TestShopSales.Reset(); });
     if (!bStarted) TestShopSales.Reset();
 }
 

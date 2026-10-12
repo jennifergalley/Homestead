@@ -32,6 +32,7 @@ Run from the repo root:
 import json
 import os
 import struct
+import sys
 
 import numpy as np
 from PIL import Image
@@ -39,6 +40,9 @@ from scipy.ndimage import distance_transform_edt, gaussian_filter, map_coordinat
 from skimage.draw import polygon as fill_polygon
 
 from cove_heath import GRASS_SLOPE_DEG, STONY_KEEP, heath_weight
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Mine"))
+import mine_ground  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -217,15 +221,20 @@ def ground_fields(h, w, layout):
     d_road = line_distance(layout["road"], h.shape)
     wear = np.maximum(wear, 0.45 * smoothstep(4.5, 2.4, d_road) * smoothstep(0.35, 0.75, clump))
     lm = layout["landmarks"]
-    for name, r in (("MillSite", 16.0), ("MineEntrance", 20.0), ("EstateGateway", 9.0)):
+    # The mine house stands in plain grass (Jenny, 2026-10-11): no worn working-site ring round MineEntrance.
+    for name, r in (("MillSite", 16.0), ("EstateGateway", 9.0)):
         x, y = lm[name][:2]
         d = np.hypot(X - x, Y - y)
         wear = np.maximum(wear, 0.6 * smoothstep(r, r * 0.35, d) * (0.5 + 0.5 * clump))
+    # The mine house (Scripts/Mine/mine_ground.py): a trodden apron, and no blades in or round it.
+    mine_keep, mine_wear = mine_ground.house_ground(X, Y)
+    wear = np.maximum(wear, mine_wear)
     density *= 1.0 - 0.9 * wear
     height *= 1.0 - 0.6 * wear
 
     # No grass in the manor, on water, round the river channel or in town.
     density *= smoothstep(0.5, 1.8, d_manor)
+    density *= mine_keep
     d_river = line_distance(layout["river"], h.shape)
     density *= smoothstep(3.1, 3.9, d_river)
     height = np.where(d_river < 8.0, np.maximum(height, 1.0 * smoothstep(8.0, 4.0, d_river)), height)  # lush banks

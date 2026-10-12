@@ -1,4 +1,5 @@
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadMine.h"
 
 #include <algorithm>
 #include <cmath>
@@ -187,7 +188,7 @@ bool EstatePlacementAllowed(const EstateLayout& layout, const EstatePlacement& p
 {
     const LandmarkPolygon* boundary = layout.FindPolygon(Anchor::EstateBoundary);
     return (boundary && PointInPolygon(boundary->points, placement.position)) || IsPublicRoadsidePlacement(placement)
-        || IsDriveVergeOvergrowth(placement);
+        || IsDriveVergeOvergrowth(placement) || Mine::IsMinePlacementId(placement.id);
 }
 
 bool IsDriveVergeOvergrowth(const EstatePlacement& placement)

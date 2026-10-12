@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
 #include "Simulation/HomesteadHoldings.h"
+#include "Simulation/HomesteadMine.h"
 #include "Simulation/HomesteadTravel.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveGate.h"
@@ -447,7 +448,7 @@ private:
     // The UI gallery (Development builds) sets up isolated states for each UI surface.
     friend struct FHomesteadUIGallery;
     friend class UHomesteadMapComponent;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, SceneryTree, SceneryStump };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, SceneryTree, SceneryStump, Trapdoor };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
@@ -486,12 +487,17 @@ private:
     int32 TestShopId = INDEX_NONE;
     void FinishTestShop();
     // Agent test tools (HomesteadControllerTest*.cpp, .github\skills\homestead-test-tools): teleport to
-    // X,Y with HomesteadTeleport, wait for the ground snap to settle, face her `Facing`, then run `Then`.
-    // False (and logged under `Tag`) when the teleport could not start.
-    bool BeginTestTeleport(double X, double Y, const FRotator& Facing, const TCHAR* Tag, TFunction<void()> Then);
+    // X,Y with HomesteadTeleport (at height `Z` for an underground spot, else on the terrain), wait for the ground
+    // snap to settle, face her `Facing`, then run `Then`. If she did not end up at X,Y (the snap timed out or was
+    // abandoned) `Failed` runs instead. False (and logged under `Tag`) when the teleport could not start.
+    bool BeginTestTeleport(double X, double Y, const FRotator& Facing, const TCHAR* Tag, TFunction<void()> Then,
+        TFunction<void()> Failed = nullptr, double Z = -1000000.0);
     FTimerHandle TestTeleportTimer;
-    // Resolves a Goto target (landmark, id or kind name) to where she should stand and face.
-    bool ResolveTestTarget(const FString& Target, double& StandX, double& StandY, FRotator& Facing, FString& Described) const;
+    // Resolves a Goto target (landmark, id or kind name) to where she should stand and face; StandZ is the
+    // underground floor height for a mine target and -1000000 (the terrain) otherwise.
+    bool ResolveTestTarget(const FString& Target, double& StandX, double& StandY, double& StandZ, FRotator& Facing, FString& Described) const;
+    // Rejects a test action while a ground snap is pending, and says so in the log (not only as a toast).
+    bool RejectTestWhileSnapping(const TCHAR* Tag);
     // HomesteadUse: log what the swing or press did once its animation has had time to land.
     FTimerHandle TestUseTimer;
     FTimerHandle TestOutcomeTimer;
@@ -885,6 +891,33 @@ private:
     void UpdateFocus();
     // HomesteadControllerToolFocus.cpp: the held tool's aimed overgrowth, and the 280-300 cm band.
     void FocusHeldToolTarget(Homestead::Point Position);
+
+    // HomesteadControllerMine.cpp: the estate mine (trapdoor, ladder, tunnels).
+    // True while she is in the tunnels (below the surface at the mine footprint).
+    bool IsUnderground() const;
+    // The trapdoor above, the ladder foot below, whichever she is near.
+    void ConsiderTrapdoorFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
+    // E on the trapdoor or ladder: the lid opens and she climbs to the other level.
+    void ClimbMineLadder();
+    // The pickaxe on a rock face, seam, vein or gem pocket.
+    void SwingAtMine(Homestead::Item Tool);
+    // One blow of the mine swing has landed (called from LandOvergrowthSwing when SwingNode is a mine node).
+    void LandMineSwing(bool bMoreComing);
+    // The sim's blows for a mine node (SwingNode), or 0 when SwingNode isn't one.
+    int32 MineSwingsNeeded() const;
+    // Per frame: the stuck rule, the exhaustion wake and the ladder climb's lid (the camera arm shortens by itself
+    // under the tunnel roof, UpdateRoomCamera).
+    void TickMine(float DeltaSeconds);
+    // Moves her to a spot in the mine, house or tunnels, through the ground snap without the landscape wait.
+    void MoveWithinMine(const Homestead::Mine::Spot& Spot, float EyeYawDegrees);
+    bool bMineLadderBusy = false;
+    // The ladder climb: the lid opens, she moves at MineLadderMoveAt, and the lid shuts at MineLadderDoneAt.
+    bool bMineLadderMovePending = false;
+    bool bMineLadderDescending = false;
+    double MineLadderMoveAt = 0.0;
+    double MineLadderDoneAt = 0.0;
+    int32 MineStuckRecoveries = 0;
+    int32 MineWakes = 0;
     void BeginPlacement(Homestead::Piece Kind);
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);

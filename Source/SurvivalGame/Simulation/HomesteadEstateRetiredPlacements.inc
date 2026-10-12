@@ -74,3 +74,19 @@ retired(500386);
 retired(500388);
 retired(500387);
 retired(500389);
+// The mine's open heath (Jenny, 2026-10-11: "a plains-type setting ... not woods"; Scripts/Mine/clear_mine_yard.py):
+// the forest trees and the windfall under the cleared woods within 60 m of the mine house.
+retired(585020);
+retired(585027);
+retired(584001);
+retired(584002);
+retired(584016);
+retired(584024);
+retired(584070);
+retired(584117);
+retired(584135);
+retired(584141);
+retired(584142);
+retired(584154);
+retired(584155);
+retired(584163);

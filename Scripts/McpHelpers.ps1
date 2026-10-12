@@ -20,9 +20,9 @@ Functions:
     quit                                   stop PIE and quit the editor cleanly (releases DLL and .uasset locks)
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
     tp <x> <y> [z]                         HomesteadTeleport: stand her on the ground at x,y (with z: on the first surface at or below z)
-    sellat ["Name N,Name N"]               HomesteadSellAtStore: open the General Store's hours, stand her at its real counter, sell what she carries, open the shop; logs LogHomesteadPlaytest
-    state [n]                              the full world/character dump (time, weather, pack, hotbar, lamp, equipment, position, focus, nearby with ids, store, open screen)
-    goto <target> / use "<target> [item]"  walk-free go-to (store, mine, node:ID, plot:N, nearest kind...) / go-to then interact or use the hotbar item
+    sellat ["Name N,Name N"]               HomesteadSellAtStore: open the General Store's hours, stand her at its real counter, sell what she carries, open the shop; waits and returns the SELLAT log lines
+    state [n]                              the full world/character dump (time, weather, pack, hotbar, lamp, equipment, position incl. z/underground, focus, nearby with ids, store, open screen)
+    goto <target> / use "<target> [item]"  go-to without walking (store, mine yard, mine-ladder, node:ID incl. underground, plot:N, nearest kind...) / go-to then interact or use the hotbar item; both wait and return the GOTO/USE log lines
     screen <name> / weather rain|clear / reset   open or close a screen by name / skip to rain or a clear hour / full energy and lamp, screens closed
     plog [n] [pattern]                     recent LogHomesteadPlaytest lines from this worktree's editor log (results of the commands above)
     click <x> <y>                          real Win32 left click at editor-window pixels (Slate clicks don't reach game widgets)
@@ -79,7 +79,9 @@ function st([int]$n = 6) {
 function hotbar([string]$item = '') {
     $cells = (st).hotbar
     if ($item) {
-        $cell = $cells | Where-Object { $_.item -like "*$item*" } | Select-Object -First 1
+        # Ignore spaces, dashes and case so `hotbar OilLamp`, `hotbar "oil lamp"` and `hotbar oil-lamp` all match "Oil lamp".
+        $want = ($item -replace '[\s_-]', '')
+        $cell = $cells | Where-Object { ($_.item -replace '[\s_-]', '') -like "*$want*" -and $_.item } | Select-Object -First 1
         if (-not $cell) { Write-Warning "No hotbar cell holds '$item'."; return $cells | Format-Table index, key, item, count, selected }
         $names = @{ '1' = 'One'; '2' = 'Two'; '3' = 'Three'; '4' = 'Four'; '5' = 'Five'; '6' = 'Six'; '7' = 'Seven'; '8' = 'Eight'; '9' = 'Nine'; '0' = 'Zero' }
         hk tap_key (@{ key = $names[$cell.key] } | ConvertTo-Json -Compress) | Out-Null
@@ -163,10 +165,8 @@ function sellat([string]$items = 'Coal 3,CopperOre 2,Quartz 2,Amethyst 1') {
     # HomesteadSellAtStore: brings the General Store's hours round (skips to 9 AM if closed or Sunday), teleports her
     # to the real village counter, sells the carried items through the shop's own sell path, opens the shop screen and
     # logs per-item prices and the purse delta (filter the log for LogHomesteadPlaytest). It sells; it does not grant,
-    # so `con "HomesteadGive Coal 3"` first. The sale waits for the teleport to settle, so read the log a few seconds later.
-    $cmd = "HomesteadSellAtStore $items"
-    $null = con $cmd
-    $cmd
+    # so `con "HomesteadGive Coal 3"` first. Waits for the sale and returns its SELLAT log lines.
+    Invoke-PlayCommand "HomesteadSellAtStore $items" 'SELLAT: (shop screen|FAILED|refused|nothing|this map|could not|no pawn)'
 }
 
 # The test-tools commands (details and recipes: .github\skills\homestead-test-tools\SKILL.md). Each returns the
@@ -174,13 +174,37 @@ function sellat([string]$items = 'Coal 3,CopperOre 2,Quartz 2,Amethyst 1') {
 function plog([int]$n = 12, [string]$pattern = 'LogHomesteadPlaytest') {
     $log = Join-Path $script:McpRoot 'Saved\Logs\SurvivalGame.log'
     if (-not (Test-Path $log)) { return "No $log (is this worktree's editor running?)" }
+    $lines = (Read-PlayLog 0).Text -split "`r?`n" | Where-Object { $_ -match $pattern }
+    $lines | Select-Object -Last $n
+}
+
+# The editor holds the log open, so read it with shared access. Returns the text from byte offset $from and the
+# offset the log ended at (a mark for the next call).
+function Read-PlayLog([long]$from = 0) {
+    $log = Join-Path $script:McpRoot 'Saved\Logs\SurvivalGame.log'
+    if (-not (Test-Path $log)) { return [pscustomobject]@{ Text = ''; End = 0 } }
     $stream = [IO.File]::Open($log, 'Open', 'Read', 'ReadWrite, Delete')
     try {
-        $reader = New-Object IO.StreamReader($stream)
-        $text = $reader.ReadToEnd()
+        if ($from -gt $stream.Length) { $from = 0 }
+        $null = $stream.Seek($from, 'Begin')
+        $text = (New-Object IO.StreamReader($stream)).ReadToEnd()
+        [pscustomobject]@{ Text = $text; End = $stream.Length }
     } finally { $stream.Dispose() }
-    $lines = $text -split "`r?`n" | Where-Object { $_ -match $pattern }
-    $lines | Select-Object -Last $n
+}
+
+# Run a console command, then wait for the playtest log line that ends it (the Execs finish a few seconds later,
+# after the teleport settles). Prints the matching LogHomesteadPlaytest lines, or says what timed out.
+function Invoke-PlayCommand([string]$command, [string]$done, [int]$timeoutSec = 100) {
+    $mark = (Read-PlayLog 0).End
+    $null = con $command
+    $deadline = (Get-Date).AddSeconds($timeoutSec)
+    $seen = @()
+    while ((Get-Date) -lt $deadline) {
+        Start-Sleep -Milliseconds 400
+        $seen = @((Read-PlayLog $mark).Text -split "`r?`n" | Where-Object { $_ -match 'LogHomesteadPlaytest' })
+        if ($seen | Where-Object { $_ -match $done }) { return $seen }
+    }
+    $seen + "TIMED OUT after ${timeoutSec}s waiting for /$done/. Check `st` (groundSnapPending) and `plog 20`."
 }
 
 # state: the whole world/character picture in one call (st's `world` object). `state | ConvertTo-Json -Depth 6`
@@ -191,18 +215,18 @@ function state([int]$n = 12) {
 }
 
 function goto([string]$target) {
-    # HomesteadGoto: store | counter | mine | cove | square | gate | mill | farm | home | x,y | an id such as node:520001 /
-    # plot:3 | the nearest <resource, piece or plot kind>. Stands her facing it, then logs the focus.
-    $cmd = "HomesteadGoto $target"
-    $null = con $cmd
-    $cmd
+    # HomesteadGoto: store | counter | mine (the yard in front of the mine house door) | mine-ladder / underground (the
+    # tunnel floor at the ladder foot) | cove | square | gate | mill | farm | home | x,y | an id such as node:520001 or
+    # node:588011 (an underground rock face: she stands in the tunnel facing it) / plot:3 | the nearest <resource,
+    # piece or plot kind>. Stands her facing it and WAITS: returns the GOTO log lines ("arrived ... Focus: ..." or
+    # "FAILED"/"refused"), so a result is never silently missing.
+    Invoke-PlayCommand "HomesteadGoto $target" 'GOTO: (arrived|no target|refused|FAILED|the teleport)'
 }
 
 function use([string]$targetAndItem) {
     # HomesteadUse "<target> [item]": goto, then Interact (no item) or select the item on the hotbar and use it.
-    $cmd = "HomesteadUse $targetAndItem"
-    $null = con $cmd
-    $cmd
+    # Waits and returns the USE log lines, ending with the outcome (toast, pack, energy) or the failure.
+    Invoke-PlayCommand "HomesteadUse $targetAndItem" 'USE: (outcome|FAILED|refused|no |could not|format|the teleport)'
 }
 
 function screen([string]$name = 'close') {

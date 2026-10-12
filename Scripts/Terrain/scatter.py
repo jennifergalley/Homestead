@@ -70,6 +70,8 @@ def main():
         ok &= river.query(p)[0] > river_clear
         ok &= np.linalg.norm(p - town, axis=1) > 180
         ok &= np.linalg.norm(p - lm["StandingRoomOrigin"], axis=1) > 28
+        # The mine yard: Scripts/Mine/clear_mine_yard.py post-filters EstateScenery.bin further (a clear view of the
+        # mine house from its path); rerun it after regenerating.
         ok &= np.linalg.norm(p - lm["MineEntrance"], axis=1) > 20
         ok &= np.linalg.norm(p - lm["MillSite"], axis=1) > 14
         return ok

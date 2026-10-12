@@ -59,6 +59,9 @@ public:
     float GetRoomMix() const { return Roomed; }
     /** 0 .. 1, eased: how deep in the sea cave she is (Homestead::SeaCaveDepth). Its chamber's daylight follows this. */
     float GetCaveMix() const { return Caved; }
+    /** 0 .. 1, eased: her position is in the mine's tunnel level (Homestead::Mine::IsUnderground). No sky, sun or haze reaches
+     *  it, and the exposure holds still, so her lamp is the only real light. */
+    float GetMineMix() const { return Mined; }
 
 private:
     bool LoadAssets();
@@ -77,6 +80,7 @@ private:
     float Indoors = 0.0f;       // 0 outdoors .. 1 indoors, eased.
     float Roomed = 0.0f;        // GetRoomMix.
     float Caved = 0.0f;         // GetCaveMix.
+    float Mined = 0.0f;         // GetMineMix.
     float StreakFade = 1.0f;    // 0 under a roof that isn't a building piece.
     float OverheadCheckIn = 0.0f;
     bool bOverhead = false;

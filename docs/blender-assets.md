@@ -455,6 +455,20 @@ clusters (`T.cluster_layout` + `T.paint_cluster`, far `T.paint_mass`), then call
   `ProfileGPU` readings only inside a perf window (`Scripts\Start-PerfWindow.ps1` /
   `Stop-PerfWindow.ps1`: your editor is the only Unreal process and no build is running).
 
+## Fingerposts (one shared style)
+
+Every fingerpost (cove, road, "To the mine") is built by `Scripts\Blender\homestead_signage.py`, so they all
+match and one edit restyles them all. The look lives in its constants: the font (`FONT_PATH`, Abril Fatface),
+ink and board colours, post and board sizes, letter height, the arm's pointed tip. The recipes
+(`Recipes\fingerpost.py`, `Recipes\fingerpost_road.py`) hold no style, only a list of signs.
+
+- **New sign:** copy a recipe and return `fingerpost(kit, "SM_Fingerpost_<Name>", [Arm("Words", height_m)])`
+  per mesh. A second arm is `Arm("Words", 1.40, turn=-1.0)` (points -X). An arm to hang on an existing post is
+  `with_post=False`. Arm length follows the words. Pivot is the post's foot; the arm points +X.
+- **Restyle all:** change the constants, then rebuild and import each recipe
+  (`New-Prop.ps1 fingerpost`, `fingerpost_road`; `import_props.main(['Fingerpost'])`, `['FingerpostRoad']`).
+- Review the hero and detail renders, then confirm the lettering reads correctly in the engine.
+
 ## Outputs and review
 
 `Assets\Props\<Name>\` receives `SM_*.fbx`, `<Name>.blend`, `report.json`

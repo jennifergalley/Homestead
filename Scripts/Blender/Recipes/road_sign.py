@@ -11,7 +11,7 @@ Real-object research (written before modeling):
 - Weathering: silver-grey oak with dark checks, green algae low on the post, the paint chalky and
   flaking at the edges of the board and worn through on the capping.
 
-Style and frame match fingerpost.py (the cove route's "To the Cove" post): same oak, same post section.
+Style and frame match fingerpost.py (the cove route's "To the cove" post): same oak, same post section.
 Pivot at the post's foot on the ground. The board faces along +X and -X (TextRender reads from +X at yaw 0
 and from -X at yaw 180) and runs across Y; it is symmetric in Y, so the FBX Y mirror changes nothing.
 The post is bedded 0.35 m below the pivot. No collision (the actor disables it; she walks up to it).
