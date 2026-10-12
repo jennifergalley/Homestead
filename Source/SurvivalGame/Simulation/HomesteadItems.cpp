@@ -195,9 +195,9 @@ constexpr ItemInfo ItemCatalogue[] = {
             {Item::CopperOre, "copper-ore", "Copper ore", "Green-streaked ore from a copper vein. Worth more once it's smelted.",
                 ItemCategory::Material, "copper-ore", 25, StoreBuys, 0.0, 0.0, "Copper veins in the mine"},
             {Item::Quartz, "quartz", "Quartz", "A clear quartz crystal. Pretty on a mantelpiece.",
-                ItemCategory::Material, "quartz", 35, StoreBuys, 0.0, 0.0, "Gem pockets in the mine"},
-            {Item::Amethyst, "amethyst", "Amethyst", "A violet amethyst from a gem pocket. Rare and lovely.",
-                ItemCategory::Material, "amethyst", 150, StoreBuys, 0.0, 0.0, "Gem pockets in the mine"},
+                ItemCategory::Material, "quartz", 35, StoreBuys, 0.0, 0.0, "Now and then in the mine's stone and ore"},
+            {Item::Amethyst, "amethyst", "Amethyst", "A violet amethyst, found in the rock. Rare and lovely.",
+                ItemCategory::Material, "amethyst", 150, StoreBuys, 0.0, 0.0, "Rarely in the mine's stone and ore"},
         };
         static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 

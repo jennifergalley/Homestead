@@ -124,7 +124,10 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
     // In the sea cave the landscape is overhead: its floor is the cave's own (always loaded) rock.
     // Underground the landscape is far overhead: the tunnels' own collision is the floor, and the settle waits for it.
     const bool bUnderground = bEstateMap && Homestead::Mine::IsUnderground({Target.X, Target.Y}, Target.Z);
-    const bool bLandscapeReady = !bEstateMap || bInSeaCave || bUnderground
+    // The mine house's floorboards sit over the landscape (holed round the trapdoor), so like the tunnels they are
+    // the floor and the heightfield is not waited for.
+    const bool bInMineHouse = bEstateMap && Homestead::Mine::InHouse({Target.X, Target.Y}, Target.Z);
+    const bool bLandscapeReady = !bEstateMap || bInSeaCave || bUnderground || bInMineHouse
         || HomesteadGroundSnap::HasLandscapeCollision(GetWorld(), Target, End, Avatar);
     if ((!bFound || !bLandscapeReady) && Waited < HoldLimitSeconds)
     {

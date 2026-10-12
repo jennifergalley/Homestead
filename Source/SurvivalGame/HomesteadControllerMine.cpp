@@ -110,7 +110,7 @@ void AHomesteadController::SwingAtMine(Homestead::Item Tool)
     const int32 Target = Sim.FindAimedMine(Position, Z, {Forward.X, Forward.Y});
     if (Target == INDEX_NONE || Target < 0 || !Homestead::Mine::FindNode(Target))
     {
-        Notify(TEXT("Aim at a rock face, seam, vein or gem pocket."), true);
+        Notify(TEXT("Aim at a rock face, seam or vein."), true);
         return;
     }
     const auto Ready = Sim.CheckMine(Target, Tool, Position, Z);

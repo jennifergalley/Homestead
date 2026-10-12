@@ -50,14 +50,16 @@ Layout BuildLayout()
 }
 
 // Balance's numbers (design section 7): swings are worn / iron / steel / master (master = steel).
+// The last column is the chance (percent) that a mined node also gives one gem (Jenny, 2026-10-11: gems are a
+// random find in stone and ore, not a node of their own).
 const NodeInfo MineNodeTable[] = {
-    {{3, 2, 2, 2}, 2.5, 5, 7, 0.0},     // Rock face: stone, back every morning.
-    {{2, 1, 1, 1}, 2.0, 2, 3, 24.0},    // Coal seam: back after a day.
-    {{3, 2, 2, 2}, 3.0, 2, 2, 48.0},    // Copper vein: back after two days.
-    {{4, 3, 2, 2}, 3.0, 1, 2, 96.0},    // Gem pocket: back after four days.
+    {{3, 2, 2, 2}, 2.5, 5, 7, 0.0, 3},     // Rock face: stone, back every morning.
+    {{2, 1, 1, 1}, 2.0, 2, 3, 24.0, 10},   // Coal seam: back after a day.
+    {{3, 2, 2, 2}, 3.0, 2, 2, 48.0, 10},   // Copper vein: back after two days.
 };
-// Gem pockets roll quartz or amethyst each time they come back.
-constexpr int AmethystChancePercent = 20;
+constexpr int MineNodeKinds = 3;
+// A gem find is quartz or, this often, amethyst (Balance: 85% quartz, 15% amethyst).
+constexpr int AmethystChancePercent = 15;
 
 const ResourceNode* MineFindResource(const std::vector<ResourceNode>& nodes, int id)
 {
@@ -97,7 +99,6 @@ ResourceKind ResourceFor(NodeKind kind)
     case NodeKind::Rock: return ResourceKind::MineRockFace;
     case NodeKind::Coal: return ResourceKind::MineCoalSeam;
     case NodeKind::Copper: return ResourceKind::MineCopperVein;
-    case NodeKind::Gem: return ResourceKind::MineGemPocket;
     }
     return ResourceKind::MineRockFace;
 }
@@ -105,7 +106,7 @@ ResourceKind ResourceFor(NodeKind kind)
 bool IsMineNodeKind(ResourceKind kind)
 {
     return kind == ResourceKind::MineRockFace || kind == ResourceKind::MineCoalSeam
-        || kind == ResourceKind::MineCopperVein || kind == ResourceKind::MineGemPocket;
+        || kind == ResourceKind::MineCopperVein;
 }
 
 bool IsMinePlacementId(int id) { return id >= FirstPlacementId && id <= LastPlacementId; }
@@ -119,7 +120,7 @@ const Node* FindNode(int id)
 const NodeInfo& InfoFor(NodeKind kind)
 {
     const int index = static_cast<int>(kind);
-    return MineNodeTable[index >= 0 && index < 4 ? index : 0];
+    return MineNodeTable[index >= 0 && index < MineNodeKinds ? index : 0];
 }
 
 double OutsideFloorBy(Point p)
@@ -143,6 +144,14 @@ bool IsUnderground(Point p, double z)
             return true;
     }
     return false;
+}
+
+bool InHouse(Point p, double z)
+{
+    const Spot& house = GetLayout().house;
+    if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(z)) return false;
+    return std::abs(p.x - house.x) <= HouseHalfLengthCm && std::abs(p.y - house.y) <= HouseHalfWidthCm
+        && z >= house.z - HouseBelowCm && z <= house.z + HouseAboveCm;
 }
 
 bool IsStuck(Point p, double z)
@@ -240,15 +249,10 @@ Result Simulation::MineNode(int nodeId, Item tool, Point player, double playerZ)
     case Mine::NodeKind::Rock: item = Item::Stone; break;
     case Mine::NodeKind::Coal: item = Item::Coal; break;
     case Mine::NodeKind::Copper: item = Item::CopperOre; break;
-    case Mine::NodeKind::Gem:
-        item = Item::Quartz;
-        if (Overgrowth::StableRoll(nodeId, day * 4 + 2) < Mine::AmethystChancePercent)
-        {
-            item = Item::Amethyst;
-            quantity = 1;
-        }
-        break;
     }
+    // Now and then the rock gives up a gem too: quartz, or rarely amethyst.
+    const bool gemFound = Overgrowth::StableRoll(nodeId, day * 4 + 2) < info.gemChancePercent;
+    const Item gem = Overgrowth::StableRoll(nodeId, day * 4 + 3) < Mine::AmethystChancePercent ? Item::Amethyst : Item::Quartz;
 
     State candidate = state_;
     ResourceNode* updated = nullptr;
@@ -257,19 +261,33 @@ Result Simulation::MineNode(int nodeId, Item tool, Point player, double playerZ)
     if (!Detail::SaveResourceEdit(candidate, *updated))
         return MineBad("The world has reached its 16384 persistent resource edit limit.");
 
-    const int room = Homestead::PackCapacity(candidate) - Detail::PackUsed(candidate);
-    const int slot = static_cast<int>(item);
-    const int fits = std::max(0, std::min({quantity, room, Homestead::PackCapacity(candidate) - candidate.inventory[slot]}));
-    candidate.inventory[slot] += fits;
-    const int left = quantity - fits;
-    const bool dropped = left > 0 && Detail::AddWorldDrop(candidate, node->position, item, left);
+    // What fits goes in the pack; the rest lands on the ground at the face.
+    const auto stow = [&](Item what, int amount)
+    {
+        const int room = Homestead::PackCapacity(candidate) - Detail::PackUsed(candidate);
+        const int slot = static_cast<int>(what);
+        const int fits = std::max(0, std::min({amount, room, Homestead::PackCapacity(candidate) - candidate.inventory[slot]}));
+        candidate.inventory[slot] += fits;
+        const int left = amount - fits;
+        return left > 0 && Detail::AddWorldDrop(candidate, node->position, what, left) ? left : 0;
+    };
+    const int left = stow(item, quantity);
+    const int gemLeft = gemFound ? stow(gem, 1) : 0;
     std::string message;
-    if (dropped)
+    if (left > 0)
         message = "Pack full: " + std::to_string(left) + " " + ItemName(item) + " left on the ground.";
     else
-        message = "Mined +" + std::to_string(quantity) + " " + ItemName(item) + ".";
+        message = "Mined +" + std::to_string(quantity) + " " + ItemName(item);
+    if (gemFound)
+    {
+        if (gemLeft > 0)
+            message += std::string(left > 0 ? " " : ". ") + "1 " + ItemName(gem) + " left on the ground too.";
+        else
+            message += std::string(left > 0 ? " +1 " : ", +1 ") + ItemName(gem) + (left > 0 ? "." : "");
+    }
+    if (left == 0 && gemLeft == 0) message += ".";
     auto done = Exert(cost, CommitInventory(std::move(candidate), message.c_str()));
-    if (done.ok && dropped) done.code = ResultCode::PackOverflow;
+    if (done.ok && (left > 0 || gemLeft > 0)) done.code = ResultCode::PackOverflow;
     return done;
 }
 

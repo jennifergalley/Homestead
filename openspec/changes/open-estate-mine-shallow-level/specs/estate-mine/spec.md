@@ -27,12 +27,17 @@ set-down lamp is within its light radius (about 4 m) of the face.
 
 ### Requirement: Rock faces give plenty of stone every day
 The shallow level SHALL have rock faces that yield stone to the pickaxe and come back every morning
-at 6:00, plus coal seams, copper veins and gem pockets (quartz or amethyst) that come back on a
-slower cadence. The general store SHALL buy all of them.
+at 6:00, plus coal seams and copper veins that come back on a slower cadence. Gems have no place of
+their own: mining stone or ore SHALL now and then also turn up a quartz or, rarely, an amethyst
+(Jenny, 2026-10-11). The general store SHALL buy all of them.
 
 #### Scenario: A morning in the mine
 - **WHEN** she mines the shallow level's rock faces with a full lamp and full energy
-- **THEN** she leaves with enough stone for a visible step of the manor restoration, plus some coal and copper ore
+- **THEN** she leaves with enough stone for a visible step of the manor restoration, plus some coal and copper ore, and now and then a gem
+
+#### Scenario: A gem in the rock
+- **WHEN** a swing at a rock face, coal seam or copper vein turns up a gem
+- **THEN** she gets one quartz (or, rarely, one amethyst) on top of the usual yield, and the toast says what she found
 
 ### Requirement: Exhaustion underground is harmless
 Running out of energy in the mine SHALL return her to the mine house's ground floor fully rested,

@@ -81,7 +81,7 @@ Result Swing(Simulation& sim, int id)
 void LayoutHasTheClaimedNodes()
 {
     const Mine::Layout& layout = Mine::GetLayout();
-    int counts[4] = {};
+    int counts[3] = {};
     std::set<int> ids;
     for (const auto& node : layout.nodes)
     {
@@ -89,8 +89,9 @@ void LayoutHasTheClaimedNodes()
         CHECK(ids.insert(node.id).second && Mine::IsMinePlacementId(node.id) && node.id != Mine::PileId);
         CHECK(Mine::FindNode(node.id) == &node);
     }
-    // Design section 7: 20 rock faces, 6 coal seams, 4 copper veins and 3 gem pockets.
-    CHECK(counts[0] == 20 && counts[1] == 6 && counts[2] == 4 && counts[3] == 3);
+    // Design section 7 (2026-10-11 revision): 20 rock faces, 7 coal seams and 6 copper veins; gems are a random
+    // find in stone and ore, so no node of their own (588050-588052 are retired).
+    CHECK(counts[0] == 20 && counts[1] == 7 && counts[2] == 6);
     CHECK(!layout.floors.empty());
     CHECK(Mine::PileId == 588000 && Mine::TrapdoorId == 588001 && Mine::LadderFootId == 588002);
     CHECK(!Mine::IsMinePlacementId(587999) && !Mine::IsMinePlacementId(588200));
@@ -191,19 +192,19 @@ void SwingsAndEnergyFollowTheTable()
 {
     Mined mined = NewMine();
     Simulation& sim = mined.sim;
-    const Mine::NodeKind kinds[] = {Mine::NodeKind::Rock, Mine::NodeKind::Coal, Mine::NodeKind::Copper, Mine::NodeKind::Gem};
-    const int worn[] = {3, 2, 3, 4};
-    const double energy[] = {2.5, 2.0, 3.0, 3.0};
-    for (int i = 0; i < 4; ++i)
+    const Mine::NodeKind kinds[] = {Mine::NodeKind::Rock, Mine::NodeKind::Coal, Mine::NodeKind::Copper};
+    const int worn[] = {3, 2, 3};
+    const double energy[] = {2.5, 2.0, 3.0};
+    for (int i = 0; i < 3; ++i)
     {
         const int id = NodeOfKind(kinds[i]);
         CHECK(sim.MineSwings(id) == worn[i]);
         CHECK(std::abs(sim.MineCost(id) - energy[i]) < 1e-9);
         CHECK(Mine::InfoFor(kinds[i]).swings[0] == worn[i]);
     }
-    // Iron and steel pickaxes cut the swings and the energy (Balance: 3/2/2, 2/1/1, 3/2/2, 4/3/2).
-    CHECK(Mine::InfoFor(Mine::NodeKind::Rock).swings[1] == 2 && Mine::InfoFor(Mine::NodeKind::Gem).swings[2] == 2);
-    CHECK(Mine::InfoFor(Mine::NodeKind::Coal).swings[1] == 1 && Mine::InfoFor(Mine::NodeKind::Copper).swings[2] == 2);
+    // Iron and steel pickaxes cut the swings and the energy (Balance: 3/2/2, 2/1/1, 3/2/2).
+    CHECK(Mine::InfoFor(Mine::NodeKind::Rock).swings[1] == 2 && Mine::InfoFor(Mine::NodeKind::Copper).swings[2] == 2);
+    CHECK(Mine::InfoFor(Mine::NodeKind::Coal).swings[1] == 1 && Mine::InfoFor(Mine::NodeKind::Copper).swings[1] == 2);
 }
 
 void YieldsAndRefills()
@@ -231,51 +232,86 @@ void YieldsAndRefills()
     Light(sim);
     CHECK(sim.CheckMine(rock, Item::Pickaxe, At(rock), ZOf(rock)).ok);
 
-    // Coal seams, copper veins and gem pockets come back after the days Balance set (every 2, 3 and 5 days).
+    // Coal seams and copper veins come back after the days Balance set (every 2 and 3 days).
     const struct { Mine::NodeKind kind; Item item; int low, high; double days; } rows[] = {
-        {Mine::NodeKind::Coal, Item::Coal, 2, 3, 2.0}, {Mine::NodeKind::Copper, Item::CopperOre, 2, 2, 3.0},
-        {Mine::NodeKind::Gem, Item::Quartz, 1, 2, 5.0}};
+        {Mine::NodeKind::Coal, Item::Coal, 2, 3, 2.0}, {Mine::NodeKind::Copper, Item::CopperOre, 2, 2, 3.0}};
     for (const auto& row : rows)
     {
         const int id = NodeOfKind(row.kind);
         CHECK(sim.SetEnergy(100.0).ok);
         Light(sim);
         const double mineHour = sim.GetState().hour;
-        const int quartz = sim.Count(Item::Quartz), amethyst = sim.Count(Item::Amethyst), kept = sim.Count(row.item);
+        const int kept = sim.Count(row.item);
         CHECK(Swing(sim, id).ok);
-        if (row.kind == Mine::NodeKind::Gem)
-        {
-            const int gained = sim.Count(Item::Quartz) - quartz + sim.Count(Item::Amethyst) - amethyst;
-            CHECK(gained >= 1 && gained <= 2);
-        }
-        else
-        {
-            const int gained = sim.Count(row.item) - kept;
-            CHECK(gained >= row.low && gained <= row.high);
-        }
+        const int gained = sim.Count(row.item) - kept;
+        CHECK(gained >= row.low && gained <= row.high);
         const double ready = Resource(sim, id)->readyAtHour;
         const double fromMorning = ready - std::floor(mineHour / 24.0) * 24.0;
         CHECK(std::abs(fromMorning - (24.0 + 6.0 + (row.days - 1.0) * 24.0)) < 1e-6);
     }
 }
 
-void GemPocketsRollQuartzOrAmethyst()
+// Gems are a passing find in stone and ore (Jenny, 2026-10-11): quartz mostly, amethyst now and then, never
+// more than one per swing, and the main yield is untouched.
+void GemsTurnUpInStoneAndOre()
 {
-    int amethyst = 0, quartz = 0;
-    for (int day = 0; day < 40; ++day)
+    const Mine::NodeKind kinds[] = {Mine::NodeKind::Rock, Mine::NodeKind::Coal, Mine::NodeKind::Copper};
+    // One mine for a week of mornings at a time (three days apart, so every node has come back), then a fresh
+    // mine: the pack fills with stone and ore otherwise.
+    const int swings = 400, perMine = 8;
+    for (const Mine::NodeKind kind : kinds)
     {
-        Mined mined = NewMine();
-        Simulation& sim = mined.sim;
-        sim.AdvanceGameHours(day * 24.0 + 2.0, mined.home);
-        CHECK(sim.SetEnergy(100.0).ok);
-        Light(sim);
-        const int gem = NodeOfKind(Mine::NodeKind::Gem, day % 3);
-        const int q = sim.Count(Item::Quartz), a = sim.Count(Item::Amethyst);
-        CHECK(Swing(sim, gem).ok);
-        if (sim.Count(Item::Amethyst) > a) { ++amethyst; CHECK(sim.Count(Item::Amethyst) - a == 1 && sim.Count(Item::Quartz) == q); }
-        else { ++quartz; CHECK(sim.Count(Item::Quartz) > q); }
+        int finds = 0, amethyst = 0, quartz = 0;
+        for (int batch = 0; batch < swings / perMine; ++batch)
+        {
+            Mined mined = NewMine();
+            Simulation& sim = mined.sim;
+            // 34 days a batch (one advance call takes at most a year), and a different node of the kind every
+            // 10 batches, so every swing lands on a node and day of its own.
+            sim.AdvanceGameHours((batch % 10) * 816.0, mined.home);
+            int nodesOfKind = 0;
+            for (const auto& spot : Mine::GetLayout().nodes) nodesOfKind += spot.kind == kind;
+            const int node = NodeOfKind(kind, (batch / 10) % nodesOfKind);
+            for (int i = 0; i < perMine; ++i)
+            {
+                sim.AdvanceGameHours(96.0, mined.home);
+                CHECK(sim.SetEnergy(100.0).ok);
+                Light(sim);
+                const int q = sim.Count(Item::Quartz), a = sim.Count(Item::Amethyst);
+                const auto result = Swing(sim, node);
+                CHECK(result.ok);
+                const int gained = sim.Count(Item::Quartz) - q + sim.Count(Item::Amethyst) - a;
+                CHECK(gained == 0 || gained == 1);
+                if (gained == 0) continue;
+                ++finds;
+                if (sim.Count(Item::Amethyst) > a) ++amethyst; else ++quartz;
+                CHECK(result.message.find(", +1 ") != std::string::npos);
+            }
+        }
+        // Roughly Balance's chance (3% / 10% / 10%): well above never and well below always.
+        const int chance = Mine::InfoFor(kind).gemChancePercent;
+        CHECK(chance > 0);
+        std::cerr << "gems kind=" << static_cast<int>(kind) << " finds=" << finds << " quartz=" << quartz
+                  << " amethyst=" << amethyst << " of " << swings << "\n";
+        CHECK(finds > swings * chance / 200 && finds < swings * chance * 2 / 100);
+        CHECK(quartz > amethyst);
     }
-    CHECK(amethyst > 0 && quartz > amethyst);
+}
+
+void TheHouseFootprintIsNotTheTunnels()
+{
+    const Mine::Layout& layout = Mine::GetLayout();
+    const Mine::Spot& house = layout.house;
+    // The ground floor, her wake point and the ladder top are in the house; the tunnels under it are not.
+    CHECK(Mine::InHouse({house.x, house.y}, house.z + 18.0 + 150.0));
+    CHECK(Mine::InHouse({layout.houseFloor.x, layout.houseFloor.y}, layout.houseFloor.z + 150.0));
+    CHECK(Mine::InHouse({layout.ladderTop.x, layout.ladderTop.y}, layout.ladderTop.z + 150.0));
+    CHECK(!Mine::InHouse({house.x, house.y}, layout.ladderFoot.z + 100.0));
+    CHECK(Mine::IsUnderground({layout.ladderFoot.x, layout.ladderFoot.y}, layout.ladderFoot.z + 100.0)
+        && !Mine::IsUnderground({house.x, house.y}, house.z + 150.0));
+    // Past the walls, on the yard, is not.
+    CHECK(!Mine::InHouse({house.x + Mine::HouseHalfLengthCm + 50.0, house.y}, house.z + 150.0));
+    CHECK(!Mine::InHouse({house.x, house.y + Mine::HouseHalfWidthCm + 50.0}, house.z + 150.0));
 }
 
 void StonePileIsOneTime()
@@ -472,7 +508,8 @@ int main()
     MiningRefusals();
     SwingsAndEnergyFollowTheTable();
     YieldsAndRefills();
-    GemPocketsRollQuartzOrAmethyst();
+    GemsTurnUpInStoneAndOre();
+    TheHouseFootprintIsNotTheTunnels();
     StonePileIsOneTime();
     StonePileNeedsRoom();
     MineNodesAreNotHarvestedOrCleared();

@@ -28,12 +28,18 @@ constexpr double UndergroundCeilingAboveFloorCm = 1500.0; // Above this over the
 constexpr double FootprintMarginCm = 600.0;       // Margin around the walkable floors that still counts as the mine.
 constexpr double StuckSlackCm = 220.0;            // How far past a floor's edge before the stuck rule moves her.
 constexpr double StuckBelowFloorCm = 300.0;       // Below the lowest floor by this much she has fallen out of the level.
+// The mine house's outer footprint is 900 x 600 cm (yaw 0) about MINE_HOUSE; its level runs from just under the
+// ground floor (boards sit 18 cm above the house z) up through the roof.
+constexpr double HouseHalfLengthCm = 450.0;
+constexpr double HouseHalfWidthCm = 300.0;
+constexpr double HouseBelowCm = 100.0;
+constexpr double HouseAboveCm = 600.0;
 // Too tired to swing even the cheapest node (a worn-pickaxe coal seam costs 2.0 on top of the Reserve): she is
 // "out of energy" for the mine, and wakes at the house (WakeAtMine).
 constexpr double ExhaustedBelow = Exertion::Reserve + 2.0;
 inline bool IsExhausted(double energy) { return energy < ExhaustedBelow; }
 
-enum class NodeKind { Rock, Coal, Copper, Gem };
+enum class NodeKind { Rock, Coal, Copper };
 
 struct Spot
 {
@@ -80,7 +86,7 @@ struct Layout
 const Layout& GetLayout();
 
 ResourceKind ResourceFor(NodeKind kind);
-bool IsMineNodeKind(ResourceKind kind);   // Rock face, coal seam, copper vein or gem pocket.
+bool IsMineNodeKind(ResourceKind kind);   // Rock face, coal seam or copper vein.
 bool IsMinePlacementId(int id);
 const Node* FindNode(int id);
 
@@ -91,11 +97,14 @@ struct NodeInfo
     double energy = 0.0;
     int minYield = 0, maxYield = 0;
     double extraRefillHours = 0.0;
+    int gemChancePercent = 0;   // Chance a mined node also gives one gem (quartz, rarely amethyst).
 };
 const NodeInfo& InfoFor(NodeKind kind);
 
 // Whether the point at height z is in the tunnel level.
 bool IsUnderground(Point p, double z);
+// Whether the point is inside the mine house's footprint, at the house's own level (not the tunnels under it).
+bool InHouse(Point p, double z);
 // Distance beyond the nearest floor's edge (negative when on it), over all segments at z's level.
 double OutsideFloorBy(Point p);
 // The stuck rule: underground, below the level or off every floor by StuckSlackCm.

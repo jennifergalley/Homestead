@@ -101,8 +101,6 @@ FNodeLook LookFor(Homestead::ResourceKind Kind)
         return {TEXT("SM_MineCoalSeam"), TEXT("SM_MineCoalSeamSpent"), FLinearColor(0.02f, 0.02f, 0.025f), FLinearColor(0.1f, 0.1f, 0.11f)};
     case ResourceKind::MineCopperVein:
         return {TEXT("SM_MineCopperVein"), TEXT("SM_MineCopperVeinSpent"), FLinearColor(0.5f, 0.22f, 0.08f), FLinearColor(0.2f, 0.19f, 0.17f)};
-    case ResourceKind::MineGemPocket:
-        return {TEXT("SM_MineGemPocket"), TEXT("SM_MineGemPocketSpent"), FLinearColor(0.42f, 0.2f, 0.62f), FLinearColor(0.2f, 0.19f, 0.2f)};
     default:
         return {TEXT("SM_MineRockFace"), TEXT("SM_MineRockFaceSpent"), Stone, FLinearColor(0.2f, 0.22f, 0.21f)};
     }
@@ -408,7 +406,7 @@ void AHomesteadWorld::BuildMineResource(FHomesteadWorldVisual& Visual, const Hom
     {
         AddPart(Visual, Cube, Local(FVector(NodeDepthCm * 0.5f, 0, NodeHeightCm * 0.5f)),
             FVector(NodeDepthCm, NodeWidthCm, NodeHeightCm), Look.Colour, false, Rotation);
-        if (Node.kind == ResourceKind::MineGemPocket || Node.kind == ResourceKind::MineCopperVein)
+        if (Node.kind == ResourceKind::MineCopperVein)
         {
             AddPart(Visual, Sphere, Local(FVector(NodeDepthCm, 0, NodeHeightCm * 0.6f)), FVector(26, 34, 26), Look.Colour, false, Rotation, 0.3f);
         }
