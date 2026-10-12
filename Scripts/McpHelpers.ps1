@@ -79,7 +79,9 @@ function st([int]$n = 6) {
 function hotbar([string]$item = '') {
     $cells = (st).hotbar
     if ($item) {
-        $cell = $cells | Where-Object { $_.item -like "*$item*" } | Select-Object -First 1
+        # Ignore spaces, dashes and case so `hotbar OilLamp`, `hotbar "oil lamp"` and `hotbar oil-lamp` all match "Oil lamp".
+        $want = ($item -replace '[\s_-]', '')
+        $cell = $cells | Where-Object { ($_.item -replace '[\s_-]', '') -like "*$want*" -and $_.item } | Select-Object -First 1
         if (-not $cell) { Write-Warning "No hotbar cell holds '$item'."; return $cells | Format-Table index, key, item, count, selected }
         $names = @{ '1' = 'One'; '2' = 'Two'; '3' = 'Three'; '4' = 'Four'; '5' = 'Five'; '6' = 'Six'; '7' = 'Seven'; '8' = 'Eight'; '9' = 'Nine'; '0' = 'Zero' }
         hk tap_key (@{ key = $names[$cell.key] } | ConvertTo-Json -Compress) | Out-Null
