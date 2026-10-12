@@ -278,6 +278,29 @@
       ],
       "markdownOnlyEntries": [],
       "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    },
+    {
+      "buildId": "20261011-next-01",
+      "archivedAt": "2026-10-12T06:10:00Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "buildRecord": "builds.md",
+        "changelist": "builds.md",
+        "observedUsageReport": "accounting/reports/20261011-next-01.json",
+        "recordedCalls": 2682,
+        "recordedAiu": "41025.37314",
+        "sourceCommit": "6c7b1f8e6136afe7670341deda5384e2ee2d5e35"
+      },
+      "inboxEntries": [
+        "jenny-mut6zr63-iu7hm9",
+        "jenny-mutdvi4f-5daxbq",
+        "jenny-mv455cm5-u3ccq9"
+      ],
+      "plannerOnlyItems": [
+        "open-estate-mine-shallow-level"
+      ],
+      "markdownOnlyEntries": [],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
     }
   ]
 }
