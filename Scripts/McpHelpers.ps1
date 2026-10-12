@@ -20,6 +20,11 @@ Functions:
     quit                                   stop PIE and quit the editor cleanly (releases DLL and .uasset locks)
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
     tp <x> <y> [z]                         HomesteadTeleport: stand her on the ground at x,y (with z: on the first surface at or below z)
+    sellat ["Name N,Name N"]               HomesteadSellAtStore: open the General Store's hours, stand her at its real counter, sell what she carries, open the shop; logs LogHomesteadPlaytest
+    state [n]                              the full world/character dump (time, weather, pack, hotbar, lamp, equipment, position, focus, nearby with ids, store, open screen)
+    goto <target> / use "<target> [item]"  walk-free go-to (store, mine, node:ID, plot:N, nearest kind...) / go-to then interact or use the hotbar item
+    screen <name> / weather rain|clear / reset   open or close a screen by name / skip to rain or a clear hour / full energy and lamp, screens closed
+    plog [n] [pattern]                     recent LogHomesteadPlaytest lines from this worktree's editor log (results of the commands above)
     click <x> <y>                          real Win32 left click at editor-window pixels (Slate clicks don't reach game widgets)
 Variables: $McpEditor $McpScene $McpLogs $McpSlate $McpPlay $McpPython (toolset names for your own mcp calls).
 Short aliases $E $S $L $SL $H $PY are set too, but only if you haven't already defined those names; dot-sourcing
@@ -67,6 +72,21 @@ function hk([string]$tool, $a = '{}') { (mcp $script:TsPlay $tool $a | Out-Strin
 function st([int]$n = 6) {
     $o = mcp $script:TsPlay get_play_state "{`"nearby_count`": $n, `"radius_cm`": 4000}" | Out-String
     (($o | ConvertFrom-Json).content[0].text | ConvertFrom-Json).returnValue | ConvertFrom-Json
+}
+
+# hotbar: the hotbar as the player sees it (key, item, count, selected). `hotbar OilLamp` (or `hotbar Pickaxe`)
+# presses that item's number key and shows the hotbar after.
+function hotbar([string]$item = '') {
+    $cells = (st).hotbar
+    if ($item) {
+        $cell = $cells | Where-Object { $_.item -like "*$item*" } | Select-Object -First 1
+        if (-not $cell) { Write-Warning "No hotbar cell holds '$item'."; return $cells | Format-Table index, key, item, count, selected }
+        $names = @{ '1' = 'One'; '2' = 'Two'; '3' = 'Three'; '4' = 'Four'; '5' = 'Five'; '6' = 'Six'; '7' = 'Seven'; '8' = 'Eight'; '9' = 'Nine'; '0' = 'Zero' }
+        hk tap_key (@{ key = $names[$cell.key] } | ConvertTo-Json -Compress) | Out-Null
+        Start-Sleep -Milliseconds 400
+        $cells = (st).hotbar
+    }
+    $cells | Format-Table index, key, item, count, selected
 }
 
 function py([string]$code, [int]$timeout = 600) {
@@ -137,6 +157,72 @@ function tp([double]$x, [double]$y, $z = $null) {
     $cmd = "HomesteadTeleport $x $y" + $(if ($null -ne $z) { " $([double]$z)" } else { '' })
     $null = con $cmd
     $cmd
+}
+
+function sellat([string]$items = 'Coal 3,CopperOre 2,Quartz 2,Amethyst 1') {
+    # HomesteadSellAtStore: brings the General Store's hours round (skips to 9 AM if closed or Sunday), teleports her
+    # to the real village counter, sells the carried items through the shop's own sell path, opens the shop screen and
+    # logs per-item prices and the purse delta (filter the log for LogHomesteadPlaytest). It sells; it does not grant,
+    # so `con "HomesteadGive Coal 3"` first. The sale waits for the teleport to settle, so read the log a few seconds later.
+    $cmd = "HomesteadSellAtStore $items"
+    $null = con $cmd
+    $cmd
+}
+
+# The test-tools commands (details and recipes: .github\skills\homestead-test-tools\SKILL.md). Each returns the
+# console command it ran; the result is in the log: `plog` prints the recent LogHomesteadPlaytest lines.
+function plog([int]$n = 12, [string]$pattern = 'LogHomesteadPlaytest') {
+    $log = Join-Path $script:McpRoot 'Saved\Logs\SurvivalGame.log'
+    if (-not (Test-Path $log)) { return "No $log (is this worktree's editor running?)" }
+    $stream = [IO.File]::Open($log, 'Open', 'Read', 'ReadWrite, Delete')
+    try {
+        $reader = New-Object IO.StreamReader($stream)
+        $text = $reader.ReadToEnd()
+    } finally { $stream.Dispose() }
+    $lines = $text -split "`r?`n" | Where-Object { $_ -match $pattern }
+    $lines | Select-Object -Last $n
+}
+
+# state: the whole world/character picture in one call (st's `world` object). `state | ConvertTo-Json -Depth 6`
+# to read it all; `(state).nearby` lists things with ids, kinds and distances.
+function state([int]$n = 12) {
+    $s = st $n
+    if ($s.world) { $s.world } else { $s }
+}
+
+function goto([string]$target) {
+    # HomesteadGoto: store | counter | mine | cove | square | gate | mill | farm | home | x,y | an id such as node:520001 /
+    # plot:3 | the nearest <resource, piece or plot kind>. Stands her facing it, then logs the focus.
+    $cmd = "HomesteadGoto $target"
+    $null = con $cmd
+    $cmd
+}
+
+function use([string]$targetAndItem) {
+    # HomesteadUse "<target> [item]": goto, then Interact (no item) or select the item on the hotbar and use it.
+    $cmd = "HomesteadUse $targetAndItem"
+    $null = con $cmd
+    $cmd
+}
+
+function screen([string]$name = 'close') {
+    # HomesteadScreen: close | inventory | craft | build | settings | appearance | map | shop | chest
+    $cmd = "HomesteadScreen $name"
+    $null = con $cmd
+    $cmd
+}
+
+function weather([string]$kind) {
+    # HomesteadWeather rain|clear: skip the clock to the next rain spell, or to a clear dry hour.
+    $cmd = "HomesteadWeather $kind"
+    $null = con $cmd
+    $cmd
+}
+
+function reset() {
+    # HomesteadReset: full energy, full lamp oil, screens closed, morning if night. Items, purse and placements stay.
+    $null = con 'HomesteadReset'
+    'HomesteadReset'
 }
 
 $script:McpUser32 = @"

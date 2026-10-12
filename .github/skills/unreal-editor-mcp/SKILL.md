@@ -335,6 +335,9 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython -Ski
 
 ## 3. Choose how to call tools
 
+**Testing a feature in PIE? Start with the `homestead-test-tools` skill:** one-call state (`state`), `goto`/`use`
+without walking, `hotbar`, `screen`, `weather`, `reset`, `sellat`, with recipes. The table below stays the raw reference.
+
 - **Shell helpers (default on this shared machine):** dot-source `Scripts\McpHelpers.ps1 -Port <p>`
   at the start of each command (shell state doesn't persist between calls). It uses
   `Scripts\editor_mcp.py`, which saves images in results to `Saved\McpCaptures\*.png` and replaces
@@ -361,7 +364,8 @@ clashes between parallel callers.
 | --- | --- |
 | `mcp <toolset> <tool> [json] [timeout]` | `call_tool`, raw JSON result |
 | `hk <tool> [json]` | a `HomesteadPlayTools` **tool** call by tool name (`hk walk_to '{...}'`, `hk tap_key '{"key":"E"}'`), not a hotkey; returns its text |
-| `st [nearby]` | parsed `get_play_state` |
+| `st [nearby]` | parsed `get_play_state` (its `hotbar[]` lists index, key, item, count, selected; needs the Mine Gameplay hotbar readout, `fdddaf8b5`) |
+| `hotbar [item]` | prints the hotbar as the player sees it. `hotbar lamp` / `hotbar pickaxe` presses the number key of the first cell whose item name contains that text, then prints the bar again |
 | `py <code>` | `run_python` (needs `-AllowPython`), returns the output text |
 | `con <command>` | console command in PIE with the player controller (editor world outside PIE) |
 | `shot` | `CaptureEditorImage`, returns the PNG path |
@@ -370,6 +374,7 @@ clashes between parallel callers.
 | `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
 | `pyfile <path>` | run a Python file in the editor with `__file__` set |
 | `tp <x> <y> [z]` | `HomesteadTeleport`: stands her on the ground at x,y once its collision has streamed in (with z: on the first surface at or below z, for an upper floor). Works in packaged Development builds too |
+| `sellat ["Name N,Name N"]` | `HomesteadSellAtStore`: skips to 9 AM if the General Store is closed (or it's Sunday), teleports her to its real counter, sells the carried items (by item name or key, e.g. `Coal 3,CopperOre 2`; give them first with `HomesteadGive`), opens the shop screen and logs per-item prices and the purse delta to `LogHomesteadPlaytest`. The sale waits for the teleport to settle; read the log a few seconds later. Works in packaged Development builds too |
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px). To click something seen in a `shot` capture, scale capture pixels by client width / capture width and add the window-rect origin: with a 3840-wide client, a 1280x692 capture and the rect at (-12, -12), `x = cap_x * 3 + 12`, `y = cap_y * 3 + 12` |
 
 Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,

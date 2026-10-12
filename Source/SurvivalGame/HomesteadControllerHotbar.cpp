@@ -244,6 +244,7 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::BuildHotbarSnapshot() const
                 continue;
             }
             Slot.Tool = Entry->item;
+            Slot.Name = UTF8_TO_TCHAR(Homestead::ItemName(Slot.Tool));
             Slot.Food = IsFoodItem(Slot.Tool);
             Slot.Count = Entry->quantity;
             Slot.Icon = HotbarIcon(Slot.Tool);
