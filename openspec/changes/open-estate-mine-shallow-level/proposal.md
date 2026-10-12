@@ -60,7 +60,7 @@ rock faces are back.
 ## First delivery, full acceptance and deferred scope
 
 - **First delivery (one build):** the mine house with its furnished room and a working trapdoor; the
-  shallow level with rock faces, coal seams, copper veins and gem pockets; real darkness; and store
+  shallow level with rock faces, coal seams and copper veins (gems turn up at random); real darkness; and store
   sales.
 - **Full acceptance:** Jenny can mine enough stone in a normal day to make visible progress on the
   manor once `rebuild-manor-and-decorate` ships, and the mine feels like a place: dark, timbered,

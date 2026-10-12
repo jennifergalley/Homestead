@@ -22,7 +22,7 @@ and pickaxe work SHALL be refused.
 
 ### Requirement: Rock faces give plenty of stone every day
 The shallow level SHALL have rock faces that yield stone to the pickaxe and come back every morning
-at 6:00, plus coal seams, copper veins and gem pockets (quartz or amethyst) that come back on a
+at 6:00, plus coal seams and copper veins that come back on a
 slower cadence. The general store SHALL buy all of them.
 
 #### Scenario: A morning in the mine

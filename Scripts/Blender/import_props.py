@@ -276,7 +276,11 @@ COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "comple
                        "MineHouseBlockout": "complex", "MineTunnelsBlockout": "complex", "MineTunnels": "complex",
                        "MineHouse": "complex",
                        # A hull round a timber set closed the gallery it frames (Mine Gameplay, 2026-10-11).
-                       "MineKit": "complex"}
+                       "MineKit": "complex",
+                       # The trapdoor's collar frames an opening; the desk and chair are walked round, not hulls.
+                       "MineFurnishing": "complex",
+                       # Nodes stand into the gallery; a box would block her before she reaches the face.
+                       "MineNodes": "convex"}
 # Meshes with no collision at all, whatever their prop's kind (the mine's sump: she wades, not walks on it).
 NO_COLLISION_MESHES = {"SM_MineSumpWater"}
 # Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.

@@ -29,6 +29,16 @@
     "source": "https://polyhaven.com/a/white_rough_plaster",
     "mean_luminance": 0.7085
   },
+  "Plaster": {
+    "id": "white_plaster_02",
+    "name": "White Plaster 02",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/white_plaster_02",
+    "mean_luminance": 0.5326
+  },
   "Slate": {
     "id": "seaside_rock",
     "name": "Seaside Rock",

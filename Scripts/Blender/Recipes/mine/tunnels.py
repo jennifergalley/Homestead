@@ -90,14 +90,44 @@ def sump():
     return sdf.box((cx, cy, -L.SUMP["depth"] / 2 + 0.2), (hx, hy, L.SUMP["depth"] / 2 + 0.2), rounding=0.12)
 
 
+# Jenny (08-tunnels): "the tunnel arches up above the timber braces and leaves them supporting nothing. The
+# tunnel's ceiling should probably be flat against the timber brace." At each set the roof comes down onto the
+# lagging over its cap (SET_HOLD m either side of it), then rises back to the gallery's arch over SET_EASE m.
+SET_ROOF_ABOVE_WALL_H = 0.20   # the lagging's top over the run's wall height (mine_kit.timber_set: cap at wall_h - 0.05)
+SET_HOLD, SET_EASE = 0.45, 1.4
+
+
+def set_roofs():
+    """[(point, along unit, lateral half, roof z)] for every timber set."""
+    out = []
+    for edge, t in L.TIMBER_SETS:
+        a, b = np.asarray(L.POINTS[edge[0]], float), np.asarray(L.POINTS[edge[1]], float)
+        u = (b - a) / np.linalg.norm(b - a)
+        drift = edge != ("L", "A")
+        half = (L.DRIFT_HALF if drift else L.GALLERY_HALF) + 0.4
+        wall_h = L.DRIFT_WALL_H if drift else L.GALLERY_WALL_H
+        out.append((a + (b - a) * t, u, half, wall_h + SET_ROOF_ABOVE_WALL_H))
+    return out
+
+
 def air(extra=None, blend=JUNCTION_BLEND):
     """The whole level's air. ``extra`` adds more upper-volume nodes (e.g. node recesses)."""
     upper = sdf.smooth_union(runs() + [chamber(), shaft()] + list(extra or []), blend)
     pit = sump()
+    roofs = set_roofs()
 
     def fn(p, band):
         floor = -p[:, 2]
         d = np.maximum(floor, upper(p, band))
+        for c, u, half, roof in roofs:
+            rel = p[:, :2] - c
+            s = np.abs(rel @ u)
+            q = np.abs(rel[:, 0] * -u[1] + rel[:, 1] * u[0])
+            near = (q < half) & (s < SET_HOLD + SET_EASE)
+            if near.any():
+                ease = np.clip((s[near] - SET_HOLD) / SET_EASE, 0.0, 1.0)
+                lid = p[near, 2] - (roof + 1.6 * ease * ease * (3 - 2 * ease))
+                d[near] = np.maximum(d[near], lid)
         return np.minimum(d, pit(p, band)).astype(np.float32)
     lo = np.minimum(upper.lo, pit.lo)
     hi = np.maximum(upper.hi, pit.hi)

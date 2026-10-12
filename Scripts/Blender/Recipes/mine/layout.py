@@ -166,7 +166,10 @@ NODES = _rock_faces() + [    (588030, COAL, ("N1", "E1"), 0.38, 1), (588031, COA
     (588033, COAL, ("S2", "E3"), 0.36, 1), (588034, COAL, ("D", "E4"), 0.34, -1), (588035, COAL, ("D", "E4"), 0.62, 1),
     (588040, COPPER, ("N1", "E1"), 0.68, -1), (588041, COPPER, ("B", "E2"), 1.0, 0),
     (588042, COPPER, ("S2", "E3"), 0.66, -1), (588043, COPPER, ("D", "E4"), 1.0, 0),
-    (588050, GEM, ("N1", "E1"), 1.0, 0), (588051, GEM, ("B", "E2"), 0.84, -1), (588052, GEM, ("S2", "E3"), 1.0, 0),
+    # Jenny (2026-10-11): "we actually don't need gems to have a dedicated spot where you mine them. I'd rather
+    # they just be something you get at random when mining stone or an ore vein." The three gem-pocket spots
+    # (588050-588052, never shipped; not reused) became ore veins.
+    (588044, COPPER, ("N1", "E1"), 1.0, 0), (588036, COAL, ("B", "E2"), 0.84, -1), (588045, COPPER, ("S2", "E3"), 1.0, 0),
 ]
 NODE_PROUD = 0.10           # a node's ground point sits this far in front of the wall line
 ROCK_PILE_ID, TRAPDOOR_ID, LADDER_FOOT_ID = 588000, 588001, 588002
@@ -249,6 +252,7 @@ def dressing():
     out.append(("MineChair", f"{fur}/SM_MineChair", "house", (*CHAIR["centre"], FLOOR_Z), CHAIR["yaw"]))
     out.append(("MineLedger", f"{fur}/SM_MineLedger", "house", (DESK["centre"][0] - 0.18, -0.25, FLOOR_Z + DESK["size"][2]), 176.0))
     out.append(("MineRockPile", f"{fur}/SM_MineRockPile", "house", (*ROCK_PILE["centre"], FLOOR_Z), 0.0))
+    out.append(("MineTrapdoorCollar", f"{fur}/SM_MineTrapdoorCollar", "house", (*TRAPDOOR["centre"], FLOOR_Z), 0.0))
     # Store props by the door: a crate, a barrel and sacks (shared with the general store's kit).
     out.append(("MineCrate", f"{PROPS}/StoreCrate/SM_Store_Crate", "house", (IN_E - 0.55, IN_Y - 0.45, FLOOR_Z), 8.0))
     out.append(("MineBarrel", f"{PROPS}/StoreBarrel/SM_Store_Barrel", "house", (IN_E - 1.35, IN_Y - 0.40, FLOOR_Z), 0.0))

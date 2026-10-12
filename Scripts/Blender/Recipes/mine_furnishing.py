@@ -157,13 +157,40 @@ def trapdoor_lid(kit, wood, iron):
     for x in (0.18 + lap, lx - 0.18 - lap):     # battens clear of the rebate
         parts.append(kit.box(f"Ledge{x}", (0.12, ly - 2 * lap - 0.08, 0.03), U(x, 0.0, -t - 0.015), material=wood,
                              bevel=0.004))
-    for sy in (-0.38, 0.38):
-        parts.append(kit.box(f"Hinge{sy}", (0.55, 0.045, 0.006), U(0.27, sy, 0.003), material=iron, bevel=0.0015))
-        parts.append(kit.cylinder(f"Knuckle{sy}", 0.012, 0.09, U(0.0, sy, 0.0), rotation=(90, 0, 0), material=iron, sides=12))
-    parts.append(kit.box("RingPlate", (0.06, 0.08, 0.005), U(lx - 0.1, 0.0, 0.0025), material=iron, bevel=0.0015))
-    ring = [U(lx - 0.1 + 0.055 * math.sin(a) + 0.055, 0.045 * math.cos(a) * 0 + 0.055 * math.cos(a), 0.008)
-            for a in np.linspace(0, 2 * math.pi, 25)]
-    parts.append(kit.tube("Ring", ring, radius=0.007, sides=10, material=iron))
+    # Long dark strap hinges and a big drop ring, so the hatch reads at a glance (Balance, 2026-10-11).
+    for sy in (-0.40, 0.40):
+        parts.append(kit.box(f"Hinge{sy}", (0.78, 0.065, 0.008), U(0.39, sy, 0.004), material=iron, bevel=0.002))
+        parts.append(kit.cylinder(f"Knuckle{sy}", 0.017, 0.12, U(0.0, sy, 0.0), rotation=(90, 0, 0), material=iron, sides=12))
+    parts.append(kit.box("RingPlate", (0.10, 0.12, 0.006), U(lx - 0.14, 0.0, 0.003), material=iron, bevel=0.002))
+    ring = [U(lx - 0.14 + 0.085 * math.sin(a) + 0.085, 0.085 * math.cos(a), 0.012)
+            for a in np.linspace(0, 2 * math.pi, 29)]
+    parts.append(kit.tube("Ring", ring, radius=0.011, sides=10, material=iron))
+    return parts
+
+
+COLLAR = {"kerb_w": 0.14, "kerb_h": 0.14, "post": 0.12, "post_h": 0.48, "gap": 0.01}
+
+
+def trapdoor_collar(kit, wood):
+    """A timber kerb round the hatch with short corner posts, as at a shaft head (Jenny, review 7: "add a frame
+    of posts/timbers around its edges so the hatch reads clearly"). Centred on the opening, on the floor."""
+    half = L.TRAPDOOR["size"][0] / 2 + L.TRAPDOOR_LAP + COLLAR["gap"]
+    w, h, post, ph = COLLAR["kerb_w"], COLLAR["kerb_h"], COLLAR["post"], COLLAR["post_h"]
+    outer = half + w
+    parts = []
+    for s in (-1, 1):
+        # Kerbs along X run the full width; kerbs along Y sit between them (halved over at the corners).
+        parts.append(kit.box(f"KerbX{s}", (2 * outer, w, h), U(0.0, s * (half + w / 2), h / 2), material=wood,
+                             bevel=0.008))
+        parts.append(kit.box(f"KerbY{s}", (w, 2 * half, h * 0.92), U(s * (half + w / 2), 0.0, h * 0.46),
+                             material=wood, bevel=0.008))
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            c = half + w / 2
+            parts.append(kit.box(f"Post{sx}{sy}", (post, post, ph), U(sx * c, sy * c, ph / 2), material=wood,
+                                 bevel=0.012))
+            parts.append(kit.box(f"Cap{sx}{sy}", (post + 0.02, post + 0.02, 0.03), U(sx * c, sy * c, ph + 0.012),
+                                 material=wood, bevel=0.008))
     return parts
 
 
@@ -188,4 +215,7 @@ def build(kit):
            kit.join(ledger(kit, leather, marbled, paper, stoneware), "SM_MineLedger", pivot="base")]
     out += rock_pile(kit, granite, rng)
     out.append(kit.join(trapdoor_lid(kit, lid_wood, iron), "SM_MineTrapdoorLid", pivot=None))
+    collar_wood = kit.mats.aged_wood("M_MineTrapdoorCollar", light=(0.20, 0.15, 0.10), dark=(0.06, 0.045, 0.03),
+                                     saw=0.4, grime=0.75, seed=11.0)
+    out.append(kit.join(trapdoor_collar(kit, collar_wood), "SM_MineTrapdoorCollar", pivot=None))
     return out

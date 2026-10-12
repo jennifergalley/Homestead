@@ -26,8 +26,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "Scripts" / "Blender" / "Recipes"))
 from mine import layout as L  # noqa: E402
 
-GRASS_MARGIN_M = 2.4        # no blades this far past the walls: the 2 m texels are sampled bilinearly, so a smaller
-                            # margin lets the texels straddling the walls put blades up through the floor (Jenny)
+GRASS_MARGIN_M = -1.5       # full meadow density right up to the walls (Jenny/Orchestrator, review 7: "drop the bare
+                            # apron"); UHomesteadGrassField clips the blades at the house footprint itself (Mine
+                            # Gameplay's bare squares), so the 2 m density texels can straddle the walls
 APRON_M = 0.0               # Jenny: "just give it grass around it" - no trodden apron
 YARD_GRASS_M = (44.0, 58.0) # meadow grass right up to the house within the first, blended out by the second
 MEADOW_RING_M = (60.0, 80.0)  # the surrounding meadow's density and height are read from this ring

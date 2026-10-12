@@ -111,6 +111,8 @@ on its yield and not per swing:
 
 - Spread the 20 rock faces through the main gallery and the side drifts, about 8–10 m apart, so she
   mines her way round the loop rather than standing at one wall.
+- The three gem-pocket spots became one coal seam and two copper veins (ids 588036, 588044, 588045;
+  588050-588052 were never shipped and aren't reused).
 - Space the veins more thinly, in the side drifts, so finding a vein feels like a small discovery.
 - The refill cadences are per node, counted from when she mined it, and they reset at 6:00, like
   the beach.
@@ -219,7 +221,7 @@ Two heavy lanes, spawned together in dependency order, use the two heavy-job slo
 
 1. **Mine Art Agent** (Claude Opus 5.5, Blender + Unreal). Owns the mine house (exterior, the
    furnished ground-floor room, the trapdoor and ladder shaft) and a modular tunnel kit: walls, timber
-   sets, sump, and rock face, coal, copper and gem node meshes in the sea cave's granite.
+   sets, sump, and rock face, coal and copper node meshes in the sea cave's granite.
    It assembles the shallow level and places it under the mine site. Files: `Scripts/Blender/Recipes/mine_*.py`,
    `Content/SurvivalGame/Mine/**`, the level's placement script.
 2. **Mine Gameplay Agent** (Claude Sonnet 5.5). Owns the simulation: item and resource-kind appends,

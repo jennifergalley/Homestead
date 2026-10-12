@@ -30,7 +30,8 @@ YARD_Z_CM = 5600.0          # the yard level (HomesteadEstate.cpp Anchor::MineEn
 SOURCES = {
     "Granite": "lichen_rock",            # weathered grey rock with lichen: Cornish granite rubble and quoins
     "Mortar": "grey_plaster_02",         # lime mortar
-    "Limewash": "white_rough_plaster",   # limewash over the inner rubble, flaking
+    "Limewash": "white_rough_plaster",   # flaking plaster: the painted frames' ground
+    "Plaster": "white_plaster_02",        # the room's lime render and wash: even, faintly mottled
     "Slate": "seaside_rock",             # fine dark grey stone: Delabole slate
     "Boards": "fine_grained_wood",       # floorboards, worn
     "Timber": "rough_wood",              # joists, beams, roof boarding
@@ -42,14 +43,14 @@ SOURCES = {
 # Tints lean a little away from green: the house stands in tall meadow grass, whose bounce light tinted the pale
 # limewash and granite yellow-green in review (Jenny, Balance: "too green", "limewash reads yellow-green").
 INSTANCES = {
-    "M_MineHouseStone": ("Granite", dict(tiles=0.9, tint=(1.85, 1.55, 1.58), sat=0.12, vc=1.0, normal=1.0,
+    "M_MineHouseStone": ("Granite", dict(tiles=0.9, tint=(1.95, 1.48, 1.62), sat=0.12, vc=1.0, normal=1.0,
                                          rough=(1.0, 0.0), macro=0.35, grime=0.45)),
     "M_MineHouseShaftStone": ("Granite", dict(tiles=0.9, tint=(0.55, 0.53, 0.50), sat=0.1, vc=1.0, normal=1.0,
                                               rough=(0.9, 0.0), macro=0.3, grime=0.0)),
     "M_MineHouseMortar": ("Mortar", dict(tiles=1.2, tint=(0.62, 0.53, 0.56), sat=0.0, vc=0.0, normal=1.0,
                                          rough=(1.0, 0.05), macro=0.4, grime=0.6)),
-    "M_MineHouseLimewash": ("Limewash", dict(tiles=1.1, tint=(0.82, 0.76, 0.96), sat=0.0, vc=0.0, normal=1.0,
-                                             rough=(1.0, 0.0), macro=0.35, grime=0.5)),
+    "M_MineHouseLimewash": ("Plaster", dict(tiles=0.8, tint=(2.35, 2.30, 3.30), sat=0.0, vc=0.0, normal=0.6,
+                                             rough=(1.0, 0.0), macro=0.12, grime=0.25)),
     "M_MineHouseBrick": ("Brick", dict(tiles=2.5, tint=(1.15, 0.62, 0.45), sat=1.0, vc=1.0, normal=0.8,
                                        rough=(1.0, 0.0), macro=0.2, grime=0.0)),
     "M_MineHouseSlate": ("Slate", dict(tiles=1.6, tint=(0.62, 0.66, 0.72), sat=1.0, vc=1.0, normal=0.9,
@@ -73,16 +74,32 @@ INSTANCES = {
     # The furnishing (whole meshes, see WHOLE_MESHES).
     "M_MineFurnitureWood": ("Boards", dict(tiles=1.3, tint=(0.80, 0.66, 0.52), sat=0.9, vc=0.0, normal=0.8,
                                            rough=(0.9, 0.0), macro=0.25, grime=0.0, tri=1.0)),
-    "M_MinePileStone": ("Granite", dict(tiles=1.4, tint=(1.85, 1.55, 1.58), sat=0.12, vc=0.0, normal=1.0,
+    "M_MinePileStone": ("Granite", dict(tiles=1.4, tint=(1.95, 1.48, 1.62), sat=0.12, vc=0.0, normal=1.0,
                                         rough=(1.0, 0.0), macro=0.3, grime=0.0, tri=1.0)),
-    "M_MineLidBoards": ("Boards", dict(tiles=0.6, tint=(0.95, 0.85, 0.75), sat=0.9, vc=0.0, normal=1.0,
-                                       rough=(1.0, 0.0), macro=0.35, grime=0.0, tri=1.0)),
+    # The galleries (one Nanite shell, no metric UVs): damp granite, world-aligned. Its baked atlas gave about
+    # 2 cm texels and a grid slot; the photoscan reads true at the lamp's distance.
+    "M_MineTunnelRock": ("Granite", dict(tiles=0.55, tint=(1.05, 0.98, 0.92), sat=0.1, vc=0.0, normal=1.3,
+                                         rough=(0.85, -0.05), macro=0.45, grime=0.0, tri=1.0)),
+    "M_MineCollarTimber": ("Timber", dict(tiles=0.9, tint=(0.42, 0.33, 0.25), sat=0.7, vc=0.0, normal=1.1,
+                                          rough=(1.0, 0.0), macro=0.3, grime=0.0, tri=1.0)),
+    # Mine nodes (mine_nodes.py): the tunnel's own rock, the ore as a region of it.
+    "M_MineCoal": ("Slate", dict(tiles=1.2, tint=(0.17, 0.16, 0.155), sat=0.0, vc=0.0, normal=1.5,
+                                 rough=(0.3, -0.06), macro=0.3, grime=0.0, tri=1.0)),
+    "M_MineCopperOre": ("Granite", dict(tiles=1.0, tint=(0.55, 1.15, 0.85), sat=0.0, vc=0.0, normal=1.2,
+                                        rough=(0.8, 0.0), macro=0.45, grime=0.0, tri=1.0)),
+    "M_MineCopperStain": ("Granite", dict(tiles=0.55, tint=(0.95, 1.05, 0.88), sat=0.1, vc=0.0, normal=1.3,
+                                          rough=(0.85, -0.05), macro=0.45, grime=0.0, tri=1.0)),
 }
 # Meshes whose every slot takes one instance (baked props that read better in the photoscans).
 WHOLE_MESHES = {"/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineDesk": "M_MineFurnitureWood",
                 "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineChair": "M_MineFurnitureWood",
-                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorLid": "M_MineLidBoards",
-                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineRockPile": "M_MinePileStone"}
+                                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorCollar": "M_MineCollarTimber",
+                "/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineRockPile": "M_MinePileStone",
+                "/Game/SurvivalGame/Environment/Props/MineTunnels/SM_MineTunnels": "M_MineTunnelRock"}
+_NODE_SLOTS = {"M_MineNodeRock": "M_MineTunnelRock", "M_MineNodeCoal": "M_MineCoal", "M_MineNodeCopper": "M_MineCopperOre",
+               "M_MineNodeStain": "M_MineCopperStain"}
+WHOLE_MESHES.update({f"/Game/SurvivalGame/Environment/Props/MineNodes/SM_Mine{n}{s}": _NODE_SLOTS
+                     for n in ("RockFace", "CoalSeam", "CopperVein") for s in ("", "Spent")})
 MESHES = ["SM_MineHouseWallE", "SM_MineHouseWallW", "SM_MineHouseWallN", "SM_MineHouseWallS", "SM_MineHouseStack",
           "SM_MineHouseShaft", "SM_MineHouseRoof", "SM_MineHouseFloors", "SM_MineHouseJoinery"]
 MESH_DEST = "/Game/SurvivalGame/Environment/Props/MineHouse"
@@ -406,10 +423,13 @@ def apply(unreal):
         if not mesh:
             print("missing", path)
             continue
-        for index in range(len(mesh.get_editor_property("static_materials"))):
-            mesh.set_material(index, instances[slot])
+        names = [str(m.get_editor_property("material_slot_name")) for m in mesh.get_editor_property("static_materials")]
+        for index, name in enumerate(names):
+            target = slot.get(name) if isinstance(slot, dict) else slot
+            if target:
+                mesh.set_material(index, instances[target])
         LIB.save_loaded_asset(mesh, False)
-        print(path.rsplit("/", 1)[1], "->", instances[slot].get_name())
+        print(path.rsplit("/", 1)[1], "->", slot)
 
 
 if __name__ == "__main__":

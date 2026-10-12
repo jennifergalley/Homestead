@@ -10,8 +10,8 @@
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_MineTunnels": {
-      "vertices": 1206645,
-      "triangles": 2413024,
+      "vertices": 1209489,
+      "triangles": 2418700,
       "size_cm": [
         7871.19,
         4768.68,
@@ -61,12 +61,11 @@
         "eye_distance": 90.0
       },
       "fbx": "SM_MineTunnels.fbx",
-      "sha256": "b47e5dcb9897f616628b69a215aa1b265abb674baf469fe736559e5757bc3e5a",
-      "preview": "preview_SM_MineTunnels.png"
+      "sha256": "a1e076654755de2c35b46ea9ca24492d29c7dbf02216ac5db4914148e3da65b5"
     },
     "SM_MineTunnels_LOD1": {
-      "vertices": 180116,
-      "triangles": 359999,
+      "vertices": 180118,
+      "triangles": 360000,
       "size_cm": [
         7871.47,
         4768.74,
@@ -101,8 +100,7 @@
         "eye_distance": 90.0
       },
       "fbx": "SM_MineTunnels_LOD1.fbx",
-      "sha256": "950d1fd7c3e838e03172d86c068e52e93e7692cfeec191e95b7149b9061802c8",
-      "preview": "preview_SM_MineTunnels_LOD1.png"
+      "sha256": "9ec0e8122593f69f72d2a5fc953706ad7020b03fb71cd5337a6ef3af6d7cf90d"
     },
     "SM_MineTunnels_LOD2": {
       "vertices": 55104,
@@ -141,8 +139,7 @@
         "eye_distance": 90.0
       },
       "fbx": "SM_MineTunnels_LOD2.fbx",
-      "sha256": "ca3837aed881778fcbd83212056702656757797d0f369f9a13f9543b073c95a1",
-      "preview": "preview_SM_MineTunnels_LOD2.png"
+      "sha256": "0e7ae3a92b0e7c210b5e525f1a11fa85c166fe0d03d8651ba608f85d835ee00a"
     }
   },
   "warnings": [],
@@ -160,11 +157,11 @@
   "nanite": true,
   "pivot": "Tunnel frame origin: the floor under the trapdoor's centre; place at layout.tunnel_world(), yaw 0.",
   "textures": {
-    "T_MineTunnels_basecolor.png": "e97211cf7d6fb4e5f93354ed7e586d4b850a2d6aab2c82ca571797583bc6d22c",
-    "T_MineTunnels_roughness.png": "f4c21e0796d35a69b0c5e67f57655f326619b97010208cfcca17add1439e9f2b",
-    "T_MineTunnels_normal.png": "7339acdc74234427bf23e57e20bbe54fa43e451ecfe688a0aea7ca416cd7173a",
+    "T_MineTunnels_basecolor.png": "72a0579f23274dc4f7b1aed2b8b367a0115b21711a3aa703bbdabae7b8e2a8f8",
+    "T_MineTunnels_roughness.png": "4afac62d518fbc302d7b52789f2ff1f39c2ad20db14594a50482c62ee309aee4",
+    "T_MineTunnels_normal.png": "521db45bd78e2d78fec62360a9e129f8805ccbfd80f2c515fbc32af58425984e",
     "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
-    "T_MineTunnels_mask.png": "fa17da30bcebe9e07d705d35bebf46150d39cc8f9fcf5a2c5eb5b0a055a07003",
+    "T_MineTunnels_mask.png": "b7b1db51ae1d95d923f0745b2b0213ba19f696a4ca716bb1255e7d7db2838802",
     "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
     "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
   }

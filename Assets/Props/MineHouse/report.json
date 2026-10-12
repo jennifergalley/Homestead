@@ -10,12 +10,12 @@
   "provenance": "Original project-authored procedural geometry; surfaces from CC0 Poly Haven photoscans (Assets/Props/MineSurfaces/CREDITS.json) or, with HOMESTEAD_MINE_PHOTO=0, procedural bakes.",
   "meshes": {
     "SM_MineHouseWallE": {
-      "vertices": 101842,
-      "triangles": 182589,
+      "vertices": 86931,
+      "triangles": 154701,
       "size_cm": [
-        84.27,
-        627.82,
-        1227.06
+        80.91,
+        628.15,
+        1226.71
       ],
       "materials": [
         {
@@ -66,15 +66,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallE.fbx",
-      "sha256": "4f2ae0a8d33169b623a1e6e43d3408de7aafef7be8f43094447b47483d5ffb12"
+      "sha256": "e265184f71ed590beb08e6a0864dfa1702c567f178a9d4d63438847d644b5de2"
     },
     "SM_MineHouseWallE_LOD1": {
-      "vertices": 38562,
-      "triangles": 63905,
+      "vertices": 32935,
+      "triangles": 54144,
       "size_cm": [
-        84.28,
-        627.83,
-        1227.06
+        80.82,
+        628.15,
+        1226.71
       ],
       "materials": [
         {
@@ -125,15 +125,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallE_LOD1.fbx",
-      "sha256": "94b158d8c9002c3545f0e8d963338e8a6c1b53ffffe9ca30814c0e0b031f8651"
+      "sha256": "c0edfd1da44f09c992b347ad83d97295f855b61af511330ce24b883a4500929b"
     },
     "SM_MineHouseWallE_LOD2": {
-      "vertices": 14828,
-      "triangles": 21910,
+      "vertices": 12700,
+      "triangles": 18564,
       "size_cm": [
-        84.28,
-        628.23,
-        1226.79
+        80.71,
+        628.2,
+        1226.48
       ],
       "materials": [
         {
@@ -184,15 +184,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallE_LOD2.fbx",
-      "sha256": "1ea0c55a79fda7ea97dcc6a28bed140583607c08b328235da631b6de2dd35d3c"
+      "sha256": "9d8c33dd41aa4c05780ff0fc4c12fa9cc233fc3ab884dc5d101745811f9585c5"
     },
     "SM_MineHouseWallW": {
-      "vertices": 105815,
-      "triangles": 189940,
+      "vertices": 73675,
+      "triangles": 131042,
       "size_cm": [
-        139.19,
-        628.09,
-        1227.26
+        135.74,
+        628.44,
+        1225.6
       ],
       "materials": [
         {
@@ -243,15 +243,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallW.fbx",
-      "sha256": "a734861118d57f7bcb5899f5942d33c628b46e380359b4ea05f3af37f1cfda3b"
+      "sha256": "a50127b37b8ee1f16036bb00b6ef51907aa6a8a7fdd4a984812e8144f9bffc28"
     },
     "SM_MineHouseWallW_LOD1": {
-      "vertices": 39907,
-      "triangles": 66478,
+      "vertices": 27865,
+      "triangles": 45864,
       "size_cm": [
-        139.14,
-        628.09,
-        1227.21
+        135.74,
+        628.44,
+        1225.56
       ],
       "materials": [
         {
@@ -302,15 +302,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallW_LOD1.fbx",
-      "sha256": "cd50659fde8dfc282b290feeb72f005ac532e6104df086419ef8aa096e2af291"
+      "sha256": "53a503a8b85b147234577765d8c3a86d8170a8a5aed02b799a37a391548207b1"
     },
     "SM_MineHouseWallW_LOD2": {
-      "vertices": 15272,
-      "triangles": 22791,
+      "vertices": 10634,
+      "triangles": 15725,
       "size_cm": [
-        138.89,
-        628.12,
-        1227.27
+        135.61,
+        628.53,
+        1225.7
       ],
       "materials": [
         {
@@ -361,15 +361,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallW_LOD2.fbx",
-      "sha256": "7760598600ae6c7f1d526367cce4ba73075155d78e0fbfc3c7132c512ac889d1"
+      "sha256": "8c148bf291ec25f577d49966dab7aa380de325a546e72c2edcf7da8a8c01c0bc"
     },
     "SM_MineHouseWallN": {
-      "vertices": 157397,
-      "triangles": 281099,
+      "vertices": 119886,
+      "triangles": 212009,
       "size_cm": [
-        772.22,
-        79.21,
-        987.83
+        772.29,
+        77.46,
+        988.54
       ],
       "materials": [
         {
@@ -420,15 +420,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallN.fbx",
-      "sha256": "43ec42f8f370d7d6774b357b31872844c9d366681a040fb1b9e2eddc57a83312"
+      "sha256": "40885747a36f616f2476a3e7a872598d2575f325bb365eebab672476b5e1a41c"
     },
     "SM_MineHouseWallN_LOD1": {
-      "vertices": 59571,
-      "triangles": 98384,
+      "vertices": 45548,
+      "triangles": 74203,
       "size_cm": [
-        772.16,
-        79.25,
-        987.73
+        772.24,
+        77.46,
+        988.54
       ],
       "materials": [
         {
@@ -479,15 +479,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallN_LOD1.fbx",
-      "sha256": "75e160e7767b70f72a9fad1b1236fb458aadfdf37ff1ff2e85bb69e630e9b50c"
+      "sha256": "0761b4a1a7bba57b565356fc3871a1bd8bc42eacc8501740b3c64756359b097c"
     },
     "SM_MineHouseWallN_LOD2": {
-      "vertices": 23027,
-      "triangles": 33731,
+      "vertices": 17676,
+      "triangles": 25440,
       "size_cm": [
-        772.13,
-        79.3,
-        987.79
+        772.07,
+        76.93,
+        988.56
       ],
       "materials": [
         {
@@ -538,15 +538,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallN_LOD2.fbx",
-      "sha256": "18569c047faf2a3bade4ec5828be258c0c5bf8a3e7826e561a9af4b9483ea400"
+      "sha256": "09f9e9a9bbd7459840a43fe62bb4f7ec0ce5f8bf536ac7640def2da117be6efd"
     },
     "SM_MineHouseWallS": {
-      "vertices": 174163,
-      "triangles": 310343,
+      "vertices": 131510,
+      "triangles": 232109,
       "size_cm": [
-        904.46,
-        79.16,
-        988.08
+        904.4,
+        77.41,
+        988.64
       ],
       "materials": [
         {
@@ -597,15 +597,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallS.fbx",
-      "sha256": "37151f45ccf3969f4752563cee487f4e9aa4abc6a27f532c22ddb4a4e815d12e"
+      "sha256": "cd6b2852f83da205ac00c7f177af1399913887608aa6f7aea5fa5ead841bbf54"
     },
     "SM_MineHouseWallS_LOD1": {
-      "vertices": 66156,
-      "triangles": 108620,
+      "vertices": 50180,
+      "triangles": 81238,
       "size_cm": [
-        904.46,
-        79.19,
-        987.95
+        904.39,
+        77.4,
+        988.42
       ],
       "materials": [
         {
@@ -656,15 +656,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallS_LOD1.fbx",
-      "sha256": "208a9f1e39eaca27155e13725f2b11b9e3c5fc9fe2770affc12e2c56e1c108c0"
+      "sha256": "a3a002b330655874dfd67a831ebefd1327fea583b901ba6790d31ab7f56b265a"
     },
     "SM_MineHouseWallS_LOD2": {
-      "vertices": 25712,
-      "triangles": 37240,
+      "vertices": 19607,
+      "triangles": 27852,
       "size_cm": [
-        904.15,
-        79.23,
-        987.88
+        904.24,
+        76.79,
+        988.3
       ],
       "materials": [
         {
@@ -715,15 +715,15 @@
         ]
       },
       "fbx": "SM_MineHouseWallS_LOD2.fbx",
-      "sha256": "d998734fa018bfb38b7e128001da2f5fd1956c989c236f552e7e220d16a2d1bf"
+      "sha256": "06cc1b065ed1a43fd914310752409fe4dc9cf4ed3e9efb23c08b3f3407ac1abd"
     },
     "SM_MineHouseStack": {
-      "vertices": 86504,
-      "triangles": 149865,
+      "vertices": 87044,
+      "triangles": 150885,
       "size_cm": [
-        163.0,
-        163.0,
-        1737.21
+        163.59,
+        163.57,
+        1737.18
       ],
       "materials": [
         {
@@ -774,15 +774,15 @@
         ]
       },
       "fbx": "SM_MineHouseStack.fbx",
-      "sha256": "4ed69060539f33ed8256ef76e8bbeec1aeb9a05f85bc90bc08983ec533f53660"
+      "sha256": "faea3e7efc49181873e61cd84fc033113210c39f98805f3221f673c77ff34190"
     },
     "SM_MineHouseStack_LOD1": {
-      "vertices": 34506,
-      "triangles": 52452,
+      "vertices": 34727,
+      "triangles": 52808,
       "size_cm": [
-        163.05,
-        163.09,
-        1737.21
+        163.64,
+        163.59,
+        1737.17
       ],
       "materials": [
         {
@@ -833,14 +833,14 @@
         ]
       },
       "fbx": "SM_MineHouseStack_LOD1.fbx",
-      "sha256": "39d253568174052b6412ce5fe27d0edd40a3644e4ce14bd6410d86591e50d9b6"
+      "sha256": "ed6a5b7b7d176fdeac764c74d82ac48e088bd37441c7c70e7839267dad97751a"
     },
     "SM_MineHouseStack_LOD2": {
-      "vertices": 14501,
-      "triangles": 17983,
+      "vertices": 14584,
+      "triangles": 18106,
       "size_cm": [
-        163.11,
-        163.44,
+        163.57,
+        163.82,
         1737.1
       ],
       "materials": [
@@ -892,7 +892,7 @@
         ]
       },
       "fbx": "SM_MineHouseStack_LOD2.fbx",
-      "sha256": "b060c8b5ea5e80f5a07bd2409587c989029e36b0323631845077f7b9cae181e4"
+      "sha256": "c5b1af7a6fa0bd84b206d21cd137390e7b955435bea079b520571051d31ec876"
     },
     "SM_MineHouseRoof": {
       "vertices": 48556,
@@ -942,7 +942,7 @@
         ]
       },
       "fbx": "SM_MineHouseRoof.fbx",
-      "sha256": "e53d4bdab8e88ab009ae07fba7904e44226b6fb11fc3081d5fc99bafebfe5195"
+      "sha256": "8b94695540e6b5813b83cb52e556a489145de9d9b479c36bdf02639dc8d41e1c"
     },
     "SM_MineHouseRoof_LOD1": {
       "vertices": 18627,
@@ -992,7 +992,7 @@
         ]
       },
       "fbx": "SM_MineHouseRoof_LOD1.fbx",
-      "sha256": "ba8d294f697973da9f54a083553fde8031d3b754a04bf70f5ea19129fc284bb0"
+      "sha256": "6292c4de3e8ed91b044e74851c8d553a4363c6587e3f13b9c82475014ec41d8b"
     },
     "SM_MineHouseRoof_LOD2": {
       "vertices": 8037,
@@ -1042,7 +1042,7 @@
         ]
       },
       "fbx": "SM_MineHouseRoof_LOD2.fbx",
-      "sha256": "b570735bf1d4133d18b8b3f88c4b4c5c9f0b8486b5dbe689ab78a895587ae591"
+      "sha256": "4867630d1c0b931ff01eee1c054f304220f4c0e79ec615e4ecb7b92ad9a268ec"
     },
     "SM_MineHouseFloors": {
       "vertices": 16272,
@@ -1092,7 +1092,7 @@
         ]
       },
       "fbx": "SM_MineHouseFloors.fbx",
-      "sha256": "dc0074204c886de85e22f08536a01be5f4a561df9ff25fcff218309cdee708f4"
+      "sha256": "6c96ca49515dea618259908336c1e2f915bb3b405b3543d43b05031dcec30c6c"
     },
     "SM_MineHouseFloors_LOD1": {
       "vertices": 5839,
@@ -1142,7 +1142,7 @@
         ]
       },
       "fbx": "SM_MineHouseFloors_LOD1.fbx",
-      "sha256": "95aa2329e7ae2213c3652e1570b97429714e1e65068625383e76f2fd11db2b88"
+      "sha256": "b69162b0a852e6913793b8cf55b49045f5dc709dd46441691de0a48807a953d1"
     },
     "SM_MineHouseFloors_LOD2": {
       "vertices": 2148,
@@ -1192,7 +1192,7 @@
         ]
       },
       "fbx": "SM_MineHouseFloors_LOD2.fbx",
-      "sha256": "15e723e3f91332529221c507d2f4447b445282aebe72c9d60adb9e736eba2b91"
+      "sha256": "1a462f516001a28158b8c5c689520e1f1880748363b981cf89c16ccd806ab097"
     },
     "SM_MineHouseShaft": {
       "vertices": 18151,
@@ -1233,7 +1233,7 @@
         ]
       },
       "fbx": "SM_MineHouseShaft.fbx",
-      "sha256": "63c26106857023b00918f7baac46b6d8e46c3ff87c1cc95eee724256a505d493"
+      "sha256": "801c8501266820fc77bd073e2aaad991155923d1623a8c577d0294b2c2ffa09a"
     },
     "SM_MineHouseShaft_LOD1": {
       "vertices": 7182,
@@ -1274,7 +1274,7 @@
         ]
       },
       "fbx": "SM_MineHouseShaft_LOD1.fbx",
-      "sha256": "5e2922fee55a60bdb31bb49ff5486c8044127cdb6a8ff573b720162547d133d0"
+      "sha256": "5c9775d6e3f4c8e8442e36909f6f2b9c7f1f249b6723bb04b89242735de75969"
     },
     "SM_MineHouseShaft_LOD2": {
       "vertices": 2803,
@@ -1315,7 +1315,7 @@
         ]
       },
       "fbx": "SM_MineHouseShaft_LOD2.fbx",
-      "sha256": "a35d44afefa2399e0effc48d5d51efde3c922f9f3d509cc4502c99fa8ebc33dc"
+      "sha256": "e2581b0f70b7c6e58c6c440bbe5c26f3450861b405dad6768bbcacd990df3fc2"
     },
     "SM_MineHouseJoinery": {
       "vertices": 7255,
@@ -1365,7 +1365,7 @@
         ]
       },
       "fbx": "SM_MineHouseJoinery.fbx",
-      "sha256": "c9871ad3357ce08da8ba9a385d78de6a247e253d83dfb5814792d2799e2a7c21"
+      "sha256": "af8b9079ed44c94da21adcf601093aaf733425558bbf2a626d58363d1374146d"
     },
     "SM_MineHouseGlass": {
       "vertices": 207,
@@ -1397,7 +1397,7 @@
         ]
       },
       "fbx": "SM_MineHouseGlass.fbx",
-      "sha256": "28261df4de6797b9c95c0c1c68e15217b9fa6cd37a950f7b65ec2612506d7976"
+      "sha256": "1ca2b07e25b2065afecc81211fed193c2f70222fa82a763953e598b2315bd52c"
     }
   },
   "warnings": [],

@@ -23,6 +23,7 @@ SILL_H, SILL_PROUD = 0.12, 0.05
 MORTAR_RECESS = 0.028
 BOTTOM = -0.35                # buried footing course
 WASH_TOP = L.CEILING_Z + 0.25 # limewash inside up to just above the ceiling joists
+WASH_IDENTITY = (np.zeros(3), np.ones(3))
 
 
 # --------------------------------------------------------------------------- wall frames
@@ -305,10 +306,10 @@ def arch_band(m, wall, c, spring, r0, r1, mat, segs=28):
 def mortar_core(m, wall):
     """Lime-mortar core between the faces, recessed behind them, with the openings left open."""
     d0, d1 = MORTAR_RECESS, wall.t - MORTAR_RECESS
-    # The N/S cores stop the recess short of the corners: flush ends showed flat mortar through the quoins
-    # (Jenny: "the corners have no quoins: there's flat render where big dressed corner stones should be").
-    u0 = wall.u0 + (MORTAR_RECESS if wall.key in ("+Y", "-Y") else L.WALL)
-    u1 = wall.u1 - (MORTAR_RECESS if wall.key in ("+Y", "-Y") else L.WALL)
+    # The N/S cores run to the corners (a recessed end let daylight through the corner); the corner quoins
+    # stand proud of them (QUOIN_PROUD), so no flat mortar shows at the corners.
+    u0 = wall.u0 + (0.0 if wall.key in ("+Y", "-Y") else L.WALL)
+    u1 = wall.u1 - (0.0 if wall.key in ("+Y", "-Y") else L.WALL)
     if wall.key == "-X":
         u1 = stack_box()[2]
     if wall.key == "+Y":
@@ -393,13 +394,14 @@ def build_wall(key, seed):
             break
         free = free_intervals(wall, k, z0, z1)
         joints_out = rubble(m, wall, z0, z1, free, rng, joints_out)
-        if z1 <= WASH_TOP and z0 >= L.FLOOR_Z - 0.2:
-            inner = inner_intervals(wall, k, z0, z1)
-            joints_in = rubble(m, wall, z0, z1, inner, rng, joints_in, inner=True)
-            # Limewash runs over the joints too: a washed skin just behind the stone faces.
-            for a, b in inner:
-                box_on(m, wall, a, b, z0, z1, wall.t - 0.022, wall.t - 0.013, MAT_WASH, radius=0.002, bulge=0.0,
-                       relief=0.0)
+        if z1 <= WASH_TOP and z1 > L.FLOOR_Z - 0.05:
+            # Jenny (review 7): "an even, whiter off-white that hides the stone pattern". The room's walls are
+            # rendered and limewashed flush: one continuous skin (a shared identity keeps the photo continuous
+            # from course to course), with only a hand-applied waviness.
+            for a, b in inner_intervals(wall, k, z0, z1):
+                p0, p1 = wall.p(a, z0, wall.t - 0.02), wall.p(b, z1, wall.t)
+                m.block(np.minimum(p0, p1), np.maximum(p0, p1), mat=MAT_WASH, radius=0.0005, relief=0.0015,
+                        step=0.25, bulge=0.0, skip=(("z", -1), ("z", 1)), identity=WASH_IDENTITY)
     for o in wall.openings:
         opening_dressing(m, wall, o, cs, rng)
     if wall.gable:
@@ -450,6 +452,11 @@ def build_stack(seed=31):
                          bulge=rng.uniform(0.004, 0.016))
     m.box(np.array([x0 + MORTAR_RECESS, y0 + MORTAR_RECESS, BOTTOM]),
           np.array([x1 - MORTAR_RECESS, y1 - MORTAR_RECESS, top + 0.02]), MAT_MORTAR, skip=(("z", -1),))
+    # Where the stack stands into the room's corner, its two faces are rendered and limewashed like the walls.
+    m.block(np.array([x1 - 0.03, y0 - 0.02, L.FLOOR_Z - 0.05]), np.array([x1 + 0.02, L.IN_Y + 0.02, WASH_TOP]),
+            mat=MAT_WASH, radius=0.0005, relief=0.0015, step=0.25, skip=(("z", -1), ("z", 1)), identity=WASH_IDENTITY)
+    m.block(np.array([L.IN_W - 0.02, y0 - 0.02, L.FLOOR_Z - 0.05]), np.array([x1 + 0.02, y0 + 0.03, WASH_TOP]),
+            mat=MAT_WASH, radius=0.0005, relief=0.0015, step=0.25, skip=(("z", -1), ("z", 1)), identity=WASH_IDENTITY)
     bh = L.STACK["brick_half"]
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     m.block(np.array([x0 + 0.02, y0 + 0.02, top]), np.array([x1 - 0.02, y1 - 0.02, top + 0.16]), mat=MAT_STONE,
