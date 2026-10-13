@@ -26,6 +26,28 @@ export function slotKeyForHeading(heading) {
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const strings = (value) => (Array.isArray(value) ? value.filter((item) => typeof item === "string") : []);
 
+// "On main, awaiting build": priority.json `merged` maps a card ID to { sha, mergedAt, note }. Cards here are done and
+// merged but not yet in a delivered build; the planner shows them in their own group, out of the build slots.
+export const MERGED_LABEL = "On main, awaiting build";
+
+export function shortSha(sha) {
+    return typeof sha === "string" ? sha.slice(0, 9) : "";
+}
+
+export function normalizeMerged(value) {
+    const merged = {};
+    if (!isObject(value)) return merged;
+    for (const [id, entry] of Object.entries(value)) {
+        if (!id || !isObject(entry) || typeof entry.sha !== "string" || !entry.sha) continue;
+        merged[id] = {
+            sha: entry.sha,
+            mergedAt: typeof entry.mergedAt === "string" ? entry.mergedAt : "",
+            note: typeof entry.note === "string" ? entry.note : "",
+        };
+    }
+    return merged;
+}
+
 // Maps a priority document that may still carry fixed-time slot keys
 // ("YYYY-MM-DD HH:mm") or legacy `nextBuild` IDs onto the two named slots.
 // Distinct open date-times are ordered chronologically: the earliest becomes
@@ -46,10 +68,12 @@ export function migrateSlots(priority, deliveredKeys = new Set()) {
         slots[id] = isBuildSlotKey(value) ? value : mapped.get(value) ?? "next";
     }
     for (const id of strings(nextBuild)) if (!(id in slots)) slots[id] = "next";
-    return { ...rest, order: strings(source.order), removed: strings(source.removed), slots };
+    const migrated = { ...rest, order: strings(source.order), removed: strings(source.removed), slots };
+    if ("merged" in source) migrated.merged = normalizeMerged(source.merged);
+    return migrated;
 }
 
-// Integration's final step after a delivery: shipped IDs leave the slots,
+// Integration's final step after a delivery: shipped IDs leave the slots and the merged group,
 // unfinished `next` items stay in `next`, and `after-next` items move up.
 export function promoteAfterDelivery(priority, shippedIds, deliveredKeys = new Set()) {
     if (!Array.isArray(shippedIds) || shippedIds.some((id) => typeof id !== "string" || !id)) {
@@ -61,5 +85,7 @@ export function promoteAfterDelivery(priority, shippedIds, deliveredKeys = new S
     for (const [id, key] of Object.entries(migrated.slots)) {
         if (!shipped.has(id)) slots[id] = key === "after-next" ? "next" : key;
     }
-    return { ...migrated, slots };
+    const result = { ...migrated, slots };
+    if (migrated.merged) result.merged = Object.fromEntries(Object.entries(migrated.merged).filter(([id]) => !shipped.has(id)));
+    return result;
 }

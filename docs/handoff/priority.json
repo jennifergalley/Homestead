@@ -94,7 +94,6 @@
     "backlog:jenny-mv643gkt-eggdtc": "next",
     "backlog:jenny-mv647jvv-kplqgk": "next",
     "backlog:jenny-mv64e3n4-tncvf1": "next",
-    "backlog:jenny-mv62x9e8-k3g6qz": "next",
     "backlog:jenny-mv4701b5-4flmli": "next",
     "backlog:jenny-mv46hauz-8qmvc0": "next",
     "backlog:jenny-mv46ate4-mi5h3r": "next",
@@ -224,5 +223,12 @@
     "backlog:jenny-muucngve-dfc8a4",
     "fix-fullloop-woodland-queueclearcell"
   ],
-  "updated": "2026-10-13T04:32:24.648Z"
+  "updated": "2026-10-13T05:01:52.168Z",
+  "merged": {
+    "backlog:jenny-mv62x9e8-k3g6qz": {
+      "sha": "049a7282ff0d58dcf0593c9f15d707e2f38d93ac",
+      "mergedAt": "2026-10-13T04:24:06.000Z",
+      "note": "Planner backlog search box (on main; ships in the next build)"
+    }
+  }
 }

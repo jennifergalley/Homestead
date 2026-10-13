@@ -299,6 +299,25 @@ export function renderPlannerHtml() {
     .check-row.dragging { opacity: .45; }
     .check-row.next { background: color-mix(in srgb, var(--true-color-blue, #58a6ff) 9%, transparent); }
     .check-row.shipped { background: color-mix(in srgb, var(--true-color-green, #3fb950) 9%, transparent); }
+    .merged-group { margin-top: 18px; }
+    .merged-group > summary { cursor: pointer; font-weight: var(--font-weight-semibold, 600); padding: 4px 2px 8px; }
+    .merged-group .hint { color: var(--text-color-muted, #8b949e); font-weight: 400; font-size: 12px; margin-left: 6px; }
+    .merged-list { border-color: color-mix(in srgb, var(--true-color-green, #3fb950) 45%, var(--border-color-default, #30363d)); }
+    .merged-row {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 16px;
+      border-bottom: 1px solid color-mix(in srgb, var(--border-color-default, #30363d) 55%, transparent);
+      background: color-mix(in srgb, var(--true-color-green, #3fb950) 6%, transparent);
+    }
+    .merged-row:last-child { border-bottom: 0; }
+    .merged-row .check-title, .merged-row .check-text { opacity: .72; }
+    .merged-row .row-actions { opacity: .6; }
+    .merged-row:hover .row-actions { opacity: 1; }
+    .merged-badge {
+      display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 400;
+      border: 1px solid var(--true-color-green, #3fb950); color: var(--true-color-green, #3fb950); white-space: nowrap;
+      font-family: var(--font-mono, Consolas, monospace);
+    }
+    .merged-note { color: var(--text-color-muted, #8b949e); font-size: 12px; margin-top: 2px; }
     .delivery-note { color: var(--true-color-green, #3fb950); font-size: 12px; margin-top: 2px; }
     .rank { color: var(--text-color-muted, #8b949e); font-variant-numeric: tabular-nums; text-align: right; padding-top: 1px; }
     .drag { color: var(--text-color-muted, #8b949e); letter-spacing: -3px; padding-top: 1px; user-select: none; }
@@ -768,28 +787,42 @@ export function renderPlannerHtml() {
     function renderBoard() {
       board.replaceChildren();
       const features = state.planner.features.filter((feature) => feature.status !== "complete");
+      // Done and on main, awaiting a build: their own group, out of the slots and out of prioritisation.
+      const mergedList = el("div", "checklist merged-list");
       const flagged = features.filter((feature) => feature.slot).length;
+      const mergedCount = features.filter((feature) => feature.merged).length;
       const tokens = searchTokens();
       const openTasks = (feature) => feature.sections.flatMap((section) => section.tasks).filter((task) => !task.done);
       const matching = features.filter((feature) => matchesSearch(tokens, feature.title, feature.description,
         ...openTasks(feature).map((task) => task.text)));
       note.textContent = (tokens.length ? matching.length + " of " + features.length + " items match" : features.length + " items")
-        + (flagged ? " · " + flagged + " scheduled" : "");
+        + (flagged ? " · " + flagged + " scheduled" : "") + (mergedCount ? " · " + mergedCount + " done, awaiting build" : "");
       if (!features.length) {
         board.append(el("div", "empty", "Nothing planned. Playtest feedback will land here."));
         return;
       }
       const list = el("div", "checklist");
-      features.forEach((feature, index) => {
+      let nextRank = 0;
+      features.forEach((feature) => {
         const open = openTasks(feature);
-        const row = el("div", "check-row" + (feature.slot ? " next" : "") + (feature.deliveryStatus === "shipped" ? " shipped" : ""));
+        const isMerged = !!feature.merged;
+        const index = isMerged ? -1 : nextRank++;
+        const row = el("div", isMerged ? "merged-row" : "check-row" + (feature.slot ? " next" : "") + (feature.deliveryStatus === "shipped" ? " shipped" : ""));
         row.dataset.id = feature.id;
-        row.draggable = true;
+        row.draggable = !isMerged;
         row.title = feature.path ?? feature.description ?? feature.title;
         // Filtered rows stay in the list so drag and move-to-top keep saving the whole order.
         row.hidden = !matching.includes(feature);
         const text = el("div");
-        text.append(highlighted("check-title", feature.title, tokens));
+        const title = highlighted("check-title", feature.title, tokens);
+        if (isMerged) {
+          const when = feature.merged.mergedAt ? new Date(feature.merged.mergedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+          const badge = el("span", "merged-badge", ["On main", feature.merged.shortSha, when].filter(Boolean).join(" · "));
+          badge.title = "On main since " + (feature.merged.mergedAt || "an earlier merge") + " (" + feature.merged.sha + "); ships in the next build.";
+          title.append(badge);
+        }
+        text.append(title);
+        if (isMerged && feature.merged.note) text.append(el("div", "merged-note", feature.merged.note));
         if (feature.deliveryStatus === "shipped") {
           text.append(el("div", "delivery-note", "Shipped in " + feature.deliveryBuildId + " · Player acceptance pending"));
         }
@@ -881,6 +914,22 @@ export function renderPlannerHtml() {
           });
           actions.append(edit);
         }
+        if (isMerged) {
+          // Done on main: no priority, drag or slot controls; editing and quoting stay, de-emphasised.
+          const reopen = el("button", "icon-button", "↩ Reopen");
+          reopen.type = "button";
+          reopen.title = "Not actually done? Put it back on the board";
+          reopen.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            reopen.disabled = true;
+            try { await savePriority({ unmerge: feature.id }); await load(true, true); note.textContent = "Reopened “" + feature.title + "”"; }
+            catch (error) { note.textContent = error.message; reopen.disabled = false; }
+          });
+          actions.append(reopen, quote);
+          row.append(text, actions);
+          mergedList.append(row);
+          return;
+        }
         actions.append(top, button, quote, remove);
         row.append(el("div", "rank", String(index + 1)), el("div", "drag", "⋮⋮"), text, actions);
         row.addEventListener("dragstart", (event) => {
@@ -907,6 +956,14 @@ export function renderPlannerHtml() {
         list.append(row);
       });
       board.append(list);
+      if (mergedList.children.length) {
+        const group = el("details", "merged-group");
+        group.open = true;
+        const heading = el("summary", "", "Done, ships in the next build");
+        heading.append(el("span", "hint", mergedList.children.length + (tokens.length ? " matching" : "") + " · on main, no need to edit or prioritise"));
+        group.append(heading, mergedList);
+        board.append(group);
+      }
       if (tokens.length && !matching.length) board.append(el("div", "empty", "No items match “" + state.search.trim() + "”."));
     }
 
@@ -1049,7 +1106,7 @@ export function renderPlannerHtml() {
       const id = feedbackState.entry?.id;
       resetFeedbackForm();
       feedbackStatus("Changes cancelled.");
-      const row = [...board.querySelectorAll(".check-row")].find((value) => value.dataset.id === "backlog:" + id);
+      const row = [...board.querySelectorAll(".check-row, .merged-row")].find((value) => value.dataset.id === "backlog:" + id);
       (row?.querySelector(".feedback-edit") ?? backlogTitle).focus();
     });
     backlogImageRemove.addEventListener("click", () => {

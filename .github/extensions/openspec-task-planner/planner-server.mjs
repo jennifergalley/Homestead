@@ -76,13 +76,19 @@ export async function startPlannerServer(projectRoot, instanceId, session, optio
                         sendJson(res, { error: "Choose Next build or Build after next" }, 400);
                         return;
                     }
+                    if (slot && priority.merged?.[id]) {
+                        sendJson(res, { error: "That item is done and on main; it ships in the next build. Reopen it to schedule it again." }, 400);
+                        return;
+                    }
                     if (slot) priority.slots[id] = slot;
                     else delete priority.slots[id];
                 }
+                if (typeof body.unmerge === "string" && priority.merged) delete priority.merged[body.unmerge];
                 if (typeof body.remove === "string") {
                     const id = body.remove;
                     priority.removed = [...new Set([...(priority.removed), id])];
                     delete priority.slots[id];
+                    if (priority.merged) delete priority.merged[id];
                     priority.order = priority.order.filter((value) => value !== id);
                 }
                 await writePriority(priority);

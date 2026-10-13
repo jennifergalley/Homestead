@@ -1,5 +1,6 @@
-// Usage: node .github/extensions/openspec-task-planner/close-delivery.mjs --build-id <id> --shipped <card ids...>
+// Usage: node .github/extensions/openspec-task-planner/close-delivery.mjs --build-id <id> [--shipped <card ids...>]
 //          [--package-sha <sha>] [--promoted-at "<local time>"] [--root <dir>] [--dry-run]
+// Without --shipped every card marked "On main, awaiting build" (Scripts\Mark-Merged.ps1) ships, and its merged state is cleared.
 // The planner half of Scripts\Close-Delivery.ps1 (README "Playtest builds" step 4): in one run it
 //   1. removes the shipped cards from priority.json `order`/`slots` and adds them to `removed`,
 //   2. moves their inbox entries to backlog-archive.json with the delivery receipt, then refreshes the
@@ -164,14 +165,12 @@ function receiptFor(report, buildId, sha) {
 }
 
 export async function closeDelivery(projectRoot, options) {
-    const { buildId, shippedCards, packageSha = "", promotedAt = "", configuration = "Development", dryRun = false, now = new Date() } = options;
+    const { buildId, shippedCards: requestedCards = [], packageSha = "", promotedAt = "", configuration = "Development", dryRun = false, now = new Date() } = options;
     if (typeof buildId !== "string" || !/^[\w-]+$/.test(buildId)) throw new Error("Build ID must be letters, digits, dashes and underscores.");
-    if (!Array.isArray(shippedCards) || !shippedCards.length || shippedCards.some((id) => typeof id !== "string" || !id.trim())) {
-        throw new Error("Give at least one shipped card ID.");
+    if (!Array.isArray(requestedCards) || requestedCards.some((id) => typeof id !== "string" || !id.trim())) {
+        throw new Error("Shipped card IDs must be non-empty strings.");
     }
     if (packageSha && !/^[0-9a-f]{7,64}$/i.test(packageSha)) throw new Error("Package SHA must be 7 to 64 hex digits.");
-    const shipped = unique(shippedCards.map((id) => id.trim()));
-    const shippedSet = new Set(shipped);
     const notes = [];
 
     const builds = await loadBuilds(projectRoot);
@@ -188,6 +187,9 @@ export async function closeDelivery(projectRoot, options) {
         throw error;
     });
     const priority = await loadPriority(projectRoot, builds, { strict: true });
+    // No explicit list: ship every card marked "On main, awaiting build" (Scripts\Mark-Merged.ps1).
+    const mergedIds = Object.keys(priority.merged ?? {});
+    const defaulted = !requestedCards.length;
     const entries = await loadBacklogInbox(projectRoot);
     const inboxDocument = await readJson(backlogInboxPath(projectRoot), { entries: [] });
     const archivePath = handoffPath(projectRoot, "backlog-archive.json");
@@ -196,10 +198,21 @@ export async function closeDelivery(projectRoot, options) {
     const prior = archive.archives.find((entry) => entry.buildId === buildId);
     const alreadyArchived = new Set([...(prior?.inboxEntries ?? []).map((id) => `${backlogPrefix}${id}`), ...(prior?.plannerOnlyItems ?? [])]);
 
+    if (defaulted && !mergedIds.length && !(prior || existingCard)) {
+        throw new Error("No shipped cards given and none are marked merged. Pass -ShippedCards, or run Scripts\\Mark-Merged.ps1 for the cards on main.");
+    }
+    const shippedCards = defaulted ? mergedIds : requestedCards;
+    if (defaulted) notes.push(mergedIds.length ? `No -ShippedCards given: shipping all ${mergedIds.length} card(s) marked merged.`
+        : `No -ShippedCards given and no card is marked merged; ${buildId} was closed before, so only its receipt is refreshed.`);
+    const shipped = unique(shippedCards.map((id) => id.trim()));
+    const shippedSet = new Set(shipped);
+    const stillMerged = mergedIds.filter((id) => !shippedSet.has(id));
+    if (stillMerged.length) notes.push(`${stillMerged.length} merged card(s) are not in this build and stay "On main, awaiting build": ${stillMerged.join(", ")}.`);
+
     // A typo must not silently archive nothing: every card has to be on the board, in the inbox, an OpenSpec
     // change, or already closed out under this build.
     const inboxById = new Map(entries.map((entry) => [`${backlogPrefix}${entry.id}`, entry]));
-    const known = new Set([...priority.order, ...priority.removed, ...Object.keys(priority.slots), ...inboxById.keys(),
+    const known = new Set([...priority.order, ...priority.removed, ...Object.keys(priority.slots), ...mergedIds, ...inboxById.keys(),
         ...await openSpecChangeNames(projectRoot), ...alreadyArchived]);
     const unknown = shipped.filter((id) => !known.has(id));
     if (unknown.length) throw new Error(`Unknown card ID(s): ${unknown.join(", ")}. Use the IDs the planner shows (backlog:<inbox id> or an OpenSpec change name).`);
@@ -210,15 +223,21 @@ export async function closeDelivery(projectRoot, options) {
     if (alreadyClosed.length) notes.push(`Already closed out earlier, left as they are: ${alreadyClosed.join(", ")}.`);
     const keptEntries = entries.filter((entry) => !shippedSet.has(`${backlogPrefix}${entry.id}`));
 
-    // (1)+(3): the planner's own promotion, then retire the shipped cards.
-    const promoted = promoteAfterDelivery(priority, shipped, deliveredBuildKeys(builds));
+    // (1)+(3): the planner's own promotion (first closure of this build only: a re-run must not move cards Jenny has
+    // scheduled since into Next build), then retire the shipped cards and clear their merged state.
+    const promoted = prior
+        ? { ...priority, slots: Object.fromEntries(Object.entries(priority.slots).filter(([id]) => !shippedSet.has(id))),
+            ...(priority.merged ? { merged: Object.fromEntries(Object.entries(priority.merged).filter(([id]) => !shippedSet.has(id))) } : {}) }
+        : promoteAfterDelivery(priority, shipped, deliveredBuildKeys(builds));
+    if (prior) notes.push(`${buildId} was already closed: Build after next was not promoted again.`);
     const nextPriority = {
         ...promoted,
         order: promoted.order.filter((id) => !shippedSet.has(id)),
         removed: unique([...promoted.removed, ...shipped]),
     };
     const nextIds = Object.keys(nextPriority.slots).filter((id) => nextPriority.slots[id] === "next");
-    const movedUp = Object.keys(priority.slots).filter((id) => priority.slots[id] === "after-next" && !shippedSet.has(id));
+    const movedUp = prior ? [] : Object.keys(priority.slots).filter((id) => priority.slots[id] === "after-next" && !shippedSet.has(id));
+    const mergedCleared = mergedIds.filter((id) => shippedSet.has(id));
 
     // (2): the archive entry, keeping the receipt and the full inbox records.
     const report = await readJson(handoffPath(projectRoot, "accounting", "reports", `${buildId}.json`), null);
@@ -278,7 +297,7 @@ export async function closeDelivery(projectRoot, options) {
         dryRun, buildId, heading, cardAction, packageSha: packageSha || null,
         shipped, inboxArchived: archivedEntries.map((value) => `${backlogPrefix}${value.id}`), plannerOnly,
         inboxRemaining: keptEntries.length, backlogMdChanged,
-        nextBuildSlots: nextIds.length, movedUpFromAfterNext: movedUp.length,
+        nextBuildSlots: nextIds.length, movedUpFromAfterNext: movedUp.length, mergedCleared,
         archive: prior ? "updated existing archive entry" : "added archive entry", receipt, notes,
         priorityFile: priorityExists ? "rewritten" : "not present; created",
     };
@@ -355,7 +374,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
         const tag = result.dryRun ? "[dry run, nothing written] " : "";
         console.log(`${tag}Build ${result.buildId} (${result.heading})`);
         console.log(`  builds.md card: ${result.cardAction}${result.cardAction === "inserted" ? " (fill in the Ships bullets)" : ""}`);
-        console.log(`  priority.json: ${result.shipped.length} shipped card(s) -> removed; ${result.movedUpFromAfterNext} moved up from Build after next; Next build now holds ${result.nextBuildSlots}`);
+        console.log(`  priority.json: ${result.shipped.length} shipped card(s) -> removed${result.mergedCleared.length ? ` (${result.mergedCleared.length} merged state cleared)` : ""}; ${result.movedUpFromAfterNext} moved up from Build after next; Next build now holds ${result.nextBuildSlots}`);
         console.log(`  inbox: ${result.inboxArchived.length} entr${result.inboxArchived.length === 1 ? "y" : "ies"} -> backlog-archive.json (${result.archive}); ${result.inboxRemaining} remain; backlog.md ${result.backlogMdChanged ? "refreshed" : "unchanged"}`);
         if (result.plannerOnly.length) console.log(`  planner-only cards archived: ${result.plannerOnly.join(", ")}`);
         for (const note of result.notes) console.log(`  note: ${note}`);
@@ -368,7 +387,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
         }
     } catch (error) {
         console.error(`close-delivery: ${error.message}`);
-        console.error("Usage: node close-delivery.mjs --build-id <id> --shipped <card ids...> [--package-sha <sha>] [--promoted-at \"<local time>\"] [--root <dir>] [--dry-run]");
+        console.error("Usage: node close-delivery.mjs --build-id <id> [--shipped <card ids...>] [--package-sha <sha>] [--promoted-at \"<local time>\"] [--root <dir>] [--dry-run]  (no --shipped: every merged card)");
         process.exitCode = 1;
     }
 }

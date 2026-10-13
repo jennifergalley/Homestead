@@ -211,7 +211,11 @@ Template:
 **Planner canvas:** `openspec-task-planner` reads `builds.md`, `backlog.md`, and `priority.json` for
 Jenny's scheduling. Dragging reorders priority; **Top** promotes an item, **Next build** assigns it
 to a build, and **Quote** exposes its player ask. **Remove** archives that OpenSpec change, so use
-it only for shipped, retired, or clearly stale work. All of this is agent-free: it writes straight to
+it only for shipped, retired, or clearly stale work. Work that is done and merged to `main` but not
+in a delivered build yet is **On main, awaiting build**: `priority.json` `merged` maps its card ID to
+`{sha, mergedAt, note}` (set with `Scripts\Mark-Merged.ps1`), and the planner lists it in a "Done,
+ships in the next build" group instead of the slots, with no drag or slot controls (the Backlog search
+still finds it, and **Reopen** puts it back). All of this is agent-free: it writes straight to
 `priority.json` with no chat notification, so check its `updated` timestamp when you need to know if
 Jenny changed anything. The quick backlog-entry form (title/description/screenshot) writes durable
 captures to `backlog-inbox.json`; `backlog.md` is its Markdown mirror for triage and display.
@@ -301,6 +305,15 @@ Message flow:
 3. The integration session merges the ready work in its worktree, resolves conflicts, runs the native
    tests, packages once, runs the packaged tests, and pushes the integrated result to `main`. It
    reports `[integrated] <what> @ <sha>` (with anything that failed) to the orchestrator.
+   **Right after each lane merges to `main`, Integration marks that lane's planner cards done:**
+   `Scripts\Mark-Merged.ps1 -Cards <card ids> -Sha <merge sha> [-Note "..."]`, then commits and pushes
+   `docs\handoff\priority.json` (a docs-only commit). The planner moves them to a "Done, ships in the next
+   build" group (badge: short SHA and date), out of Next build / Build after next and out of
+   prioritisation, so Jenny knows not to keep editing or scheduling them. It is idempotent
+   (`-WhatIf` previews, `-Reopen` undoes). A lane that pushes dev-only work (tooling, docs, scripts)
+   straight to `main` runs it itself for its cards. Card IDs are the ones the planner shows:
+   `backlog:<inbox id>` or an OpenSpec change name. `Scripts\Close-Delivery.ps1` ships every merged card
+   when its build is delivered and clears the state (Playtest builds, step 4).
 4. The orchestrator tells the lanes to rebase, relays to Jenny what she can try, and assigns
    follow-ups.
 
@@ -407,9 +420,12 @@ with it.
    orchestrator relays that to Jenny. Integration also updates `docs\handoff\builds.md` with the
    date/slot, SHA, status and player-facing changelist, moving unshipped work to its **Later** list.
 4. **Final delivery closure is mandatory.** One command does the mechanical part:
-   `Scripts\Close-Delivery.ps1 -BuildId <id> -ShippedCards <card ids> [-PackageSha <sha>] [-PromotedAt "2026-10-12 1:58 AM"]`
+   `Scripts\Close-Delivery.ps1 -BuildId <id> [-ShippedCards <card ids>] [-PackageSha <sha>] [-PromotedAt "2026-10-12 1:58 AM"]`
    (add `-WhatIf` to preview; `-Root <scratch copy>` to rehearse). Card IDs are the ones the planner
-   shows: `backlog:<inbox id>` or an OpenSpec change name. It exports all allocated local call records with
+   shows: `backlog:<inbox id>` or an OpenSpec change name. **Omit `-ShippedCards` to ship every card
+   marked "On main, awaiting build"** (`Scripts\Mark-Merged.ps1`, run after each merge); their merged
+   state is cleared as they ship, and merged cards left out of an explicit list stay merged. It exports
+   all allocated local call records with
    `Scripts\Export-BuildUsage.py` and creates `docs\handoff\accounting\reports\<build-id>.json` with
    `Scripts\Report-BuildUsage.mjs` (it needs the build's `accounting\<build-id>-allocation.json`); retires
    the shipped cards from `priority.json` (`removed`), the inbox and the `backlog.md` mirror, keeping their

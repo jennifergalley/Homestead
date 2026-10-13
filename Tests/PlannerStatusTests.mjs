@@ -99,13 +99,11 @@ test("invalid activity data surfaces an error rather than inventing a status", a
     await assert.rejects(loadPlanner(root, now), SyntaxError);
 });
 
-test("the canvas exposes all four status filters and completed-task disclosure", () => {
+test("the canvas lists open items only and refreshes itself quietly", () => {
+    // The status-filter chips and completed-task disclosure were retired with the flat priority board; the board now
+    // hides complete features and polls every 10 s.
     const html = renderPlannerHtml();
-    for (const status of ["active", "paused", "proposed", "complete"]) {
-        assert.match(html, new RegExp(`data-filter="${status}"`));
-    }
-    assert.match(html, /feature\.status === "active" \|\| feature\.status === "paused"/);
-    assert.match(html, /const completed = el\("details", "completed-group"\)/);
-    assert.match(html, /completedExpanded\.get\(feature\.id\) \?\? false/);
-    assert.match(html, /setInterval\(\(\) => load\(true\), 60_000\)/);
+    assert.doesNotMatch(html, /data-filter=/);
+    assert.match(html, /state\.planner\.features\.filter\(\(feature\) => feature\.status !== "complete"\)/);
+    assert.match(html, /setInterval\(\(\) => load\(true\), 10000\)/);
 });

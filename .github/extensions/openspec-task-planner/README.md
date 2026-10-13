@@ -32,7 +32,7 @@ Opening/refreshing only reads; user actions create missing writable files.
 | File | Access and contract | When missing |
 | --- | --- | --- |
 | `openspec\changes\*\tasks.md` | Read recursively, excluding `archive`/hidden directories. `##` sections, numbered `- [ ] 1.1 Task` / `- [x] 1.2 Task` lines. IDs/titles come from change-directory paths/names. | No OpenSpec cards; feedback works. |
-| `docs\handoff\priority.json` | Read/write board state: `order` and `removed` ID arrays, `slots` mapping IDs to one of two build slots, `next` (Next build) or `after-next` (Build after next); no key means unscheduled. Older files are migrated on read: distinct `YYYY-MM-DD HH:mm` slot values map by order (the earliest still-open one becomes `next`, later ones `after-next`; a time that already shipped or is unrecognised becomes `next`) and legacy `nextBuild` IDs become `next`. Nothing is dropped; the new keys are written on the next save. Removal hides a card, not its source. | Defaults to empty state; also currently falls back on unreadable/invalid JSON. Created on a board action. |
+| `docs\handoff\priority.json` | Read/write board state: `order` and `removed` ID arrays, `slots` mapping IDs to one of two build slots, `next` (Next build) or `after-next` (Build after next); no key means unscheduled. Optional `merged` maps an ID to `{ sha, mergedAt, note }`: **On main, awaiting build** (done and merged, not yet in a delivered build). The planner lists those cards in a "Done, ships in the next build" group with a SHA/date badge, ignores any slot they hold, and refuses to schedule them; `Scripts\Mark-Merged.ps1` writes it and `close-delivery.mjs` / `promote-build.mjs` clear it when the card ships. Older files are migrated on read: distinct `YYYY-MM-DD HH:mm` slot values map by order (the earliest still-open one becomes `next`, later ones `after-next`; a time that already shipped or is unrecognised becomes `next`) and legacy `nextBuild` IDs become `next`. Nothing is dropped; the new keys are written on the next save. Removal hides a card, not its source. | Defaults to empty state; also currently falls back on unreadable/invalid JSON. Created on a board action. |
 | `docs\handoff\backlog-inbox.json` | Read/write authoritative `{ "entries": [] }`: stable `id`, `title`, `description`, `createdUtc`, optional `updatedUtc`, `imageFile`, `imageMime`. Board ID: `backlog:<id>`. Revision-checked edits preserve IDs/schedules. | Empty inbox; created on save. Invalid data errors, never silently replaced. |
 | `docs\handoff\backlog.md` | Read/write Markdown mirror under `## Later`, replacing only `<!-- jenny-inbox:start -->` through `<!-- jenny-inbox:end -->`. Other prose survives. JSON remains authoritative if mirroring fails; the form shows a warning. | Created on feedback save. It is not a board input. |
 | `docs\handoff\attachments\backlog\` | Write/read screenshots by inbox filename: one PNG/JPEG/WebP/GIF per entry, maximum 8 MB. Replacement writes a new filename; removal clears the reference, retaining old files. | Created for an upload; a missing referenced image returns 404. |
@@ -46,7 +46,9 @@ Opening/refreshing only reads; user actions create missing writable files.
 
 `Scripts\Close-Delivery.ps1` (README "Playtest builds" step 4) runs this and the rest of the closure in one
 command; its planner half is `close-delivery.mjs` in this folder and reuses the loaders and the mirror writer
-here. The section below is the promotion step on its own.
+here. `Scripts\Mark-Merged.ps1` (`mark-merged.mjs`) is the step before it: it records cards that are done and on
+`main` as "On main, awaiting build", and Close-Delivery ships them all when `-ShippedCards` is omitted.
+The section below is the promotion step on its own.
 
 Integration's final step after a build ships:
 

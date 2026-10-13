@@ -4,7 +4,7 @@ import { basename, dirname, join, relative } from "node:path";
 import { loadUsageReports } from "./accounting-data.mjs";
 import { loadBuildCostView } from "./cost-view.mjs";
 import { parseSlotMinutes, shipmentTiming } from "./build-time.mjs";
-import { BUILD_SLOTS, isBuildSlotKey, migrateSlots, slotKeyForHeading, slotLabel } from "./build-slots.mjs";
+import { BUILD_SLOTS, isBuildSlotKey, migrateSlots, normalizeMerged, shortSha, slotKeyForHeading, slotLabel } from "./build-slots.mjs";
 
 const activeWindowMs = 15 * 60 * 1000;
 const statusOrder = { active: 0, paused: 1, proposed: 2, complete: 3 };
@@ -221,8 +221,12 @@ export async function loadPriority(projectRoot, builds, { strict = false } = {})
 
 export function scheduleFeatures(features, priority) {
     const assigned = priority.slots && typeof priority.slots === "object" ? priority.slots : {};
+    const merged = normalizeMerged(priority.merged);
     for (const feature of features) {
-        const key = feature.deliveryStatus !== "shipped" && isBuildSlotKey(assigned[feature.id]) ? assigned[feature.id] : null;
+        // A card that is done and on main is out of the build slots until it ships (or is reopened).
+        const entry = merged[feature.id];
+        feature.merged = entry ? { ...entry, shortSha: shortSha(entry.sha) } : null;
+        const key = !entry && feature.deliveryStatus !== "shipped" && isBuildSlotKey(assigned[feature.id]) ? assigned[feature.id] : null;
         feature.slot = key;
         feature.slotLabel = slotLabel(key);
         feature.nextBuild = !!key;

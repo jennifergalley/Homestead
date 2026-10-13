@@ -24,6 +24,8 @@ Nothing here needs Unreal or a heavy slot. Afterwards: fill in the Ships bullets
 The delivered build, e.g. 20261011-next-01.
 .PARAMETER ShippedCards
 Planner card IDs that shipped: `backlog:<inbox id>` or an OpenSpec change name. Comma- or space-separated.
+Omit it to ship every card marked "On main, awaiting build" (Scripts\Mark-Merged.ps1); their merged state is cleared as
+they ship. Merged cards you leave out of an explicit list stay merged.
 .PARAMETER PackageSha
 Package source SHA (7-64 hex digits). Omit to write `pending`.
 .PARAMETER PromotedAt
@@ -41,7 +43,7 @@ Scripts\Close-Delivery.ps1 -BuildId 20261011-next-01 -ShippedCards open-estate-m
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [Parameter(Mandatory)][ValidatePattern('^[\w-]+$')][string]$BuildId,
-    [Parameter(Mandatory)][string[]]$ShippedCards,
+    [string[]]$ShippedCards = @(),
     [string]$PackageSha = '',
     [string]$PromotedAt = '',
     [string]$Root = '',
@@ -59,7 +61,7 @@ $allocation = Join-Path $accounting "$BuildId-allocation.json"
 $usage = Join-Path $accounting "$BuildId-usage.json"
 $report = Join-Path $accounting "reports\$BuildId.json"
 $cards = @($ShippedCards | ForEach-Object { $_ -split '[,\s]+' } | Where-Object { $_ })
-if (-not $cards) { throw 'Give at least one shipped card ID.' }
+# No -ShippedCards: the node half ships every card marked merged (Scripts\Mark-Merged.ps1) and clears their merged state.
 if ($PackageSha -and $PackageSha -notmatch '^[0-9a-fA-F]{7,64}$') { throw "PackageSha '$PackageSha' is not 7-64 hex digits." }
 $dryRun = [bool]$WhatIfPreference
 
@@ -82,7 +84,8 @@ if ($SkipUsage) {
 
 # 2-4. Planner clean-up, promotion and the builds.md card.
 $planner = @((Join-Path $repo '.github\extensions\openspec-task-planner\close-delivery.mjs'),
-    '--root', $Root, '--build-id', $BuildId, '--shipped') + $cards
+    '--root', $Root, '--build-id', $BuildId)
+if ($cards) { $planner += @('--shipped') + $cards }
 if ($PackageSha) { $planner += @('--package-sha', $PackageSha) }
 if ($PromotedAt) { $planner += @('--promoted-at', $PromotedAt) }
 if ($dryRun) { $planner += '--dry-run' }
