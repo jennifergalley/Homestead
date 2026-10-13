@@ -1786,7 +1786,7 @@ void SporadicDailyWeeds()
             s.AdvanceGameHours(6.0, Home);
         }
     };
-    Edit(sim, [](State& st) { st.hour = 7.0; for (auto& plot : st.plots) plot.weeds = 0.0; });
+    Edit(sim, [](State& st) { st.hour = 7.0; for (auto& plot : st.plots) { plot.weeds = 0.0; plot.planted = true; } });
     day(sim);
     day(sim);
     Simulation reloaded;
@@ -1805,6 +1805,170 @@ void SporadicDailyWeeds()
             if (Crops::WeedsComeUp(plot.id, d)) want = std::min(1.0, want + CropCare::DailyWeeds);
         CHECK(Close(plot.weeds, want));
     }
+}
+
+// Balance 2026-10-12: tilled soil left bare for a day may revert to plain ground at a 06:00 (20% a
+// morning, fixed per plot and day). Anything with a crop in it, or worked in the last 24 h, stays.
+void BareSoilReversion()
+{
+    int hits = 0;
+    for (int id = 100; id < 116; ++id)
+        for (int day = 1; day <= 50; ++day) hits += Crops::BareSoilReverts(id, day) ? 1 : 0;
+    CHECK(hits > 800 * 0.1 && hits < 800 * 0.3);
+
+    int hitDay = 1, missDay = 1;
+    while (!Crops::BareSoilReverts(100, hitDay)) ++hitDay;
+    while (Crops::BareSoilReverts(100, missDay)) ++missDay;
+    const auto remaining = [](int day, const std::function<void(Plot&)>& tweak) {
+        State state;
+        state.hour = 6.0 + 24.0 * day;
+        Plot plot;
+        plot.id = 100;
+        plot.moisture = 0.6;
+        plot.weeds = 0.3;
+        plot.bareSinceHour = 0.0;
+        tweak(plot);
+        state.plots.push_back(plot);
+        Crops::RevertBareSoil(state, 1);
+        return state.plots.size();
+    };
+    const double rollover = 6.0 + 24.0 * hitDay;
+    CHECK(remaining(hitDay, [](Plot&) {}) == 0);
+    CHECK(remaining(missDay, [](Plot&) {}) == 1);
+    CHECK(remaining(hitDay, [&](Plot& plot) { plot.bareSinceHour = rollover - Crops::BareHoursBeforeRevert; }) == 0);
+    CHECK(remaining(hitDay, [&](Plot& plot) { plot.bareSinceHour = rollover - 23.9; }) == 1);
+    CHECK(remaining(hitDay, [&](Plot& plot) { plot.bareSinceHour = rollover - 1.0; }) == 1);
+    CHECK(remaining(hitDay, [](Plot& plot) { plot.planted = true; plot.growth = 0.3; }) == 1);
+    CHECK(remaining(hitDay, [](Plot& plot) { plot.planted = true; plot.growth = 1.0; }) == 1);
+    CHECK(remaining(hitDay, [](Plot& plot) { plot.planted = true; plot.withered = true; }) == 1);
+
+    // One pass over three days (a long sleep) matches three daily passes.
+    const auto field = [] {
+        State state;
+        for (int i = 0; i < 24; ++i)
+        {
+            Plot plot;
+            plot.id = 100 + i;
+            plot.cellX = i;
+            state.plots.push_back(plot);
+        }
+        return state;
+    };
+    State together = field(), apart = field();
+    together.hour = 6.0 + 24.0 * 3;
+    Crops::RevertBareSoil(together, 3);
+    for (int day = 1; day <= 3; ++day)
+    {
+        apart.hour = 6.0 + 24.0 * day;
+        Crops::RevertBareSoil(apart, 1);
+    }
+    CHECK(together.plots.size() == apart.plots.size() && together.plots.size() < 24 && !together.plots.empty());
+    for (size_t i = 0; i < together.plots.size(); ++i) CHECK(together.plots[i].id == apart.plots[i].id);
+
+    // Working a plot restarts its bare clock: tilling, watering, and emptying it by harvest or hoe.
+    Simulation sim;
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::Seeds, 3}});
+    const Point garden = CellCenter(-2, -1);
+    const auto energy = [&] { OK(sim.SetEnergy(100.0)); };
+    energy();
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    const int id = sim.GetState().plots[0].id;
+    CHECK(sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+    sim.AdvanceGameHours(3.0, garden);
+    OK(sim.FillWater(WaterSource));
+    energy();
+    OK(sim.Water(id, garden));
+    CHECK(sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+    energy();
+    OK(sim.Plant(id, garden));
+    Edit(sim, [](State& state) { state.energy = 100.0; state.plots[0].growth = 1.0; state.plots[0].weeds = 0.0; });
+    sim.AdvanceGameHours(2.0, garden);
+    energy();
+    OK(sim.HarvestCrop(id, garden));
+    CHECK(!sim.GetState().plots[0].planted && sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+    energy();
+    OK(sim.Plant(id, garden));
+    Edit(sim, [](State& state) { state.energy = 100.0; state.plots[0].withered = true; });
+    sim.AdvanceGameHours(2.0, garden);
+    energy();
+    OK(sim.ClearWithered(id, garden));
+    CHECK(!sim.GetState().plots[0].planted && sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+
+    // A morning that rolls a revert removes a long-bare plot and keeps the planted one.
+    Simulation morning;
+    Stock(morning, {{Item::DiggingStick, 1}, {Item::Seeds, 3}, {Item::Berries, 60}});
+    OK(morning.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    OK(morning.Till(CellToGarden(-2) + 1, CellToGarden(-1), garden));
+    OK(morning.Plant(morning.GetState().plots[1].id, garden));
+    const int bareId = morning.GetState().plots[0].id, cropId = morning.GetState().plots[1].id;
+    for (int day = 0; day < 60 && morning.GetState().plots.size() == 2; ++day)
+    {
+        morning.AdvanceGameHours(24.0, garden);
+        OK(morning.SetEnergy(100.0));
+        while (morning.GetState().hunger < 60 && morning.Count(Item::Berries) > 0) OK(morning.Eat(Item::Berries));
+    }
+    CHECK(morning.GetState().plots.size() == 1 && morning.GetState().plots[0].id == cropId && bareId != cropId);
+}
+
+// The "baresince" section: what Serialize writes for bare plots, a round trip, and saves without it.
+void BareSinceSaves()
+{
+    Simulation sim;
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::Seeds, 1}});
+    const Point garden = CellCenter(-2, -1);
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    OK(sim.Till(CellToGarden(-2) + 1, CellToGarden(-1), garden));
+    OK(sim.Plant(sim.GetState().plots[1].id, garden));
+    const int bareId = sim.GetState().plots[0].id;
+    sim.AdvanceGameHours(1.5, garden);
+    OK(sim.Till(CellToGarden(-2) + 2, CellToGarden(-1), garden));
+    const double tilledAt = sim.GetState().plots[2].bareSinceHour;
+    CHECK(tilledAt > sim.GetState().plots[0].bareSinceHour);
+
+    // Only bare plots are written, last, as a counted list of id and hour.
+    const std::string saved = sim.Serialize();
+    const size_t at = saved.find("\nbaresince ");
+    CHECK(at != std::string::npos && saved.find("baresince", at + 1) == at + 1);
+    const size_t end = saved.find('\n', at + 1);
+    CHECK(end == saved.size() - 1);
+    std::istringstream section(saved.substr(at + 1, end - at - 1));
+    std::string tag;
+    int count = 0;
+    section >> tag >> count;
+    CHECK(tag == "baresince" && count == 2);
+    int id = 0;
+    double since = 0.0;
+    section >> id >> since;
+    CHECK(id == bareId && since == sim.GetState().plots[0].bareSinceHour);
+
+    Simulation loaded;
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.Serialize() == saved);
+    CHECK(loaded.GetState().plots[0].bareSinceHour == sim.GetState().plots[0].bareSinceHour
+        && loaded.GetState().plots[2].bareSinceHour == tilledAt);
+
+    // A save without the section (every earlier save) loads, with each plot worked at the load hour.
+    const std::string payload = saved.substr(saved.find('\n') + 1);
+    const std::string oldSave = Envelope(payload.substr(0, payload.find("baresince ")));
+    Simulation old;
+    OK(old.Deserialize(oldSave));
+    CHECK(old.GetState().plots.size() == 3);
+    for (const auto& plot : old.GetState().plots) CHECK(plot.bareSinceHour == old.GetState().hour);
+
+    // Damaged sections are refused and leave the current game alone.
+    const auto refuses = [&](const std::string& body) {
+        Simulation other = sim;
+        const std::string before = other.Serialize();
+        CHECK(!other.Deserialize(Envelope(payload.substr(0, payload.find("baresince ")) + body)).ok);
+        CHECK(other.Serialize() == before);
+    };
+    const std::string planted = std::to_string(sim.GetState().plots[1].id);
+    refuses("baresince 1 " + planted + " 7\n");
+    refuses("baresince 1 999 7\n");
+    refuses("baresince 2 " + std::to_string(bareId) + " 7 " + std::to_string(bareId) + " 8\n");
+    refuses("baresince 1 " + std::to_string(bareId) + " 99999\n");
+    refuses("baresince 1 " + std::to_string(bareId) + " -1\n");
+    refuses("baresince 1 " + std::to_string(bareId) + " 7\nbaresince 1 " + std::to_string(bareId) + " 7\n");
 }
 
 void FarmingAndRain()
@@ -6097,6 +6261,8 @@ int main()
     Run("default gameplay walkthrough", GameplayWalkthrough);
     Run("weeds come up once a day, on waking or at 6 AM", DailyWeedPass);
     Run("sporadic daily weeds, stable over reloads", SporadicDailyWeeds);
+    Run("bare tilled soil may revert at 06:00; crops and worked plots never", BareSoilReversion);
+    Run("the baresince save section round-trips and older saves load", BareSinceSaves);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);
     Run("placement and enclosure", PlacementAndShelter);

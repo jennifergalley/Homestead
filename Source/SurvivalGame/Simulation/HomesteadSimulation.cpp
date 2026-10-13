@@ -2788,7 +2788,7 @@ Result Simulation::CheckTillGround(int cellX, int cellY, Point player) const
 Result Simulation::Till(int cellX, int cellY, Point player)
 {
     if (auto ready = CheckTill(cellX, cellY, player); !ready) return ready;
-    state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0});
+    state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0, CropKind::Roots, false, false, state_.hour});
     return Exert(Exertion::TillEnergy, Good("Soil tilled. Choose seeds or a berry on your hotbar to plant here."));
 }
 Result Simulation::CheckSow(int plotId, Point player, CropKind kind) const
@@ -2846,6 +2846,7 @@ Result Simulation::Water(int plotId, Point player)
     auto* plot = Find(state_.plots, plotId);
     if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad(EmptyPailText);
     plot->moisture = 1.0;
+    plot->bareSinceHour = state_.hour;
     return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }
 Result Simulation::CheckWeed(int plotId, Point player) const
@@ -2890,6 +2891,7 @@ Result Simulation::ClearWithered(int plotId, Point player)
     plot->picked = false;
     plot->growth = 0.0;
     plot->weeds = 0.0;
+    plot->bareSinceHour = state_.hour;
     // A cleared plot keeps the neutral kind (saves require it for bare soil).
     plot->kind = CropKind::Roots;
     return Exert(Exertion::TillEnergy, Good("Hoed out the withered " + name + ". The soil is ready to plant."));
@@ -2915,7 +2917,11 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     plot->planted = regrows;
     plot->picked = regrows;
     // A cleared plot keeps the neutral kind (saves require it for bare soil).
-    if (!regrows) plot->kind = CropKind::Roots;
+    if (!regrows)
+    {
+        plot->kind = CropKind::Roots;
+        plot->bareSinceHour = state_.hour;
+    }
     plot->growth = regrows ? std::max(0.0, 1.0 - crop.regrowHours / crop.growHours) : 0.0;
     const auto counted = [](Item item, int count)
     {
@@ -3033,7 +3039,12 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
     // The 06:00 rollover: the shops sell down, weeds creep and the seasons turn (OnNewDay).
     for (int day = dayBefore + 1; day <= Calendar::DayIndex(state_.hour); ++day) OnNewDay(Calendar::DateOfDay(day));
     // Awake at 6 AM, the day's plot weeds come up now; asleep, they wait for her to wake (Sleep, DozeOff).
-    if (!sleeping) Crops::GrowDailyWeeds(state_, Calendar::DayIndex(state_.hour) - dayBefore);
+    if (!sleeping)
+    {
+        const int days = Calendar::DayIndex(state_.hour) - dayBefore;
+        Crops::GrowDailyWeeds(state_, days);
+        Crops::RevertBareSoil(state_, days);
+    }
     // Energy running out makes her doze off (AdvanceGameHours); only in the woodland does hunger fail her.
     if (state_.energy <= 1e-10) state_.energy = 0.0;
     if (state_.hunger <= 1e-10)
@@ -3066,7 +3077,11 @@ double Simulation::DozeOff(Point player)
         left -= done;
         slept += done;
     }
-    if (!state_.failed) Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
+    if (!state_.failed)
+    {
+        Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
+        Crops::RevertBareSoil(state_, Crops::WeedDay(state_.hour) - weedDay);
+    }
     ++dozes_;
     ++revision_;
     return slept;
@@ -3203,7 +3218,7 @@ Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimi
     state_.energy = 100.0;
     // Slept through 6 AM: the day's weeds are up when she wakes.
     Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
-    return Good("You wake rested. Your garden and fires continued through the night.");
+    Crops::RevertBareSoil(state_, Crops::WeedDay(state_.hour) - weedDay); Your garden and fires continued through the night.");
 }
 
 std::string Simulation::Serialize() const
@@ -3272,6 +3287,7 @@ std::string Simulation::Serialize() const
     Food::WriteSaveSection(body, state_);
     TravelDiscovery::WriteSaveSection(body, state_);
     TreeFelling::WriteSaveSection(body, state_);
+    Crops::WriteBareSinceSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3487,6 +3503,8 @@ Result Simulation::Deserialize(const std::string& data)
                 Inset(ResourceFootprint(*FindBuilding(candidate, piece.buildingId), piece.kind, piece.cellX, piece.cellY,
                     piece.rotation, HasPiece(candidate, Piece::Foundation, piece.buildingId, piece.cellX, piece.cellY)))))
                 return invalid();
+        // Saves without the "baresince" section treat every plot as freshly worked at the load hour.
+        plot.bareSinceHour = candidate.hour;
         candidate.plots.push_back(plot);
     }
     if (!(input >> count) || count < 0 || count > MaxWorldDrops) return invalid();
@@ -3547,7 +3565,7 @@ Result Simulation::Deserialize(const std::string& data)
     bool packSlotsSeen = false;
     bool travelSeen = false;
     bool felledSeen = false;
-    while (!input.eof())
+    bool bareSinceSeen = false;
     {
         std::string tag;
         if (!(input >> tag)) return invalid();
@@ -3566,6 +3584,11 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::WitheredSaveTag) { if (!Crops::ReadWitheredSection(input, candidate)) return invalid(); }
+        else if (tag == Crops::BareSinceSaveTag)
+        {
+            if (bareSinceSeen || !Crops::ReadBareSinceSection(input, candidate)) return invalid();
+            bareSinceSeen = true;
+        }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == PackRowRules::ParkedSaveTag)
         {

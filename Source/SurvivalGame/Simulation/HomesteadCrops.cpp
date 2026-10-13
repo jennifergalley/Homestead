@@ -278,6 +278,59 @@ bool ReadWitheredSection(std::istream& input, State& state)
     return true;
 }
 
+bool BareSoilReverts(int plotId, int day)
+{
+    return CropDailyRoll(plotId, day, 0xA24BAED4963EE407ull) < RevertChance;
+}
+
+int RevertBareSoil(State& state, int days)
+{
+    if (days <= 0) return 0;
+    const int lastDay = WeedDay(state.hour);
+    int reverted = 0;
+    for (int day = lastDay - days + 1; day <= lastDay; ++day)
+    {
+        const double rollover = Calendar::DayStartHour + 24.0 * day;
+        const auto gone = std::remove_if(state.plots.begin(), state.plots.end(), [&](const Plot& plot)
+        {
+            return !plot.planted && rollover - plot.bareSinceHour >= BareHoursBeforeRevert - 1e-9
+                && BareSoilReverts(plot.id, day);
+        });
+        reverted += static_cast<int>(state.plots.end() - gone);
+        state.plots.erase(gone, state.plots.end());
+    }
+    return reverted;
+}
+
+void WriteBareSinceSection(std::ostream& output, const State& state)
+{
+    int bare = 0;
+    for (const auto& plot : state.plots) bare += plot.planted ? 0 : 1;
+    if (bare == 0) return;
+    output << BareSinceSaveTag << ' ' << bare;
+    for (const auto& plot : state.plots)
+        if (!plot.planted) output << ' ' << plot.id << ' ' << plot.bareSinceHour;
+    output << '\n';
+}
+
+bool ReadBareSinceSection(std::istream& input, State& state)
+{
+    int count = 0;
+    if (!(input >> count) || count < 0 || count > static_cast<int>(state.plots.size())) return false;
+    std::vector<int> seen;
+    for (int i = 0; i < count; ++i)
+    {
+        int id = 0;
+        double since = 0.0;
+        if (!(input >> id >> since) || !std::isfinite(since) || since < 0.0 || since > state.hour) return false;
+        const auto plot = std::find_if(state.plots.begin(), state.plots.end(), [id](const Plot& p) { return p.id == id; });
+        if (plot == state.plots.end() || plot->planted || std::find(seen.begin(), seen.end(), id) != seen.end()) return false;
+        seen.push_back(id);
+        plot->bareSinceHour = since;
+    }
+    return true;
+}
+
 int WitherOutOfSeason(State& state, Season season)
 {
     int count = 0;

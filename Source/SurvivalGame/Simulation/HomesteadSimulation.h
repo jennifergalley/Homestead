@@ -327,6 +327,10 @@ struct Plot
     // the dead plant's look, yields nothing and grows no further until the hoe clears it. Saved in
     // the optional "withered" section.
     bool withered = false;
+    // The game hour a bare plot was last worked: tilled, watered, or emptied by a harvest or the hoe. A
+    // bare plot untouched for Crops::BareHoursBeforeRevert may go back to plain ground at a 06:00
+    // (Crops::RevertBareSoil). Saved in the optional "baresince" section; older saves load it as the load hour.
+    double bareSinceHour = 0.0;
 };
 
 struct WorldDrop
