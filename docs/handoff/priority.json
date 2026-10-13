@@ -18,7 +18,6 @@
     "backlog:jenny-mv465zej-2nnt6t",
     "backlog:jenny-mv45zu94-atf5z0",
     "backlog:jenny-mv45vu1f-kvsj9t",
-    "backlog:jenny-mv45tx98-dlxn1q",
     "backlog:jenny-mv45psq4-8h9mdi",
     "backlog:jenny-mv45ehn7-4lxps3",
     "backlog:jenny-mv44v075-kibbix",
@@ -104,7 +103,12 @@
     "backlog:jenny-mv62x9e8-k3g6qz": "next",
     "backlog:jenny-mv4701b5-4flmli": "next",
     "backlog:jenny-mv46hauz-8qmvc0": "next",
-    "backlog:jenny-mv46ate4-mi5h3r": "next"
+    "backlog:jenny-mv46ate4-mi5h3r": "next",
+    "backlog:jenny-mv465zej-2nnt6t": "next",
+    "backlog:jenny-mv45zu94-atf5z0": "next",
+    "backlog:jenny-mv45ehn7-4lxps3": "next",
+    "backlog:jenny-mv44v075-kibbix": "next",
+    "backlog:jenny-mv44r23l-qtqeud": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -213,7 +217,8 @@
     "backlog:jenny-mutdvi4f-5daxbq",
     "backlog:jenny-mut6zr63-iu7hm9",
     "open-estate-mine-shallow-level",
-    "backlog:jenny-mv455cm5-u3ccq9"
+    "backlog:jenny-mv455cm5-u3ccq9",
+    "backlog:jenny-mv45tx98-dlxn1q"
   ],
-  "updated": "2026-10-13T03:53:16.641Z"
+  "updated": "2026-10-13T03:54:03.608Z"
 }

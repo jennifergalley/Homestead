@@ -99,3 +99,11 @@ Plan: `openspec/changes/open-estate-mine-shallow-level` (decisions D1-D5 in its 
 - The Orchestrator approves review media on her behalf (ready evidence: "Orchestrator approved for Jenny, 2026-10-11 overnight"). Mine Art gets one timeboxed fix round on review 10; leftovers become follow-up cards.
 - Integration merges Mine Gameplay (with Test Tools' mine-aware goto commits) and Mine Art, then packages Development and promotes it as an interim delivery of the Next build. The other Next cards stay in Next.
 - **Delivered 2026-10-12 1:58 AM:** `20261011-next-01`, the mine only (package source `6c7b1f8e6`; closure `33c60917f`, ship list fixed in `d24e7f1a1`). Next is now Jenny's deferred cards (quests, compost, currants, dim Owned price, remove building menu, remove hint bar) plus the farm fence. Mine follow-ups are on the backlog (coal still reads like a hole; check in play the open trapdoor, a mined-out face, a gem drop and the copper icon). Mine Art, Mine Gameplay and Test Tools are idle and kept for Jenny's feedback.
+
+## Small code-only cards for the next build (started 2026-10-12 20:55)
+
+Jenny: "pick 2-3 small, code-only (no Unreal, no Blender) cards ... Don't make a new build yet." The lane commits to its branch only; Integration merges it with the next build.
+
+| Name | Session | Model | MCP port | Scope |
+| --- | --- | --- | --- | --- |
+| Polish Agent | `7d7c9a21-295e-4944-9093-1144b407718b` | Claude Sonnet 5.5 / high | — (no editor) | remove the controls hint bar (`jenny-mv448c92`); bigger, consistent focus-card titles (`jenny-mv647jvv`); roots rebalance (`jenny-mv643gkt`) |
