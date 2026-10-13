@@ -72,9 +72,7 @@ FBox2D UHomesteadMapComponent::CompassBox(float ViewWidth, float ViewHeight)
 
 bool UHomesteadMapComponent::IsCompassVisible() const
 {
-    // It shares the top row with the first-minute controls strip, so it waits for that to retire.
-    const AHomesteadController* Controller = Owner();
-    return IsMinimapVisible() && Controller && !Controller->IsControlsHintOnScreen();
+    return IsMinimapVisible() && Owner();
 }
 
 void UHomesteadMapComponent::BeginPlay()

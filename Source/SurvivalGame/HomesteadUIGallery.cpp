@@ -181,7 +181,6 @@ void FHomesteadUIGallery::Prepare(AHomesteadController& PC, bool bPad)
     PC.ToastText.Reset();
     PC.bToastError = false;
     PC.Pickups.Reset();
-    PC.ControlsHint.Advance(1.0e6, true);
     PC.bGamepad = bPad;
     PC.bShowMouseCursor = !bPad;
     const int32 Empty = PC.FirstEmptyHotbarCell();
@@ -596,8 +595,6 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             PC.bPickupsPrimed = true;
             PC.Pickups = {{Item::Berries, 3, 0.0f}, {Item::Branch, 2, 0.0f}, {Item::Stone, 1, 0.0f}};
         }, 0.5f);
-    Add(TEXT("hud-controls-strip"), TEXT("The first-minute controls strip at the top left (keyboard or controller words)."),
-        ECover::Notice, static_cast<int32>(ENotice::ControlsStrip), nullptr, [](AHomesteadController& PC) { PC.ControlsHint.Restart(); });
 
     // Interaction hints over what's in front of her.
     Add(TEXT("focus-gather"), TEXT("Facing a berry bush: the parchment focus card with the gather key."),

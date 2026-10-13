@@ -159,7 +159,7 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::Branches: return 24.0;
     case ResourceKind::Stones: return 48.0;
     case ResourceKind::BerryBush: return 36.0;
-    case ResourceKind::Roots: return 48.0;
+    case ResourceKind::Roots: return 72.0;
     case ResourceKind::Flowers: return 24.0;
     case ResourceKind::Reeds: return 24.0;
     case ResourceKind::Sapling: return 168.0;
@@ -195,7 +195,7 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::Branches: return Items({{Item::Branch, 5}, {Item::Kindling, 1}});
     case ResourceKind::Stones: return Items({{Item::Stone, 4}});
     case ResourceKind::BerryBush: return Items({{Item::Berries, 5}});
-    case ResourceKind::Roots: return Items({{Item::Roots, 2}, {Item::Seeds, 2}});
+    case ResourceKind::Roots: return Items({{Item::Roots, 2}, {Item::Seeds, 1}});
     case ResourceKind::Flowers: return Items({{Item::Flowers, 3}});
     case ResourceKind::ForestTree: return Items({{Item::Timber, 6}, {Item::Branch, 4}});
     case ResourceKind::Primroses: return Items({{Item::Primroses, 3}});

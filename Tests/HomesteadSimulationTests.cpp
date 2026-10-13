@@ -1001,7 +1001,10 @@ void ReducedCultivatedSeedReturns()
     const auto roots = Node(wild, ResourceKind::Roots);
     const int seeds = wild.Count(Item::Seeds);
     OK(wild.Harvest(roots.id, roots.position));
-    CHECK(wild.Count(Item::Seeds) == seeds + 2);
+    CHECK(wild.Count(Item::Seeds) == seeds + 1 && wild.Count(Item::Roots) >= 2);
+    // A picked wild root node grows back in three days.
+    for (const auto& node : wild.GetState().resources)
+        if (node.id == roots.id) CHECK(Close(node.readyAtHour - wild.GetState().hour, 72.0));
 }
 
 void BasicCropMeals()
@@ -1076,7 +1079,7 @@ void BasicCropMeals()
     for (Item produce : {Item::Turnip, Item::Carrot, Item::Potato, Item::Cabbage,
         Item::BroadBeans, Item::Strawberries, Item::Roots, Item::Berries})
         CHECK(covered.count(produce) == 1);
-    CHECK(GetItemInfo(Item::RoastedRoots).energy == 25.0 && GetItemInfo(Item::HerbedRoots).energy == 40.0);
+    CHECK(GetItemInfo(Item::RoastedRoots).energy == 19.0 && GetItemInfo(Item::HerbedRoots).energy == 25.0);
     CHECK(!FindCropMeal(Recipe::HaftAxe) && !FindCropMeal(Recipe::Count));
     CHECK(!FindCropMeal(static_cast<Recipe>(std::numeric_limits<int>::min())));
 
@@ -2015,10 +2018,10 @@ void CropTableAndStatus()
     }
     CHECK(GetCropInfo(CropKind::Count).kind == CropKind::Count);
     CHECK(CropForSeed(Item::Stone) == nullptr);
-    CHECK(CropDays(CropKind::Roots) == 2 && CropDays(CropKind::Berries) == 2);
+    CHECK(CropDays(CropKind::Roots) == 5 && CropDays(CropKind::Berries) == 2);
     CHECK(CropRegrowDays(CropKind::Berries) == 1 && CropRegrowDays(CropKind::Roots) == 0);
-    CHECK(ReadyInText(CropKind::Roots) == "Ready in about 2 days if watered.");
-    CHECK(std::string(ItemDescription(Item::Seeds)).find("Matures in about 2 days") != std::string::npos);
+    CHECK(ReadyInText(CropKind::Roots) == "Ready in about 5 days if watered.");
+    CHECK(std::string(ItemDescription(Item::Seeds)).find("Matures in about 5 days") != std::string::npos);
     // Period crops: each seed's description states its days (and regrow days), the store sells it,
     // and its produce sells back at the store.
     const auto& storeGoods = ShopGoods(ShopKind::GeneralStore);
@@ -2061,14 +2064,14 @@ void CropTableAndStatus()
     CHECK(std::string(StageName(CropStage::Sprout)) == "Sprout" && std::string(StageName(CropStage::Ripe)) == "Ripe");
     plot.growth = 0.1;
     CHECK(CropDay(plot) == 1);
-    CHECK(PlotStatus(plot) == "Roots: day 1 of 2");
-    plot.growth = 0.6;
+    CHECK(PlotStatus(plot) == "Roots: day 1 of 5");
+    plot.growth = 0.65;
     plot.moisture = 0.1;
-    CHECK(PlotStatus(plot) == "Roots: day 2 of 2  |  needs water, growing slowly");
+    CHECK(PlotStatus(plot) == "Roots: day 4 of 5  |  needs water, growing slowly");
     plot.weeds = 0.8;
-    CHECK(PlotStatus(plot) == "Roots: day 2 of 2  |  needs water and weeding, growing slowly");
+    CHECK(PlotStatus(plot) == "Roots: day 4 of 5  |  needs water and weeding, growing slowly");
     plot.moisture = 1.0;
-    CHECK(PlotStatus(plot) == "Roots: day 2 of 2  |  weedy, growing slowly");
+    CHECK(PlotStatus(plot) == "Roots: day 4 of 5  |  weedy, growing slowly");
     plot.growth = 1.0;
     CHECK(IsRipe(plot) && PlotStatus(plot) == "Roots: ready to harvest");
     // A berry bush growing for the first time counts up normally (no regrowth special case).
@@ -2091,12 +2094,12 @@ void CropTableAndStatus()
     const int rootId = sim.FindNearestPlot(roots, 1);
     const Result planted = sim.Plant(rootId, roots);
     OK(planted);
-    CHECK(planted.message == "Planted roots. Ready in about 2 days if watered.");
+    CHECK(planted.message == "Planted roots. Ready in about 5 days if watered.");
     OK(sim.FillWater(WaterSource));
-    for (int day = 0; day < 2; ++day)
+    for (int day = 0; day < 5; ++day)
     {
         Edit(sim, [](State& state) { state.plots[0].moisture = 1.0; state.plots[0].weeds = 0.0; state.hunger = 100; state.energy = 100; });
-        CHECK(!IsRipe(sim.GetState().plots[0]));
+        if (day < 4) CHECK(!IsRipe(sim.GetState().plots[0]));
         sim.AdvanceGameHours(15, Home);
         Edit(sim, [](State& state) { state.hunger = 100; state.energy = 100; });
         sim.AdvanceGameHours(15, Home);
@@ -5775,11 +5778,11 @@ void SnackOnFullStomachRestoresEnergy()
     const auto fed = sim.Eat(Item::Berries);
     OK(fed);
     CHECK(fed.message == "Ate Berries: Food +12." && sim.GetState().hunger == 62.0);
-    // Full and tired with a cooked dish: Energy only (the §3a table's +40 applies in the woodland too).
+    // Full and tired with a cooked dish: Energy only (the §3a table's +25 applies in the woodland too).
     Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 20.0; });
     const auto dish = sim.Eat(Item::HerbedRoots);
     OK(dish);
-    CHECK(dish.message == "Ate Herbed roots: Energy +40." && Close(sim.GetState().energy, 60.0));
+    CHECK(dish.message == "Ate Herbed roots: Energy +25." && Close(sim.GetState().energy, 45.0));
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
     CHECK(loaded.Serialize() == sim.Serialize());

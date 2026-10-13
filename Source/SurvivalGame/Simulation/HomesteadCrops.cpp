@@ -28,7 +28,7 @@ constexpr SeasonMask CropSeasonsSpringToAutumn = CropSeasonsSpringSummer | Seaso
 // crops follow Coral Island / Stardew pacing (a handful of days), not real gardening time.
 const CropInfo CropTable[] = {
     // Legacy crops from the woodland prototype, kept with their original timings and yields.
-    {CropKind::Roots, "Roots", "roots", Item::Seeds, Item::Roots, 4, Item::Seeds, 1, 30.0, 0.0,
+    {CropKind::Roots, "Roots", "roots", Item::Seeds, Item::Roots, 4,     Item::Seeds, 1, 120.0, 0.0,
         HarvestStyle::Pull, "CropCarrot", CropSeasonsSpringToAutumn},
     {CropKind::Berries, "Berries", "berries", Item::Berries, Item::Berries, 6, Item::Count, 0, 42.0, 24.0,
         HarvestStyle::Pick, "CropStrawberry", CropSeasonsSpringToAutumn},

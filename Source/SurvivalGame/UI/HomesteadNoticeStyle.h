@@ -55,7 +55,6 @@ enum class ESurface : uint8
     BookNoticeError,
     FocusCard,        // the focus title and action hints
     PickupLine,       // "+3 Berries" in the common HUD notice stack
-    ControlsStrip,    // the first-minute controls reminder
     ShopStatus,       // the shop's status line (a refusal or a confirm)
     Count
 };

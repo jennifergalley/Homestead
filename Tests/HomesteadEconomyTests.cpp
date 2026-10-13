@@ -69,7 +69,7 @@ void CatalogueMatchesLegacyMetadata()
     CHECK(std::string(ItemIcon(Item::Fur)) == "fur");
     CHECK(IsEdible(Item::Berries) && IsEdible(Item::RoastedRoots) && IsEdible(Item::HerbedRoots));
     CHECK(!IsEdible(Item::Roots) && !IsEdible(Item::Seeds));
-    CHECK(GetItemInfo(Item::HerbedRoots).hunger == 38.0 && GetItemInfo(Item::HerbedRoots).energy == 40.0);
+    CHECK(GetItemInfo(Item::HerbedRoots).hunger == 38.0 && GetItemInfo(Item::HerbedRoots).energy == 25.0);
     for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan, Item::Machete})
         CHECK(IsTool(tool) && ItemSortRank(tool) == 0);
     CHECK(ItemSortRank(Item::Fur) == 1 && ItemSortRank(Item::Flowers) == 2 && ItemSortRank(Item::Water) == 3);

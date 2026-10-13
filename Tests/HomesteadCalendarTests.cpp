@@ -276,8 +276,8 @@ void EatingForEnergy()
     CHECK(!IsEdible(Item::Potato) && !IsEdible(Item::Roots) && !IsEdible(Item::Seeds));
     const std::pair<Item, double> energy[] = {
         {Item::BroadBeans, 4}, {Item::Berries, 6}, {Item::Turnip, 6}, {Item::Carrot, 6}, {Item::Strawberries, 8},
-        {Item::Cabbage, 10}, {Item::Bread, 12}, {Item::Cheese, 15}, {Item::RoastedRoots, 25}, {Item::Pasty, 40},
-        {Item::HerbedRoots, 40}};
+        {Item::Cabbage, 10}, {Item::Bread, 12}, {Item::Cheese, 15}, {Item::RoastedRoots, 19}, {Item::Pasty, 40},
+        {Item::HerbedRoots, 25}};
     for (const auto& [item, restores] : energy) CHECK(IsEdible(item) && GetItemInfo(item).energy == restores);
     CHECK(FoodEnergyLabel(Item::Pasty) == "+40 Energy");
 
