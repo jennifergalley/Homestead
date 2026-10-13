@@ -30,9 +30,9 @@ public:
     virtual FNavigationReply OnNavigation(const FGeometry&, const FNavigationEvent&) override
     { return FNavigationReply::Stop(); }
     bool HandleKey(FKey Key, EInputEvent Event, float Amount);
-    void Refresh();
-
-    // Inspection for playtests.
+    // bKeepScroll leaves the list where it was (a quantity change must not move the selected row);
+    // otherwise the list scrolls the selection into view.
+    void Refresh(bool bKeepScroll = false);
     bool IsGreeting() const { return bGreeting; }
     bool IsSellTab() const { return Tab == 0; }
     int32 GetSelection() const { return Selection; }

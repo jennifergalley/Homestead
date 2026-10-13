@@ -274,8 +274,9 @@ FString SHomesteadShop::RowName(const FRow& Row) const
     return Utf8(Row.bUpgrade ? Homestead::Backpack::Name : Homestead::ItemName(Row.Item));
 }
 
-void SHomesteadShop::Refresh()
+void SHomesteadShop::Refresh(bool bKeepScroll)
 {
+    const float KeptOffset = bKeepScroll && List.IsValid() ? List->GetScrollOffset() : 0.0f;
     BuildRows();
     if (!Chosen())
     {
@@ -304,7 +305,8 @@ void SHomesteadShop::Refresh()
                 bGreeting ? BuildGreeting() : BuildTrade()
             ]);
     }
-    ScrollToSelection();
+    if (bKeepScroll && List.IsValid()) List->SetScrollOffset(KeptOffset);
+    else ScrollToSelection();
 }
 
 TSharedRef<SWidget> SHomesteadShop::BuildGreeting()
@@ -421,7 +423,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             [
                 // Wide enough for "1,000 coins each" on one line.
                 SNew(SBox).WidthOverride(170).HAlign(HAlign_Right)
-                [ Label(Money(Row.Unit) + (IsOneOff(Row) ? TEXT("") : TEXT(" each")), 16, ShopInk, false) ]
+                [ Label(Money(Row.Unit) + (IsOneOff(Row) ? TEXT("") : TEXT(" each")), 16, Row.bOwned ? ShopMuted : ShopInk, false) ]
             ]
         ];
     RowWidgets[Index] = Widget;
@@ -650,7 +652,7 @@ void SHomesteadShop::AdjustQuantity(int32 Delta)
     if (Next == Quantity) return;
     Quantity = Next;
     if (Controller.IsValid()) Controller->ShopClick();
-    Refresh();
+    Refresh(true);
 }
 
 void SHomesteadShop::MaxQuantity()
@@ -658,7 +660,7 @@ void SHomesteadShop::MaxQuantity()
     const FRow* Row = Chosen();
     if (!bQuantity || !Row) return;
     Quantity = FMath::Max(1, Limit(*Row));
-    Refresh();
+    Refresh(true);
 }
 
 void SHomesteadShop::Confirm()
