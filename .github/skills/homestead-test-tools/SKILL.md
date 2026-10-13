@@ -1,6 +1,6 @@
 ---
 name: homestead-test-tools
-description: The one-stop kit for verifying a Homestead (SurvivalGame) feature in Play-In-Editor - read the whole game state in one call, go to a named place or target without walking, use or interact with it, select hotbar items, open and read UI screens, set time of day and weather, reset to a known state, sell at the General Store, and take screenshots. Recipe-first (verify a gatherable, a shop sale, darkness and lighting, a UI panel, a tool action). Use whenever you test a gameplay or UI feature in the editor, before you try walking or aiming by hand.
+description: The one-stop kit for verifying a Homestead (SurvivalGame) feature in Play-In-Editor - read the whole game state in one call, go to a named place or target without walking, use or interact with it, select hotbar items, open and read UI screens, set time of day and weather, reset to a known state, sell at the General Store, and take screenshots. Also holds the one-command delivery closure (`Scripts\Close-Delivery.ps1`) for Integration. Recipe-first (verify a gatherable, a shop sale, darkness and lighting, a UI panel, a tool action). Use whenever you test a gameplay or UI feature in the editor, before you try walking or aiming by hand.
 ---
 
 # Homestead test tools
@@ -132,6 +132,27 @@ Prefer `goto <name or id>` over these numbers.
 - If `con` reports nothing, PIE isn't running (`pie`, then poll `st`).
 - Read the result in the lines the wrapper returns (`goto`, `use`, `sellat` wait for them); `plog [n] [pattern]` shows older lines. Other wrappers return the command string they ran, and their results are in the log.
 - The Execs exist only once the editor module with `HomesteadControllerTest*.cpp` is built and the editor restarted (Live Coding can't add Exec declarations to the header).
+
+## Close a delivery (Integration; no editor, no heavy slot)
+
+After a build ships, one command does the mechanical closure that used to be hand-editing `priority.json`, the inbox,
+`backlog.md` and `builds.md` (README "Playtest builds" step 4):
+
+```
+Scripts\Close-Delivery.ps1 -BuildId 20261011-next-01 -ShippedCards open-estate-mine-shallow-level,backlog:jenny-mut6zr63-iu7hm9 `
+    -PackageSha 6c7b1f8e6136 -PromotedAt "2026-10-12 1:58 AM" -WhatIf      # drop -WhatIf to do it
+```
+
+- Card IDs are what the planner shows: `backlog:<inbox id>` or an OpenSpec change name (a typo stops the run).
+- It needs `docs\handoff\accounting\<BuildId>-allocation.json` (Integration writes it at the freeze), then exports the call
+  records, builds `accounting\reports\<BuildId>.json`, retires the cards (`removed`, inbox -> `backlog-archive.json` with the
+  receipt, `backlog.md` mirror refreshed), promotes `after-next` to `next`, and inserts the `builds.md` card skeleton
+  (heading from `-PromotedAt`, local time; default now). It then loads the result with the planner and confirms the
+  Measured build cost tab lists the build. Re-running adds no second card; `-SkipUsage` reuses an existing report;
+  `-Root <scratch copy>` rehearses on a copy.
+- Afterwards: replace the placeholder **Ships** bullets (no `Word words:` prefixes), tidy the `## Next build` /
+  `## Build after next` cards, commit. Code: `.github\extensions\openspec-task-planner\close-delivery.mjs`;
+  tests: `node --test Tests\PlannerCloseDeliveryTests.mjs`.
 
 ## Adding to the kit
 

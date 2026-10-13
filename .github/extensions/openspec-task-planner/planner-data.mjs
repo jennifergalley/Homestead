@@ -80,7 +80,7 @@ function parseTasks(markdown) {
     return sections;
 }
 
-function parseBuilds(markdown) {
+export function parseBuilds(markdown) {
     const entries = [];
     const later = [];
     let current = null;
@@ -435,7 +435,7 @@ export async function atomicBacklogWrite(path, content) {
     }
 }
 
-async function withBacklogLock(projectRoot, action) {
+export async function withBacklogLock(projectRoot, action) {
     const path = `${backlogInboxPath(projectRoot)}.lock`;
     await mkdir(dirname(path), { recursive: true });
     let lock;

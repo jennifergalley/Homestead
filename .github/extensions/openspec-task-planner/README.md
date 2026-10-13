@@ -44,6 +44,10 @@ Opening/refreshing only reads; user actions create missing writable files.
 
 ### Promoting after a delivery
 
+`Scripts\Close-Delivery.ps1` (README "Playtest builds" step 4) runs this and the rest of the closure in one
+command; its planner half is `close-delivery.mjs` in this folder and reuses the loaders and the mirror writer
+here. The section below is the promotion step on its own.
+
 Integration's final step after a build ships:
 
 ```

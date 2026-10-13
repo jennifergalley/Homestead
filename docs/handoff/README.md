@@ -406,13 +406,22 @@ with it.
 3. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
    orchestrator relays that to Jenny. Integration also updates `docs\handoff\builds.md` with the
    date/slot, SHA, status and player-facing changelist, moving unshipped work to its **Later** list.
-4. **Final delivery closure is mandatory:** export all allocated local call records with
-   `Scripts\Export-BuildUsage.py`, then create
-   `docs\handoff\accounting\reports\<build-id>.json` with `Scripts\Report-BuildUsage.mjs`. Commit
-   the loader-compatible report with the delivery metadata so the planner shows the build and its
-   observed costs. Then remove shipped cards from the active planner/inbox/Markdown mirror, retain
-   their receipt and source evidence outside the active inbox, and refresh the delivered planner
-   data and Measured build cost tab before reporting to Jenny. Preserve exact integer nano-AIU
+4. **Final delivery closure is mandatory.** One command does the mechanical part:
+   `Scripts\Close-Delivery.ps1 -BuildId <id> -ShippedCards <card ids> [-PackageSha <sha>] [-PromotedAt "2026-10-12 1:58 AM"]`
+   (add `-WhatIf` to preview; `-Root <scratch copy>` to rehearse). Card IDs are the ones the planner
+   shows: `backlog:<inbox id>` or an OpenSpec change name. It exports all allocated local call records with
+   `Scripts\Export-BuildUsage.py` and creates `docs\handoff\accounting\reports\<build-id>.json` with
+   `Scripts\Report-BuildUsage.mjs` (it needs the build's `accounting\<build-id>-allocation.json`); retires
+   the shipped cards from `priority.json` (`removed`), the inbox and the `backlog.md` mirror, keeping their
+   receipt and records in `backlog-archive.json`; promotes `after-next` slots to `next`; and inserts a
+   delivered-card skeleton in `builds.md`. Re-running adds no second card. It finishes by loading the
+   result with the planner and checking the build shows on the Measured build cost tab. Afterwards fill in
+   the card's **Ships** bullets, tidy the `## Next build` / `## Build after next` cards, and commit the
+   loader-compatible report with the delivery metadata so the planner shows the build and its observed
+   costs. Closing by hand is the same list: export (`Export-BuildUsage.py`, then `Report-BuildUsage.mjs`),
+   remove shipped cards from the active planner/inbox/Markdown mirror, retain their receipt and source
+   evidence outside the active inbox, and refresh the delivered planner data and Measured build cost tab
+   before reporting to Jenny. Preserve exact integer nano-AIU
    arithmetic and deduplication; label AIU as observed rather than billing-reconciled credits, keep
    unknown context/post-capture tails visible, and never turn Jenny's unchecked playtest acceptance
    into completion.
