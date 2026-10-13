@@ -68,7 +68,7 @@ std::string PackUseText(const State& state, Item item)
 std::string WellFedBadge(const State& state)
 {
     return IsWellFed(state)
-        ? "Well fed until " + FormatHour(state.wellFedUntilHour) + " \xC2\xB7 " + WellFedSavingText()
+        ? "Well fed until " + FormatHour(state.wellFedUntilHour)
         : std::string();
 }
 

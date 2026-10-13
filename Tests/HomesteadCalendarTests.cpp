@@ -276,8 +276,8 @@ void EatingForEnergy()
     CHECK(!IsEdible(Item::Potato) && !IsEdible(Item::Roots) && !IsEdible(Item::Seeds));
     const std::pair<Item, double> energy[] = {
         {Item::BroadBeans, 4}, {Item::Berries, 6}, {Item::Turnip, 6}, {Item::Carrot, 6}, {Item::Strawberries, 8},
-        {Item::Cabbage, 10}, {Item::Bread, 12}, {Item::Cheese, 15}, {Item::RoastedRoots, 25}, {Item::Pasty, 40},
-        {Item::HerbedRoots, 40}};
+        {Item::Cabbage, 10}, {Item::Bread, 12}, {Item::Cheese, 15}, {Item::RoastedRoots, 19}, {Item::Pasty, 40},
+        {Item::HerbedRoots, 25}};
     for (const auto& [item, restores] : energy) CHECK(IsEdible(item) && GetItemInfo(item).energy == restores);
     CHECK(FoodEnergyLabel(Item::Pasty) == "+40 Energy");
 
@@ -467,6 +467,12 @@ void CropSeasonsAndWithering()
     // Spring 26: carrots still have Summer ahead; potatoes are sown too late, with a warning.
     OK(sim.PassDaysForPlaytest(25.0, true, at(0)));
     CHECK(sim.DayNumber() == 26 && IsRipe(PlotById(sim, plots[0])));
+    // Plots left bare for days may have reverted to ground; till them again.
+    for (int i = 1; i < 4; ++i)
+    {
+        (void)sim.Till(gx + i, gy, at(i));
+        plots[i] = sim.FindNearestPlot(at(i), 1);
+    }
     OK(sim.Plant(plots[1], at(1), CropKind::Carrots));
     const Result late = sim.Plant(plots[2], at(2), CropKind::Potatoes);
     OK(late);
@@ -547,11 +553,11 @@ void FoodLabelsAndWellFedBadge()
     OK(sim.SetEnergy(50.0));
     OK(sim.GrantItems(Item::Pasty, 1));
     OK(sim.Eat(Item::Pasty));
-    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM \xC2\xB7 work costs 15% less");
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
     // An hour on, the badge still shows the live expiry.
     sim.SkipToHourOfDay(12.5);
     CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed 3 h: work costs 15% less");
-    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM \xC2\xB7 work costs 15% less");
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
     // Once it runs out the badge goes.
     sim.SkipToHourOfDay(15.0);
     CHECK(!sim.IsWellFed() && Food::WellFedBadge(sim.GetState()).empty());

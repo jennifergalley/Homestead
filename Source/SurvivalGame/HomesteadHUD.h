@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "UI/HomesteadNoticeStyle.h"
+#include "UI/HomesteadHudNoticeLayout.h"
 #include "HomesteadHUD.generated.h"
 
 class AHomesteadController;
@@ -36,6 +37,8 @@ private:
     bool bMeasureFeedback = false, bDrawingToast = false;
     // While set, Write / TextWidth / WrappedLines set words in the field book's display serif (the toast).
     bool bNoticeText = false;
+    // The on-screen floor for notice words; the focus card raises it while it draws (HudNoticeLayout::FocusCardMinScreenSize).
+    float NoticeMinScreenSize = HudNoticeFont::DefaultMinScreenSize;
     // The UI theme trial's Canvas default: the serif in parchment (UI/HomesteadUITheme.h).
     bool bThemeSerif = false;
     FString ToastSource;

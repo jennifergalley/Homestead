@@ -46,7 +46,7 @@ std::string EffectLabel(const State& state, Item item);
 // Meal on the estate "Food: +40 Energy each. Well fed: work costs 15% less Energy for 3 h. Eat one from your pack."
 // Empty for anything that isn't food.
 std::string PackUseText(const State& state, Item item);
-// The HUD's Well fed badge: "Well fed until 2:30 PM · work costs 15% less" while it lasts, otherwise empty.
+// The HUD's Well fed badge: "Well fed until 2:30 PM" while it lasts, otherwise empty (the saving is explained on the meal's hover).
 std::string WellFedBadge(const State& state);
 
 void WriteSaveSection(std::ostream& output, const State& state);

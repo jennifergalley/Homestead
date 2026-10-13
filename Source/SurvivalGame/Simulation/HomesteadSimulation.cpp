@@ -159,7 +159,7 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::Branches: return 24.0;
     case ResourceKind::Stones: return 48.0;
     case ResourceKind::BerryBush: return 36.0;
-    case ResourceKind::Roots: return 48.0;
+    case ResourceKind::Roots: return 72.0;
     case ResourceKind::Flowers: return 24.0;
     case ResourceKind::Reeds: return 24.0;
     case ResourceKind::Sapling: return 168.0;
@@ -171,13 +171,14 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::Bluebells:
     case ResourceKind::WildDaffodils:
     case ResourceKind::WildGarlic: return 72.0;
-    // Beach finds come back at the next 06:00 rollover (Beach::NextMorning), never more than a day away;
-    // the campfire's readyAtHour is when it burns out.
+    // Beach finds refill at the first 06:00 at least Beach::MinRefillHours after the pick (Beach::RefillHour),
+    // so never more than 20 + 24 h away; the bound below is for the save check. The campfire's readyAtHour
+    // is when it burns out.
     case ResourceKind::Seashells:
     case ResourceKind::Driftwood:
     case ResourceKind::BeachPebbles:
     case ResourceKind::MusselBed:
-    case ResourceKind::LaverRocks: return 24.0;
+    case ResourceKind::LaverRocks: return 48.0;
     case ResourceKind::BeachCampfire: return Beach::CampfireBurnHours;
     // Mine nodes: readyAtHour is set to the next 06:00 plus 0/24/48/96 h (HomesteadMine.cpp), so it never exceeds this.
     case ResourceKind::MineRockFace: return 24.0;
@@ -195,7 +196,7 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::Branches: return Items({{Item::Branch, 5}, {Item::Kindling, 1}});
     case ResourceKind::Stones: return Items({{Item::Stone, 4}});
     case ResourceKind::BerryBush: return Items({{Item::Berries, 5}});
-    case ResourceKind::Roots: return Items({{Item::Roots, 2}, {Item::Seeds, 2}});
+    case ResourceKind::Roots: return Items({{Item::Roots, 2}, {Item::Seeds, 1}});
     case ResourceKind::Flowers: return Items({{Item::Flowers, 3}});
     case ResourceKind::ForestTree: return Items({{Item::Timber, 6}, {Item::Branch, 4}});
     case ResourceKind::Primroses: return Items({{Item::Primroses, 3}});
@@ -2042,7 +2043,7 @@ Result Simulation::Harvest(int nodeId, Point player)
         if (overgrowth->byHand) return ClearOvergrowth(nodeId, Item::Count, player);
         return Bad(std::string("Use a ") + ToolName(overgrowth->tool) + " to clear this.");
     }
-    if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
+    if (!Near(player, node->position, Reach + Beach::EdgeAllowanceCm(node->kind))) return Bad("Move closer to gather this resource.");
     if (Retired(node->kind)) return Bad("There's nothing here worth taking.");
     if (Mine::IsMineNodeKind(node->kind)) return Bad("Swing your pickaxe at this.");
     if (node->kind == ResourceKind::BeachCampfire) return LightBeachCampfire(nodeId, player);
@@ -2061,7 +2062,7 @@ Result Simulation::Harvest(int nodeId, Point player)
         updated->readyAtHour = 0.0;
     }
     else
-        updated->readyAtHour = Beach::IsDailyForage(node->kind) ? Beach::NextMorning(state_.hour)
+        updated->readyAtHour = Beach::IsDailyForage(node->kind) ? Beach::RefillHour(state_.hour)
             : state_.hour + Regrowth(node->kind);
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
@@ -2787,7 +2788,7 @@ Result Simulation::CheckTillGround(int cellX, int cellY, Point player) const
 Result Simulation::Till(int cellX, int cellY, Point player)
 {
     if (auto ready = CheckTill(cellX, cellY, player); !ready) return ready;
-    state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0});
+    state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0, CropKind::Roots, false, false, state_.hour});
     return Exert(Exertion::TillEnergy, Good("Soil tilled. Choose seeds or a berry on your hotbar to plant here."));
 }
 Result Simulation::CheckSow(int plotId, Point player, CropKind kind) const
@@ -2845,6 +2846,7 @@ Result Simulation::Water(int plotId, Point player)
     auto* plot = Find(state_.plots, plotId);
     if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad(EmptyPailText);
     plot->moisture = 1.0;
+    plot->bareSinceHour = state_.hour;
     return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }
 Result Simulation::CheckWeed(int plotId, Point player) const
@@ -2889,6 +2891,7 @@ Result Simulation::ClearWithered(int plotId, Point player)
     plot->picked = false;
     plot->growth = 0.0;
     plot->weeds = 0.0;
+    plot->bareSinceHour = state_.hour;
     // A cleared plot keeps the neutral kind (saves require it for bare soil).
     plot->kind = CropKind::Roots;
     return Exert(Exertion::TillEnergy, Good("Hoed out the withered " + name + ". The soil is ready to plant."));
@@ -2914,7 +2917,11 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     plot->planted = regrows;
     plot->picked = regrows;
     // A cleared plot keeps the neutral kind (saves require it for bare soil).
-    if (!regrows) plot->kind = CropKind::Roots;
+    if (!regrows)
+    {
+        plot->kind = CropKind::Roots;
+        plot->bareSinceHour = state_.hour;
+    }
     plot->growth = regrows ? std::max(0.0, 1.0 - crop.regrowHours / crop.growHours) : 0.0;
     const auto counted = [](Item item, int count)
     {
@@ -3032,7 +3039,12 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
     // The 06:00 rollover: the shops sell down, weeds creep and the seasons turn (OnNewDay).
     for (int day = dayBefore + 1; day <= Calendar::DayIndex(state_.hour); ++day) OnNewDay(Calendar::DateOfDay(day));
     // Awake at 6 AM, the day's plot weeds come up now; asleep, they wait for her to wake (Sleep, DozeOff).
-    if (!sleeping) Crops::GrowDailyWeeds(state_, Calendar::DayIndex(state_.hour) - dayBefore);
+    if (!sleeping)
+    {
+        const int days = Calendar::DayIndex(state_.hour) - dayBefore;
+        Crops::GrowDailyWeeds(state_, days);
+        Crops::RevertBareSoil(state_, days);
+    }
     // Energy running out makes her doze off (AdvanceGameHours); only in the woodland does hunger fail her.
     if (state_.energy <= 1e-10) state_.energy = 0.0;
     if (state_.hunger <= 1e-10)
@@ -3065,7 +3077,11 @@ double Simulation::DozeOff(Point player)
         left -= done;
         slept += done;
     }
-    if (!state_.failed) Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
+    if (!state_.failed)
+    {
+        Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
+        Crops::RevertBareSoil(state_, Crops::WeedDay(state_.hour) - weedDay);
+    }
     ++dozes_;
     ++revision_;
     return slept;
@@ -3202,6 +3218,7 @@ Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimi
     state_.energy = 100.0;
     // Slept through 6 AM: the day's weeds are up when she wakes.
     Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
+    Crops::RevertBareSoil(state_, Crops::WeedDay(state_.hour) - weedDay);
     return Good("You wake rested. Your garden and fires continued through the night.");
 }
 
@@ -3271,6 +3288,7 @@ std::string Simulation::Serialize() const
     Food::WriteSaveSection(body, state_);
     TravelDiscovery::WriteSaveSection(body, state_);
     TreeFelling::WriteSaveSection(body, state_);
+    Crops::WriteBareSinceSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3486,6 +3504,8 @@ Result Simulation::Deserialize(const std::string& data)
                 Inset(ResourceFootprint(*FindBuilding(candidate, piece.buildingId), piece.kind, piece.cellX, piece.cellY,
                     piece.rotation, HasPiece(candidate, Piece::Foundation, piece.buildingId, piece.cellX, piece.cellY)))))
                 return invalid();
+        // Saves without the "baresince" section treat every plot as freshly worked at the load hour.
+        plot.bareSinceHour = candidate.hour;
         candidate.plots.push_back(plot);
     }
     if (!(input >> count) || count < 0 || count > MaxWorldDrops) return invalid();
@@ -3546,6 +3566,8 @@ Result Simulation::Deserialize(const std::string& data)
     bool packSlotsSeen = false;
     bool travelSeen = false;
     bool felledSeen = false;
+    bool bareSinceSeen = false;
+    int droppedBareSince = 0;
     while (!input.eof())
     {
         std::string tag;
@@ -3565,6 +3587,11 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::WitheredSaveTag) { if (!Crops::ReadWitheredSection(input, candidate)) return invalid(); }
+        else if (tag == Crops::BareSinceSaveTag)
+        {
+            if (!Crops::ReadBareSinceSection(input, candidate, droppedBareSince, !bareSinceSeen)) return invalid();
+            bareSinceSeen = true;
+        }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == PackRowRules::ParkedSaveTag)
         {
@@ -3628,6 +3655,7 @@ Result Simulation::Deserialize(const std::string& data)
     if (!populated) return populated;
     state_ = std::move(candidate);
     nextResourceHandle_ = nextHandle;
+    droppedBareSince_ = droppedBareSince;
     // Saves from before the lamp get its kit once.
     fishing_ = {};
     GrantLampKit();

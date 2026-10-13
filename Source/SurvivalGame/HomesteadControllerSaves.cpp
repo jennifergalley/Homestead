@@ -165,6 +165,9 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Homestead::Simulation Candidate = Sim;
     const auto Result = Candidate.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
     if (!Result) { Notify(Result); return false; }
+    if (Candidate.DroppedBareSinceEntries() > 0)
+        UE_LOG(LogHomesteadSaves, Warning, TEXT("Save loaded; %d unusable bare-soil entries were ignored (those plots count as freshly worked)."),
+            Candidate.DroppedBareSinceEntries());
     const auto Region = Candidate.SetActiveWorldRegion({Save.PlayerLocation.X, Save.PlayerLocation.Y});
     if (!Region) { Notify(Region); return false; }
     FHomesteadAppearance Look;
@@ -420,7 +423,6 @@ void AHomesteadController::NewGame()
         Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
     }
     ResetHotbar();
-    ControlsHint.Restart();
     EndGroundSnap();
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->ResetSprint();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);

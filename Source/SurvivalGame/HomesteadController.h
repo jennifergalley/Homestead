@@ -12,7 +12,6 @@
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
 #include "HomesteadMusicPlaylist.h"
-#include "UI/HomesteadHudTiming.h"
 #include "Styling/SlateBrush.h"
 #include "Templates/UniquePtr.h"
 #include "HomesteadController.generated.h"
@@ -173,10 +172,6 @@ public:
     bool IsHintRetired(const FString& Verb) const;
     int32 HintUseCount(const FString& Verb) const;
     void ResetActionHints();
-    // The top-left controls strip shows for its first minute on screen (UI/HomesteadHudTiming.h).
-    bool ShowsControlsHint() const { return ControlsHint.Showing(); }
-    double ControlsHintSecondsLeft() const { return ControlsHint.Remaining(); }
-    bool IsControlsHintOnScreen() const;
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
     // Seconds the current toast has left, and a count of Notify calls (tells a repeated message apart).
@@ -713,7 +708,6 @@ private:
     void UpdatePendingFell();
     float RefreshRemaining = 0;
     float ToastRemaining = 0;
-    HomesteadHud::ControlsHintWindow ControlsHint;
     float AutosaveRemaining = 240;
     bool bAutosaveEnabled = true;
     int32 AutosaveMinutes = 5;

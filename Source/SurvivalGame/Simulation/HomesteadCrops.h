@@ -130,6 +130,27 @@ bool ReadSaveSection(std::istream& input, State& state);
 constexpr const char* WitheredSaveTag = "withered";
 void WriteWitheredSection(std::ostream& output, const State& state);
 bool ReadWitheredSection(std::istream& input, State& state);
+// Tilled soil left bare (Balance 2026-10-12): after BareHoursBeforeRevert untouched, each 06:00 it has a
+// RevertChance of going back to plain untilled ground (the plot is removed, with its water and weeds).
+// Never a plot with a crop in it, growing, ripe or withered.
+constexpr double BareHoursBeforeRevert = 24.0;
+constexpr double RevertChance = 0.20;
+// Whether bare plot `plotId` reverts at the 06:00 pass of calendar day `day`: a fixed hash like WeedsComeUp,
+// so a reload or a long sleep never rerolls a day.
+bool BareSoilReverts(int plotId, int day);
+// The reversion pass for the `days` calendar days that just began (the last is WeedDay(state.hour)), in
+// order, each measured from its own 06:00. Runs beside GrowDailyWeeds. Returns how many plots reverted.
+int RevertBareSoil(State& state, int days);
+// Optional trailing save section (tag "baresince"): plot id and the hour each bare plot was last
+// worked, count first. Written only when there are bare plots. Saves without it load every plot as
+// worked at the load hour, so nothing reverts for a day after loading an older save.
+// It never makes a save fail to load: an entry with an unknown, planted or repeated plot id or a bad
+// hour is dropped (that plot stays worked at the load hour) and counted in `dropped`, and a repeated
+// section is dropped whole (`keep` false). Only an unparseable line returns false.
+constexpr const char* BareSinceSaveTag = "baresince";
+constexpr int MaxBareSinceEntries = 100000;
+void WriteBareSinceSection(std::ostream& output, const State& state);
+bool ReadBareSinceSection(std::istream& input, State& state, int& dropped, bool keep = true);
 // The season rollover into `season`: every planted crop that doesn't grow in it withers. Returns
 // how many plots withered.
 int WitherOutOfSeason(State& state, Season season);

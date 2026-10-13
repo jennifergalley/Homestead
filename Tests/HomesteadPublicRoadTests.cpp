@@ -425,10 +425,10 @@ int main()
             const int rootsBefore = after.Count(Item::Roots);
             Check(after.Harvest(firstRoot->id, firstRoot->position).ok, "dug the new roots");
             Check(after.Count(Item::Roots) > rootsBefore, "roots in the pack", after.Count(Item::Roots));
-            // They grow back in 48 hours (her hunger would run out first if the test just waited it out).
+            // They grow back in 72 hours (her hunger would run out first if the test just waited it out).
             for (const auto& node : after.GetState().resources)
                 if (node.id == firstRoot->id)
-                    Check(std::abs(node.readyAtHour - after.GetState().hour - 48.0) < 0.01, "roots grow back after 48 hours", node.readyAtHour - after.GetState().hour);
+                    Check(std::abs(node.readyAtHour - after.GetState().hour - 72.0) < 0.01, "roots grow back after 72 hours", node.readyAtHour - after.GetState().hour);
         }
         // Every node the old save knew is still there, at the same place.
         for (const EstatePlacement& placement : old.placements)

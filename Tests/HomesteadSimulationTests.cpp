@@ -922,7 +922,7 @@ void GameplayWalkthrough()
     CHECK(Close(sim.GetState().hour, beforeSleep + 8));
     CHECK(sim.GetState().energy == 100);
     CHECK(!sim.IsNearFire(firePosition));
-    for (int cycle = 0; cycle < 8 && sim.GetState().plots[0].growth < 1.0; ++cycle)
+    for (int cycle = 0; cycle < 16 && sim.GetState().plots[0].growth < 1.0; ++cycle)
     {
         if (sim.Count(Item::Water) == 0) OK(sim.FillWater(WaterSource));
         if (sim.GetState().plots[0].moisture < 1) OK(sim.Water(plotId, garden));
@@ -933,6 +933,7 @@ void GameplayWalkthrough()
         OK(sim.Sleep(8, Home, {1, 0}));
     }
     CHECK(sim.GetState().plots[0].growth == 1);
+    if (sim.GetState().plots[0].weeds > 0) OK(sim.Weed(plotId, garden));
     const int roots = sim.Count(Item::Roots);
     const int seeds = sim.Count(Item::Seeds);
     const int seedBonus = HarvestBonusCount(CropKind::Roots, plotId, sim.GetState().hour);
@@ -1001,7 +1002,10 @@ void ReducedCultivatedSeedReturns()
     const auto roots = Node(wild, ResourceKind::Roots);
     const int seeds = wild.Count(Item::Seeds);
     OK(wild.Harvest(roots.id, roots.position));
-    CHECK(wild.Count(Item::Seeds) == seeds + 2);
+    CHECK(wild.Count(Item::Seeds) == seeds + 1 && wild.Count(Item::Roots) >= 2);
+    // A picked wild root node grows back in three days.
+    for (const auto& node : wild.GetState().resources)
+        if (node.id == roots.id) CHECK(Close(node.readyAtHour - wild.GetState().hour, 72.0));
 }
 
 void BasicCropMeals()
@@ -1076,7 +1080,7 @@ void BasicCropMeals()
     for (Item produce : {Item::Turnip, Item::Carrot, Item::Potato, Item::Cabbage,
         Item::BroadBeans, Item::Strawberries, Item::Roots, Item::Berries})
         CHECK(covered.count(produce) == 1);
-    CHECK(GetItemInfo(Item::RoastedRoots).energy == 25.0 && GetItemInfo(Item::HerbedRoots).energy == 40.0);
+    CHECK(GetItemInfo(Item::RoastedRoots).energy == 19.0 && GetItemInfo(Item::HerbedRoots).energy == 25.0);
     CHECK(!FindCropMeal(Recipe::HaftAxe) && !FindCropMeal(Recipe::Count));
     CHECK(!FindCropMeal(static_cast<Recipe>(std::numeric_limits<int>::min())));
 
@@ -1091,7 +1095,7 @@ void AtomicTransactions()
 {
     Simulation sim;
     const auto roots = Node(sim, ResourceKind::Roots);
-    Stock(sim, {{Item::Knife, 1}, {Item::Stone, 116}});
+    Stock(sim, {{Item::Knife, 1}, {Item::Stone, 117}});
     UnchangedFailure(sim, [&] { return sim.Harvest(roots.id, roots.position); });
     UnchangedFailure(sim, [&] { return sim.Clear(roots.id, roots.position); });
     CHECK(sim.CanHarvest(roots.id));
@@ -1783,7 +1787,7 @@ void SporadicDailyWeeds()
             s.AdvanceGameHours(6.0, Home);
         }
     };
-    Edit(sim, [](State& st) { st.hour = 7.0; for (auto& plot : st.plots) plot.weeds = 0.0; });
+    Edit(sim, [](State& st) { st.hour = 7.0; for (auto& plot : st.plots) { plot.weeds = 0.0; plot.planted = true; } });
     day(sim);
     day(sim);
     Simulation reloaded;
@@ -1802,6 +1806,192 @@ void SporadicDailyWeeds()
             if (Crops::WeedsComeUp(plot.id, d)) want = std::min(1.0, want + CropCare::DailyWeeds);
         CHECK(Close(plot.weeds, want));
     }
+}
+
+// Balance 2026-10-12: tilled soil left bare for a day may revert to plain ground at a 06:00 (20% a
+// morning, fixed per plot and day). Anything with a crop in it, or worked in the last 24 h, stays.
+void BareSoilReversion()
+{
+    int hits = 0;
+    for (int id = 100; id < 116; ++id)
+        for (int day = 1; day <= 50; ++day) hits += Crops::BareSoilReverts(id, day) ? 1 : 0;
+    CHECK(hits > 800 * 0.1 && hits < 800 * 0.3);
+
+    int hitDay = 1, missDay = 1;
+    while (!Crops::BareSoilReverts(100, hitDay)) ++hitDay;
+    while (Crops::BareSoilReverts(100, missDay)) ++missDay;
+    const auto remaining = [](int day, const std::function<void(Plot&)>& tweak) {
+        State state;
+        state.hour = 6.0 + 24.0 * day;
+        Plot plot;
+        plot.id = 100;
+        plot.moisture = 0.6;
+        plot.weeds = 0.3;
+        plot.bareSinceHour = 0.0;
+        tweak(plot);
+        state.plots.push_back(plot);
+        Crops::RevertBareSoil(state, 1);
+        return state.plots.size();
+    };
+    const double rollover = 6.0 + 24.0 * hitDay;
+    CHECK(remaining(hitDay, [](Plot&) {}) == 0);
+    CHECK(remaining(missDay, [](Plot&) {}) == 1);
+    CHECK(remaining(hitDay, [&](Plot& plot) { plot.bareSinceHour = rollover - Crops::BareHoursBeforeRevert; }) == 0);
+    CHECK(remaining(hitDay, [&](Plot& plot) { plot.bareSinceHour = rollover - 23.9; }) == 1);
+    CHECK(remaining(hitDay, [&](Plot& plot) { plot.bareSinceHour = rollover - 1.0; }) == 1);
+    CHECK(remaining(hitDay, [](Plot& plot) { plot.planted = true; plot.growth = 0.3; }) == 1);
+    CHECK(remaining(hitDay, [](Plot& plot) { plot.planted = true; plot.growth = 1.0; }) == 1);
+    CHECK(remaining(hitDay, [](Plot& plot) { plot.planted = true; plot.withered = true; }) == 1);
+
+    // One pass over three days (a long sleep) matches three daily passes.
+    const auto field = [] {
+        State state;
+        for (int i = 0; i < 24; ++i)
+        {
+            Plot plot;
+            plot.id = 100 + i;
+            plot.cellX = i;
+            state.plots.push_back(plot);
+        }
+        return state;
+    };
+    State together = field(), apart = field();
+    together.hour = 6.0 + 24.0 * 3;
+    Crops::RevertBareSoil(together, 3);
+    for (int day = 1; day <= 3; ++day)
+    {
+        apart.hour = 6.0 + 24.0 * day;
+        Crops::RevertBareSoil(apart, 1);
+    }
+    CHECK(together.plots.size() == apart.plots.size() && together.plots.size() < 24 && !together.plots.empty());
+    for (size_t i = 0; i < together.plots.size(); ++i) CHECK(together.plots[i].id == apart.plots[i].id);
+
+    // Working a plot restarts its bare clock: tilling, watering, and emptying it by harvest or hoe.
+    Simulation sim;
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::Seeds, 3}});
+    const Point garden = CellCenter(-2, -1);
+    const auto energy = [&] { OK(sim.SetEnergy(100.0)); };
+    energy();
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    const int id = sim.GetState().plots[0].id;
+    CHECK(sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+    sim.AdvanceGameHours(3.0, garden);
+    OK(sim.FillWater(WaterSource));
+    energy();
+    OK(sim.Water(id, garden));
+    CHECK(sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+    energy();
+    OK(sim.Plant(id, garden));
+    Edit(sim, [](State& state) { state.energy = 100.0; state.plots[0].growth = 1.0; state.plots[0].weeds = 0.0; });
+    sim.AdvanceGameHours(2.0, garden);
+    energy();
+    OK(sim.HarvestCrop(id, garden));
+    CHECK(!sim.GetState().plots[0].planted && sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+    energy();
+    OK(sim.Plant(id, garden));
+    Edit(sim, [](State& state) { state.energy = 100.0; state.plots[0].withered = true; });
+    sim.AdvanceGameHours(2.0, garden);
+    energy();
+    OK(sim.ClearWithered(id, garden));
+    CHECK(!sim.GetState().plots[0].planted && sim.GetState().plots[0].bareSinceHour == sim.GetState().hour);
+
+    // A morning that rolls a revert removes a long-bare plot and keeps the planted one.
+    Simulation morning;
+    Stock(morning, {{Item::DiggingStick, 1}, {Item::Seeds, 3}, {Item::Berries, 60}});
+    OK(morning.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    OK(morning.Till(CellToGarden(-2) + 1, CellToGarden(-1), garden));
+    OK(morning.Plant(morning.GetState().plots[1].id, garden));
+    const int bareId = morning.GetState().plots[0].id, cropId = morning.GetState().plots[1].id;
+    for (int day = 0; day < 60 && morning.GetState().plots.size() == 2; ++day)
+    {
+        morning.AdvanceGameHours(24.0, garden);
+        OK(morning.SetEnergy(100.0));
+        while (morning.GetState().hunger < 60 && morning.Count(Item::Berries) > 0) OK(morning.Eat(Item::Berries));
+    }
+    CHECK(morning.GetState().plots.size() == 1 && morning.GetState().plots[0].id == cropId && bareId != cropId);
+}
+
+// The "baresince" section: what Serialize writes for bare plots, a round trip, and saves without it.
+void BareSinceSaves()
+{
+    Simulation sim;
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::Seeds, 1}});
+    const Point garden = CellCenter(-2, -1);
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    OK(sim.Till(CellToGarden(-2) + 1, CellToGarden(-1), garden));
+    OK(sim.Plant(sim.GetState().plots[1].id, garden));
+    const int bareId = sim.GetState().plots[0].id;
+    sim.AdvanceGameHours(1.5, garden);
+    OK(sim.Till(CellToGarden(-2) + 2, CellToGarden(-1), garden));
+    const double tilledAt = sim.GetState().plots[2].bareSinceHour;
+    CHECK(tilledAt > sim.GetState().plots[0].bareSinceHour);
+
+    // Only bare plots are written, last, as a counted list of id and hour.
+    const std::string saved = sim.Serialize();
+    const size_t at = saved.find("\nbaresince ");
+    CHECK(at != std::string::npos && saved.find("baresince", at + 1) == at + 1);
+    const size_t end = saved.find('\n', at + 1);
+    CHECK(end == saved.size() - 1);
+    std::istringstream section(saved.substr(at + 1, end - at - 1));
+    std::string tag;
+    int count = 0;
+    section >> tag >> count;
+    CHECK(tag == "baresince" && count == 2);
+    int id = 0;
+    double since = 0.0;
+    section >> id >> since;
+    CHECK(id == bareId && since == sim.GetState().plots[0].bareSinceHour);
+
+    Simulation loaded;
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.Serialize() == saved);
+    CHECK(loaded.GetState().plots[0].bareSinceHour == sim.GetState().plots[0].bareSinceHour
+        && loaded.GetState().plots[2].bareSinceHour == tilledAt);
+
+    // A save without the section (every earlier save) loads, with each plot worked at the load hour.
+    const std::string payload = saved.substr(saved.find('\n') + 1);
+    const std::string oldSave = Envelope(payload.substr(0, payload.find("baresince ")));
+    Simulation old;
+    OK(old.Deserialize(oldSave));
+    CHECK(old.GetState().plots.size() == 3);
+    for (const auto& plot : old.GetState().plots) CHECK(plot.bareSinceHour == old.GetState().hour);
+
+    // A damaged entry never fails the load: it is dropped, counted, and its plot counts as just worked.
+    const std::string prefix = payload.substr(0, payload.find("baresince "));
+    const double now = sim.GetState().hour;
+    const auto loadsWith = [&](const std::string& body, int dropped, double expectedFirst) {
+        Simulation other;
+        OK(other.Deserialize(Envelope(prefix + body)));
+        CHECK(other.DroppedBareSinceEntries() == dropped);
+        CHECK(other.GetState().plots.size() == 3);
+        CHECK(Close(other.GetState().plots[0].bareSinceHour, expectedFirst, 1e-5));
+        CHECK(other.GetState().plots[1].bareSinceHour == other.GetState().hour);
+        Simulation again;
+        OK(again.Deserialize(other.Serialize()));
+        CHECK(again.DroppedBareSinceEntries() == 0 && again.Serialize() == other.Serialize());
+    };
+    const std::string planted = std::to_string(sim.GetState().plots[1].id);
+    const std::string bare = std::to_string(bareId);
+    const std::string early = std::to_string(now - 0.5);
+    loadsWith("baresince 1 " + planted + " 7\n", 1, now);
+    loadsWith("baresince 1 999 7\n", 1, now);
+    loadsWith("baresince 1 " + bare + " 99999\n", 1, now);
+    loadsWith("baresince 1 " + bare + " -1\n", 1, now);
+    loadsWith("baresince 2 " + bare + " " + early + " " + bare + " 2\n", 1, now - 0.5);
+    loadsWith("baresince 2 " + planted + " 7 " + bare + " " + early + "\n", 1, now - 0.5);
+    loadsWith("baresince 1 " + bare + " " + early + "\nbaresince 1 " + bare + " 2\n", 1, now - 0.5);
+
+    // Only a line that can't be parsed is refused, leaving the current game alone.
+    const auto refuses = [&](const std::string& body) {
+        Simulation other = sim;
+        const std::string before = other.Serialize();
+        CHECK(!other.Deserialize(Envelope(prefix + body)).ok);
+        CHECK(other.Serialize() == before);
+    };
+    refuses("baresince\n");
+    refuses("baresince -1\n");
+    refuses("baresince 2 " + bare + " 7\n");
+    refuses("baresince 1 " + bare + " soon\n");
 }
 
 void FarmingAndRain()
@@ -1951,8 +2141,8 @@ void BerryCropCycle()
     sim.AdvanceGameHours(4, Home);
     dry.AdvanceGameHours(4, Home);
     weedy.AdvanceGameHours(4, Home);
-    CHECK(sim.GetState().plots[0].growth < sim.GetState().plots[1].growth);
-    CHECK(Close(sim.GetState().plots[1].growth / sim.GetState().plots[0].growth, 42.0 / 30.0));
+    CHECK(sim.GetState().plots[0].growth > sim.GetState().plots[1].growth);
+    CHECK(Close(sim.GetState().plots[0].growth / sim.GetState().plots[1].growth, 120.0 / 42.0));
     CHECK(dry.GetState().plots[0].growth > 0);
     CHECK(dry.GetState().plots[0].growth < sim.GetState().plots[0].growth);
     CHECK(weedy.GetState().plots[0].growth < sim.GetState().plots[0].growth);
@@ -2015,10 +2205,10 @@ void CropTableAndStatus()
     }
     CHECK(GetCropInfo(CropKind::Count).kind == CropKind::Count);
     CHECK(CropForSeed(Item::Stone) == nullptr);
-    CHECK(CropDays(CropKind::Roots) == 2 && CropDays(CropKind::Berries) == 2);
+    CHECK(CropDays(CropKind::Roots) == 5 && CropDays(CropKind::Berries) == 2);
     CHECK(CropRegrowDays(CropKind::Berries) == 1 && CropRegrowDays(CropKind::Roots) == 0);
-    CHECK(ReadyInText(CropKind::Roots) == "Ready in about 2 days if watered.");
-    CHECK(std::string(ItemDescription(Item::Seeds)).find("Matures in about 2 days") != std::string::npos);
+    CHECK(ReadyInText(CropKind::Roots) == "Ready in about 5 days if watered.");
+    CHECK(std::string(ItemDescription(Item::Seeds)).find("matures in about 5 days") != std::string::npos);
     // Period crops: each seed's description states its days (and regrow days), the store sells it,
     // and its produce sells back at the store.
     const auto& storeGoods = ShopGoods(ShopKind::GeneralStore);
@@ -2061,14 +2251,14 @@ void CropTableAndStatus()
     CHECK(std::string(StageName(CropStage::Sprout)) == "Sprout" && std::string(StageName(CropStage::Ripe)) == "Ripe");
     plot.growth = 0.1;
     CHECK(CropDay(plot) == 1);
-    CHECK(PlotStatus(plot) == "Roots: day 1 of 2");
-    plot.growth = 0.6;
+    CHECK(PlotStatus(plot) == "Roots: day 1 of 5");
+    plot.growth = 0.65;
     plot.moisture = 0.1;
-    CHECK(PlotStatus(plot) == "Roots: day 2 of 2  |  needs water, growing slowly");
+    CHECK(PlotStatus(plot) == "Roots: day 4 of 5  |  needs water, growing slowly");
     plot.weeds = 0.8;
-    CHECK(PlotStatus(plot) == "Roots: day 2 of 2  |  needs water and weeding, growing slowly");
+    CHECK(PlotStatus(plot) == "Roots: day 4 of 5  |  needs water and weeding, growing slowly");
     plot.moisture = 1.0;
-    CHECK(PlotStatus(plot) == "Roots: day 2 of 2  |  weedy, growing slowly");
+    CHECK(PlotStatus(plot) == "Roots: day 4 of 5  |  weedy, growing slowly");
     plot.growth = 1.0;
     CHECK(IsRipe(plot) && PlotStatus(plot) == "Roots: ready to harvest");
     // A berry bush growing for the first time counts up normally (no regrowth special case).
@@ -2091,17 +2281,18 @@ void CropTableAndStatus()
     const int rootId = sim.FindNearestPlot(roots, 1);
     const Result planted = sim.Plant(rootId, roots);
     OK(planted);
-    CHECK(planted.message == "Planted roots. Ready in about 2 days if watered.");
+    CHECK(planted.message == "Planted roots. Ready in about 5 days if watered.");
     OK(sim.FillWater(WaterSource));
-    for (int day = 0; day < 2; ++day)
+    for (int day = 0; day < 5; ++day)
     {
         Edit(sim, [](State& state) { state.plots[0].moisture = 1.0; state.plots[0].weeds = 0.0; state.hunger = 100; state.energy = 100; });
-        CHECK(!IsRipe(sim.GetState().plots[0]));
+        if (day < 4) CHECK(!IsRipe(sim.GetState().plots[0]));
         sim.AdvanceGameHours(15, Home);
         Edit(sim, [](State& state) { state.hunger = 100; state.energy = 100; });
         sim.AdvanceGameHours(15, Home);
     }
     CHECK(IsRipe(sim.GetState().plots[0]));
+    Edit(sim, [](State& state) { state.plots[0].weeds = 0.0; });
     const int seedBonus = HarvestBonusCount(CropKind::Roots, rootId, sim.GetState().hour);
     const Result harvested = sim.HarvestCrop(rootId, roots);
     OK(harvested);
@@ -3546,7 +3737,7 @@ void GeneratedFellingAndPersistentTimers()
     OK(loaded.ResolveGeneratedResource(branch.key, resolved));
     CHECK(resolved.id == 0 && !resolved.cleared && resolved.readyAtHour == hour + 24);
     OK(loaded.ResolveGeneratedResource(sapling.key, resolved));
-    CHECK(!resolved.cleared && resolved.readyAtHour == hour + 48);
+    CHECK(!resolved.cleared && resolved.readyAtHour == hour + 72);
     OK(loaded.SetActiveWorldRegion(tree.position));
     OK(loaded.ResolveGeneratedResource(tree.key, resolved));
     CHECK(resolved.id >= TransientResourceIdBase && resolved.cleared && !loaded.CanHarvest(resolved.id));
@@ -5775,11 +5966,11 @@ void SnackOnFullStomachRestoresEnergy()
     const auto fed = sim.Eat(Item::Berries);
     OK(fed);
     CHECK(fed.message == "Ate Berries: Food +12." && sim.GetState().hunger == 62.0);
-    // Full and tired with a cooked dish: Energy only (the §3a table's +40 applies in the woodland too).
+    // Full and tired with a cooked dish: Energy only (the §3a table's +25 applies in the woodland too).
     Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 20.0; });
     const auto dish = sim.Eat(Item::HerbedRoots);
     OK(dish);
-    CHECK(dish.message == "Ate Herbed roots: Energy +40." && Close(sim.GetState().energy, 60.0));
+    CHECK(dish.message == "Ate Herbed roots: Energy +25." && Close(sim.GetState().energy, 45.0));
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
     CHECK(loaded.Serialize() == sim.Serialize());
@@ -6094,6 +6285,8 @@ int main()
     Run("default gameplay walkthrough", GameplayWalkthrough);
     Run("weeds come up once a day, on waking or at 6 AM", DailyWeedPass);
     Run("sporadic daily weeds, stable over reloads", SporadicDailyWeeds);
+    Run("bare tilled soil may revert at 06:00; crops and worked plots never", BareSoilReversion);
+    Run("the baresince save section round-trips and older saves load", BareSinceSaves);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);
     Run("placement and enclosure", PlacementAndShelter);

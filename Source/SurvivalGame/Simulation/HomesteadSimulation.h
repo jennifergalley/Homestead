@@ -327,6 +327,10 @@ struct Plot
     // the dead plant's look, yields nothing and grows no further until the hoe clears it. Saved in
     // the optional "withered" section.
     bool withered = false;
+    // The game hour a bare plot was last worked: tilled, watered, or emptied by a harvest or the hoe. A
+    // bare plot untouched for Crops::BareHoursBeforeRevert may go back to plain ground at a 06:00
+    // (Crops::RevertBareSoil). Saved in the optional "baresince" section; older saves load it as the load hour.
+    double bareSinceHour = 0.0;
 };
 
 struct WorldDrop
@@ -595,6 +599,8 @@ public:
     int PackCapacity() const;
     int ChestUsedCapacity(int chestId) const;
     std::uint64_t GetRevision() const { return revision_; }
+    // How many "baresince" entries the last Deserialize dropped as unusable (see Crops::ReadBareSinceSection).
+    int DroppedBareSinceEntries() const { return droppedBareSince_; }
     const WearableInstance* GetWearable(int id) const;
     const InventoryLayout* GetLayout(int containerId) const;
     bool IsRaining() const;
@@ -910,6 +916,7 @@ private:
     std::uint64_t nextFishingToken_ = 1;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
+    int droppedBareSince_ = 0;
     int dozes_ = 0;
     int seasonChanges_ = 0;
     SeasonChange lastSeasonChange_;

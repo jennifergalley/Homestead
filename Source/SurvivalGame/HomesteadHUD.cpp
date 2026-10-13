@@ -35,20 +35,16 @@ namespace HudNoticeFont
 // notice reads the same in the world as in the book. Slate points per HUD Size unit: TextSize 23 sets
 // at about 18 pt, a line about 31 units tall.
 constexpr float PointsPerUnit = 0.78f;
-// The smallest the serif is ever drawn on screen (font size units, about pixels): 720p scales the HUD to
-// two thirds, which left the focus title near 9 and the toast near 12 (Orchestrator review, 2026-09-30).
-// Text above it keeps its proportion at 1080p and 4K.
-constexpr float MinScreenSize = 15.0f;
-// The font as drawn on a HUD at UiScale.
-FSlateFontInfo At(float Size, float UiScale)
+// The font as drawn on a HUD at UiScale, never smaller than MinScreenSize.
+FSlateFontInfo At(float Size, float UiScale, float MinScreenSize)
 {
     return HomesteadMenus::DisplayFont(FMath::Max(Size * PointsPerUnit * UiScale, MinScreenSize));
 }
 // In HUD logical units: the drawn extent divided by UiScale, so cards grow to fit the floored text.
-FVector2D Measure(const FString& Text, float Size, float UiScale)
+FVector2D Measure(const FString& Text, float Size, float UiScale, float MinScreenSize)
 {
     if (!FSlateApplication::IsInitialized() || UiScale <= 0.0f) return FVector2D::ZeroVector;
-    return FVector2D(FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Text, At(Size, UiScale))) / UiScale;
+    return FVector2D(FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Text, At(Size, UiScale, MinScreenSize))) / UiScale;
 }
 }
 
@@ -75,12 +71,12 @@ void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLi
     {
         if (bMeasureFeedback)
         {
-            const FVector2D Extent = HudNoticeFont::Measure(Text, Size, UiScale);
+            const FVector2D Extent = HudNoticeFont::Measure(Text, Size, UiScale, NoticeMinScreenSize);
             const FBox2D Bounds(FVector2D(X, Y) * UiScale, (FVector2D(X, Y) + Extent) * UiScale);
             if (bDrawingToast) { ToastLines.Add(Text); ToastTextBounds.Add(Bounds); ToastColor = Color; }
             else if (!Text.IsEmpty()) FeedbackProtected.Emplace(Text, Bounds);
         }
-        FCanvasTextItem Item(FVector2D(X, Y) * UiScale, FText::FromString(Text), HudNoticeFont::At(Size, UiScale), Color);
+        FCanvasTextItem Item(FVector2D(X, Y) * UiScale, FText::FromString(Text), HudNoticeFont::At(Size, UiScale, NoticeMinScreenSize), Color);
         Item.Font = Engine;
         Item.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Item);
@@ -399,21 +395,6 @@ void AHomesteadHUD::DrawHUD()
             if (Compass.bIsValid)
                 ProtectFeedback(TEXT("compass"), Compass.Min.X, Compass.Min.Y, Compass.GetSize().X, Compass.GetSize().Y);
         }
-        // The controls strip is a first-minute reminder (AHomesteadController::ShowsControlsHint).
-        // The wheel picks the hotbar tool; Ctrl+wheel zooms the camera (AHomesteadController::InputKey).
-        // Sprint is a toggle, so the hint says which way it's set.
-        if (PC->ShowsControlsHint())
-        {
-            const auto* Heroine = Cast<AHomesteadCharacter>(PC->GetPawn());
-            const TCHAR* Sprint = Heroine && Heroine->IsSprintOn() ? TEXT("Sprint: on") : TEXT("Sprint: off");
-            const FString Hints = PC->UsesGamepad()
-                ? FString::Printf(TEXT("[Menu] Field book   [L3] %s   [R3] Camera distance"), Sprint)
-                : FString::Printf(TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] %s   Wheel: tool   Ctrl+wheel: zoom"), Sprint);
-            const float HintsWidth = FMath::Max(120.0f, FMath::Min(TextWidth(Hints, 19) + 26, CalendarX - 16 - 30));
-            Panel(30, 26, HintsWidth, 46, Pine);
-            DrawFrame(30, 26, HintsWidth, 46);
-            Write(Hints, 42, 38, 19, Ink);
-        }
     }
     DrawWorldNotices(*PC, NoticeBottom);
 }
@@ -422,7 +403,7 @@ float AHomesteadHUD::TextWidth(const FString& Text, float Size) const
 {
     if (bNoticeText && FSlateApplication::IsInitialized() && GEngine && GEngine->GetMediumFont()
         && GEngine->GetMediumFont()->FontCacheType == EFontCacheType::Runtime)
-        return static_cast<float>(HudNoticeFont::Measure(Text, Size, UiScale).X);
+        return static_cast<float>(HudNoticeFont::Measure(Text, Size, UiScale, NoticeMinScreenSize).X);
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
     if (!Font || !Canvas) return 0;
     float W = 0, H = 0;
@@ -434,7 +415,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
 {
     const APawn* Pawn = PC.GetPawn();
     const FString Actions = PC.FocusActions();
-    // Nothing to do here: the open woodland's "[I] Field book" hint belongs to the controls strip.
+    // The open woodland's default "[I] Field book" focus text draws no card.
     const bool bCropCard = PC.IsCropFocused();
     if (!Pawn || (Actions.IsEmpty() && !bCropCard) || Actions.Contains(TEXT("Field book"))) return 0;
     // "[E] Gather   [LMB] Clear with Knife" -> (key, verb) pairs; unkeyed hints stay plain text.
@@ -469,6 +450,8 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     if (Keyed == 1)
         Cues.RemoveAll([&PC](const FCue& Cue) { return !Cue.Key.IsEmpty() && PC.IsHintRetired(Cue.Verb); });
     if (Cues.IsEmpty() && !bCropCard) return 0;
+    // The title and the verbs are one size, and the whole card keeps a raised on-screen floor.
+    TGuardValue<float> CardFloor(NoticeMinScreenSize, HudNoticeLayout::FocusCardMinScreenSize);
     // The words are the notices' EB Garamond (as the toast and the book's card); the key and pad
     // glyphs stay in the crisp sans on their pine stamps.
     constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 11, Space = 9;
@@ -477,11 +460,10 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = bThemeSerif; return W; };
     // Key and pad glyphs: an ink keycap in the crisp sans (HomesteadPalette::Keycap*).
     const float ContentWidth = NoticeMaxWidth(PC) - HudNoticeLayout::PadX * 2 - 2;
-    const float VerbLine = FMath::Max(Size, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), Size, UiScale).Y));
+    const float VerbLine = FMath::Max(Size, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), Size, UiScale, NoticeMinScreenSize).Y));
     const bool bChest = PC.IsChestFocused();
-    const float TitleSize = bChest ? FMath::Max(HudNoticeLayout::ChestTitleSize,
-        HudNoticeLayout::ChestMinScreenSize / (HudNoticeFont::PointsPerUnit * UiScale)) : 17.0f;
-    const float TitleLine = FMath::Max(TitleSize, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), TitleSize, UiScale).Y));
+    constexpr float TitleSize = Size;
+    const float TitleLine = VerbLine;
     bNoticeText = true;
     const auto TitleLines = WrappedLines(PC.FocusTitle(), ContentWidth, TitleSize);
     bNoticeText = bThemeSerif;

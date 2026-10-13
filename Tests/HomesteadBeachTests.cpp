@@ -88,6 +88,17 @@ void DailyFinds()
     // The morning rollover: strictly after the hour, never more than a day ahead.
     CHECK(Beach::NextMorning(6.0) == 30.0 && Beach::NextMorning(5.5) == 6.0 && Beach::NextMorning(29.99) == 30.0);
     CHECK(Beach::NextMorning(30.0) == 54.0);
+    // A picked find refills at the first 06:00 at least 12 h later: any pick from 06:00 to 18:00 is back tomorrow
+    // morning; an evening or night pick (or one at 05:00) skips the very next 06:00.
+    CHECK(Beach::RefillHour(10.0) == 30.0 && Beach::RefillHour(12.0) == 30.0 && Beach::RefillHour(18.0) == 30.0);
+    CHECK(Beach::RefillHour(18.5) == 54.0 && Beach::RefillHour(30.0) == 54.0);
+    CHECK(Beach::RefillHour(29.0) == 54.0 && Beach::RefillHour(22.0) == 54.0 && Beach::RefillHour(9.99) == 30.0);
+    for (double pick = 6.0; pick < 80.0; pick += 0.37)
+    {
+        const double refill = Beach::RefillHour(pick);
+        CHECK(refill - pick >= Beach::MinRefillHours && refill - pick < Beach::MinRefillHours + 24.0);
+        CHECK(std::fmod(refill - 6.0, 24.0) == 0.0);
+    }
     const Inventory expected[] = {Beach::DailyYield(ResourceKind::Seashells), Beach::DailyYield(ResourceKind::Driftwood),
         Beach::DailyYield(ResourceKind::BeachPebbles), Beach::DailyYield(ResourceKind::MusselBed),
         Beach::DailyYield(ResourceKind::LaverRocks)};
@@ -110,7 +121,7 @@ void DailyFinds()
         for (int item = 0; item < ItemCount; ++item)
             CHECK(sim.Count(static_cast<Item>(item)) - before[item] == expected[i][item]);
         CHECK(!sim.Harvest(FirstId + i, Spot(i)));
-        CHECK(Node(sim, FirstId + i)->readyAtHour == Beach::NextMorning(sim.GetState().hour));
+        CHECK(Node(sim, FirstId + i)->readyAtHour == Beach::RefillHour(sim.GetState().hour));
     }
     const double morning = Node(sim, FirstId)->readyAtHour;
     // Saved and loaded, the picked finds stay picked until the morning.
@@ -126,6 +137,33 @@ void DailyFinds()
     for (int i = 0; i < 5; ++i) CHECK(sim.CanHarvest(FirstId + i));
     // Nothing on the beach can be cleared away for good.
     CHECK(!sim.Clear(FirstId, Spot(0)) && !Node(sim, FirstId)->cleared);
+}
+
+// A shore rock is solid, so she stops at its edge: gathering reaches past the centre by the edge allowance,
+// and other finds keep the plain 300 cm reach.
+void RockReach()
+{
+    CHECK(Beach::EdgeAllowanceCm(ResourceKind::MusselBed) > 0.0 && Beach::EdgeAllowanceCm(ResourceKind::LaverRocks) > 0.0);
+    CHECK(Beach::EdgeAllowanceCm(ResourceKind::Seashells) == 0.0 && Beach::EdgeAllowanceCm(ResourceKind::Driftwood) == 0.0);
+    const double reach = 300.0;
+    const double edge = Beach::RockEdgeAllowanceCm;
+    for (const int i : {3, 4})
+    {
+        Simulation sim;
+        CHECK(sim.NewEstateGame(ProvisionalEstateLayout(), Table()));
+        sim.AdvanceGameHours(15.0, Spot(0));
+        CHECK(sim.SetEnergy(100.0));
+        const Point centre = Spot(i);
+        CHECK(!sim.Harvest(FirstId + i, {centre.x + reach + edge + 5.0, centre.y}));
+        CHECK(sim.Harvest(FirstId + i, {centre.x + reach + edge - 5.0, centre.y}));
+    }
+    Simulation sim;
+    CHECK(sim.NewEstateGame(ProvisionalEstateLayout(), Table()));
+    sim.AdvanceGameHours(15.0, Spot(0));
+    CHECK(sim.SetEnergy(100.0));
+    const Point shells = Spot(0);
+    CHECK(!sim.Harvest(FirstId, {shells.x + reach + 5.0, shells.y}));
+    CHECK(sim.Harvest(FirstId, {shells.x + reach - 5.0, shells.y}));
 }
 
 void Campfire()
@@ -195,6 +233,7 @@ int main()
 {
     Catalogue();
     DailyFinds();
+    RockReach();
     Campfire();
     EstateBeach();
     std::cout << "HomesteadBeachTests passed (" << BeachChecks << " checks)\n";
