@@ -188,6 +188,19 @@ double Regrowth(ResourceKind kind)
     default: return 0.0;
     }
 }
+// Deserialize's readyAtHour floor assumes the earliest possible harvest (game start hour 6) plus a
+// kind's regrowth; it must never tighten when a later balance pass raises Regrowth(), or saves a
+// prior build wrote under the smaller constant are rejected as corrupt. Only the floor check uses
+// this; the upper bound and all new writes still use the current Regrowth().
+double RegrowthFloor(ResourceKind kind)
+{
+    switch (kind)
+    {
+    // Wild roots regrowth was 48 h before this build's rebalance to 72 h (card: roots rebalance).
+    case ResourceKind::Roots: return 48.0;
+    default: return Regrowth(kind);
+    }
+}
 Inventory Yield(ResourceKind kind)
 {
     switch (kind)
@@ -3415,7 +3428,7 @@ Result Simulation::Deserialize(const std::string& data)
         ResourceNode node;
         if (!GeneratedNode(candidate, entity, node) ||
             !FiniteRange(edit.readyAtHour, 0.0, candidate.hour + Regrowth(node.kind)) ||
-            (edit.readyAtHour != 0.0 && edit.readyAtHour < 6.0 + Regrowth(node.kind)) ||
+            (edit.readyAtHour != 0.0 && edit.readyAtHour < 6.0 + RegrowthFloor(node.kind)) ||
             (edit.cleared && edit.readyAtHour != 0.0) ||
             (!edit.cleared && (edit.readyAtHour == 0.0 || node.kind == ResourceKind::ForestTree))) return invalid();
         candidate.resourceEdits.push_back(edit);

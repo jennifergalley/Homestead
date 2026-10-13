@@ -3757,6 +3757,30 @@ void GeneratedFellingAndPersistentTimers()
     CHECK(loaded.Count(Item::Roots) == rootsBeforeClear + 2);
     InventoryRoundTrip(loaded);
 }
+// Card: roots rebalance raised wild-roots Regrowth from 48 h to 72 h. The save-validator's
+// readyAtHour floor (hour + Regrowth at game start) must not tighten with it: a save a
+// pre-rebalance build wrote with readyAtHour = hour + 48 must still load, not refuse as corrupt.
+void RootsRegrowthFloorAcceptsOldSaves()
+{
+    Simulation sim;
+    WorldStock(sim, {{Item::DiggingStick, 1}});
+    const auto roots = WorldNode(sim, ResourceKind::Roots);
+    const double hour = sim.GetState().hour;
+    OK(sim.Harvest(roots.id, roots.position));
+    ResourceNode resolved;
+    OK(sim.ResolveGeneratedResource(roots.key, resolved));
+    CHECK(!resolved.cleared && resolved.readyAtHour == hour + 72);
+    // Rewrite the edit as the pre-rebalance build (Regrowth(Roots) == 48) would have written it;
+    // Edit() round-trips through the real Deserialize validator, so a tightened floor fails here.
+    Edit(sim, [&](State& state) {
+        auto found = std::find_if(state.resourceEdits.begin(), state.resourceEdits.end(),
+            [&](const ResourceEdit& value) { return value.key == roots.key; });
+        CHECK(found != state.resourceEdits.end());
+        found->readyAtHour = hour + 48;
+    }, false);
+    OK(sim.ResolveGeneratedResource(roots.key, resolved));
+    CHECK(!resolved.cleared && resolved.readyAtHour == hour + 48);
+}
 void FellFixtureCell(Simulation& sim, int x, int y)
 {
     const auto nodes = sim.GetState().resources;
@@ -6328,6 +6352,7 @@ int main()
     Run("ground stacks stay small enough to pick up whole", GroundStacksStayPickable);
     Run("seeded resource identity and bounded region activation", GeneratedWorldIdentityAndActivation);
     Run("permanent generated felling and persistent renewable timers", GeneratedFellingAndPersistentTimers);
+    Run("roots regrowth floor accepts pre-rebalance saves", RootsRegrowthFloorAcceptsOldSaves);
     Run("cross-cell trunk footprint, chosen building sites and reload", GeneratedBuildingFootprintAndReload);
     Run("generated save validation and explicit sparse edit limit", GeneratedSaveValidationAndEditLimit);
     Run("long deterministic negative and positive chunk walk", LongDeterministicChunkWalk);
