@@ -599,6 +599,8 @@ public:
     int PackCapacity() const;
     int ChestUsedCapacity(int chestId) const;
     std::uint64_t GetRevision() const { return revision_; }
+    // How many "baresince" entries the last Deserialize dropped as unusable (see Crops::ReadBareSinceSection).
+    int DroppedBareSinceEntries() const { return droppedBareSince_; }
     const WearableInstance* GetWearable(int id) const;
     const InventoryLayout* GetLayout(int containerId) const;
     bool IsRaining() const;
@@ -914,6 +916,7 @@ private:
     std::uint64_t nextFishingToken_ = 1;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
+    int droppedBareSince_ = 0;
     int dozes_ = 0;
     int seasonChanges_ = 0;
     SeasonChange lastSeasonChange_;

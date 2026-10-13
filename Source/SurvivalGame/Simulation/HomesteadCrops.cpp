@@ -313,18 +313,24 @@ void WriteBareSinceSection(std::ostream& output, const State& state)
     output << '\n';
 }
 
-bool ReadBareSinceSection(std::istream& input, State& state)
+bool ReadBareSinceSection(std::istream& input, State& state, int& dropped, bool keep)
 {
     int count = 0;
-    if (!(input >> count) || count < 0 || count > static_cast<int>(state.plots.size())) return false;
+    if (!(input >> count) || count < 0 || count > MaxBareSinceEntries) return false;
     std::vector<int> seen;
     for (int i = 0; i < count; ++i)
     {
         int id = 0;
         double since = 0.0;
-        if (!(input >> id >> since) || !std::isfinite(since) || since < 0.0 || since > state.hour) return false;
+        if (!(input >> id >> since)) return false;
         const auto plot = std::find_if(state.plots.begin(), state.plots.end(), [id](const Plot& p) { return p.id == id; });
-        if (plot == state.plots.end() || plot->planted || std::find(seen.begin(), seen.end(), id) != seen.end()) return false;
+        const bool usable = keep && std::isfinite(since) && since >= 0.0 && since <= state.hour
+            && plot != state.plots.end() && !plot->planted && std::find(seen.begin(), seen.end(), id) == seen.end();
+        if (!usable)
+        {
+            ++dropped;
+            continue;
+        }
         seen.push_back(id);
         plot->bareSinceHour = since;
     }

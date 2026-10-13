@@ -3566,6 +3566,7 @@ Result Simulation::Deserialize(const std::string& data)
     bool travelSeen = false;
     bool felledSeen = false;
     bool bareSinceSeen = false;
+    int droppedBareSince = 0;
     {
         std::string tag;
         if (!(input >> tag)) return invalid();
@@ -3586,7 +3587,7 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Crops::WitheredSaveTag) { if (!Crops::ReadWitheredSection(input, candidate)) return invalid(); }
         else if (tag == Crops::BareSinceSaveTag)
         {
-            if (bareSinceSeen || !Crops::ReadBareSinceSection(input, candidate)) return invalid();
+            if (!Crops::ReadBareSinceSection(input, candidate, droppedBareSince, !bareSinceSeen)) return invalid();
             bareSinceSeen = true;
         }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
@@ -3652,6 +3653,7 @@ Result Simulation::Deserialize(const std::string& data)
     if (!populated) return populated;
     state_ = std::move(candidate);
     nextResourceHandle_ = nextHandle;
+    droppedBareSince_ = droppedBareSince;
     // Saves from before the lamp get its kit once.
     fishing_ = {};
     GrantLampKit();

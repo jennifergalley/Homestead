@@ -1955,20 +1955,42 @@ void BareSinceSaves()
     CHECK(old.GetState().plots.size() == 3);
     for (const auto& plot : old.GetState().plots) CHECK(plot.bareSinceHour == old.GetState().hour);
 
-    // Damaged sections are refused and leave the current game alone.
+    // A damaged entry never fails the load: it is dropped, counted, and its plot counts as just worked.
+    const std::string prefix = payload.substr(0, payload.find("baresince "));
+    const double now = sim.GetState().hour;
+    const auto loadsWith = [&](const std::string& body, int dropped, double expectedFirst) {
+        Simulation other;
+        OK(other.Deserialize(Envelope(prefix + body)));
+        CHECK(other.DroppedBareSinceEntries() == dropped);
+        CHECK(other.GetState().plots.size() == 3);
+        CHECK(Close(other.GetState().plots[0].bareSinceHour, expectedFirst, 1e-5));
+        CHECK(other.GetState().plots[1].bareSinceHour == other.GetState().hour);
+        Simulation again;
+        OK(again.Deserialize(other.Serialize()));
+        CHECK(again.DroppedBareSinceEntries() == 0 && again.Serialize() == other.Serialize());
+    };
+    const std::string planted = std::to_string(sim.GetState().plots[1].id);
+    const std::string bare = std::to_string(bareId);
+    const std::string early = std::to_string(now - 0.5);
+    loadsWith("baresince 1 " + planted + " 7\n", 1, now);
+    loadsWith("baresince 1 999 7\n", 1, now);
+    loadsWith("baresince 1 " + bare + " 99999\n", 1, now);
+    loadsWith("baresince 1 " + bare + " -1\n", 1, now);
+    loadsWith("baresince 2 " + bare + " " + early + " " + bare + " 2\n", 1, now - 0.5);
+    loadsWith("baresince 2 " + planted + " 7 " + bare + " " + early + "\n", 1, now - 0.5);
+    loadsWith("baresince 1 " + bare + " " + early + "\nbaresince 1 " + bare + " 2\n", 1, now - 0.5);
+
+    // Only a line that can't be parsed is refused, leaving the current game alone.
     const auto refuses = [&](const std::string& body) {
         Simulation other = sim;
         const std::string before = other.Serialize();
-        CHECK(!other.Deserialize(Envelope(payload.substr(0, payload.find("baresince ")) + body)).ok);
+        CHECK(!other.Deserialize(Envelope(prefix + body)).ok);
         CHECK(other.Serialize() == before);
     };
-    const std::string planted = std::to_string(sim.GetState().plots[1].id);
-    refuses("baresince 1 " + planted + " 7\n");
-    refuses("baresince 1 999 7\n");
-    refuses("baresince 2 " + std::to_string(bareId) + " 7 " + std::to_string(bareId) + " 8\n");
-    refuses("baresince 1 " + std::to_string(bareId) + " 99999\n");
-    refuses("baresince 1 " + std::to_string(bareId) + " -1\n");
-    refuses("baresince 1 " + std::to_string(bareId) + " 7\nbaresince 1 " + std::to_string(bareId) + " 7\n");
+    refuses("baresince\n");
+    refuses("baresince -1\n");
+    refuses("baresince 2 " + bare + " 7\n");
+    refuses("baresince 1 " + bare + " soon\n");
 }
 
 void FarmingAndRain()
