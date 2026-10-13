@@ -141,6 +141,11 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
 - **Work only while Jenny is around** (2026-10-04): no work overnight or during her workday. When she
   signs off or turns the computer off, lanes park, automations are cleared, and work resumes from
   where it stopped when she next asks.
+- **Shutting the PC down for Jenny** (2026-10-12): when she asks for the PC to be shut down (for
+  example after an overnight build), only the Orchestrator does it, and only once every session has
+  parked and no editor, build or package is running. Use a **forced** shutdown,
+  `shutdown /s /f /t 0`. A plain shutdown (`Stop-Computer`, `shutdown /s` without `/f`) is blocked by
+  open apps and silently does nothing.
 - **When Jenny pauses development to play,** every session stops launching editors and builds until
   she says to resume. Finish or park your current step, close your editor, and wait by ending your
   turn (see "Waiting means ending your turn" below).
