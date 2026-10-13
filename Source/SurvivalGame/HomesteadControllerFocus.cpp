@@ -49,7 +49,17 @@ void AHomesteadController::UpdateFocus()
     const bool bUnderground = IsUnderground();
     for (const auto& Node : State().resources)
         if (!Node.cleared && (Homestead::Mine::IsMineNodeKind(Node.kind) == bUnderground))
-            Consider(EFocus::Resource, Node.id, Node.position);
+        {
+            // A shore rock is measured from its edge (Beach::EdgeAllowanceCm), where she is stopped.
+            const double Edge = Homestead::Beach::EdgeAllowanceCm(Node.kind);
+            const double ToCentre = FMath::Sqrt(FMath::Square(Node.position.x - Position.x) + FMath::Square(Node.position.y - Position.y));
+            if (Edge > 0.0 && Node.readyAtHour <= State().hour && FMath::Max(0.0, ToCentre - Edge) < Best)
+            {
+                Best = FMath::Max(0.0, ToCentre - Edge); Focus = EFocus::Resource; FocusId = Node.id;
+                FocusTarget = Node.position; bHasFocusTarget = true;
+            }
+            else if (Edge <= 0.0) Consider(EFocus::Resource, Node.id, Node.position);
+        }
     ConsiderTrapdoorFocus(Consider);
     for (const auto& Drop : State().worldDrops)
         Consider(EFocus::Drop, Drop.id, Drop.position);
@@ -325,8 +335,8 @@ FString AHomesteadController::FocusActions() const
                 if (Node.kind == Homestead::ResourceKind::Seashells) return A + TEXT(" Pick up shells");
                 if (Node.kind == Homestead::ResourceKind::Driftwood) return A + TEXT(" Pick up driftwood");
                 if (Node.kind == Homestead::ResourceKind::BeachPebbles) return A + TEXT(" Pick up");
-                if (Node.kind == Homestead::ResourceKind::MusselBed) return A + TEXT(" Gather mussels");
-                if (Node.kind == Homestead::ResourceKind::LaverRocks) return A + TEXT(" Gather laver");
+                if (Node.kind == Homestead::ResourceKind::MusselBed) return A + TEXT(" ") + UTF8_TO_TCHAR(HomesteadActionHints::GatherMussels);
+                if (Node.kind == Homestead::ResourceKind::LaverRocks) return A + TEXT(" ") + UTF8_TO_TCHAR(HomesteadActionHints::GatherLaver);
                 return A + TEXT(" Gather");
             }
         return A + TEXT(" Gather");

@@ -171,13 +171,14 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::Bluebells:
     case ResourceKind::WildDaffodils:
     case ResourceKind::WildGarlic: return 72.0;
-    // Beach finds come back at the next 06:00 rollover (Beach::NextMorning), never more than a day away;
-    // the campfire's readyAtHour is when it burns out.
+    // Beach finds refill at the first 06:00 at least Beach::MinRefillHours after the pick (Beach::RefillHour),
+    // so never more than 20 + 24 h away; the bound below is for the save check. The campfire's readyAtHour
+    // is when it burns out.
     case ResourceKind::Seashells:
     case ResourceKind::Driftwood:
     case ResourceKind::BeachPebbles:
     case ResourceKind::MusselBed:
-    case ResourceKind::LaverRocks: return 24.0;
+    case ResourceKind::LaverRocks: return 48.0;
     case ResourceKind::BeachCampfire: return Beach::CampfireBurnHours;
     // Mine nodes: readyAtHour is set to the next 06:00 plus 0/24/48/96 h (HomesteadMine.cpp), so it never exceeds this.
     case ResourceKind::MineRockFace: return 24.0;
@@ -2042,7 +2043,7 @@ Result Simulation::Harvest(int nodeId, Point player)
         if (overgrowth->byHand) return ClearOvergrowth(nodeId, Item::Count, player);
         return Bad(std::string("Use a ") + ToolName(overgrowth->tool) + " to clear this.");
     }
-    if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
+    if (!Near(player, node->position, Reach + Beach::EdgeAllowanceCm(node->kind))) return Bad("Move closer to gather this resource.");
     if (Retired(node->kind)) return Bad("There's nothing here worth taking.");
     if (Mine::IsMineNodeKind(node->kind)) return Bad("Swing your pickaxe at this.");
     if (node->kind == ResourceKind::BeachCampfire) return LightBeachCampfire(nodeId, player);
@@ -2061,7 +2062,7 @@ Result Simulation::Harvest(int nodeId, Point player)
         updated->readyAtHour = 0.0;
     }
     else
-        updated->readyAtHour = Beach::IsDailyForage(node->kind) ? Beach::NextMorning(state_.hour)
+        updated->readyAtHour = Beach::IsDailyForage(node->kind) ? Beach::RefillHour(state_.hour)
             : state_.hour + Regrowth(node->kind);
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];

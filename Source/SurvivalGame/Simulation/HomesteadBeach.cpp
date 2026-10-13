@@ -15,6 +15,15 @@ double NextMorning(double hour)
     return next;
 }
 
+double RefillHour(double pickHour)
+{
+    const double earliest = pickHour + MinRefillHours;
+    double refill = std::ceil((earliest - Calendar::DayStartHour) / 24.0) * 24.0 + Calendar::DayStartHour;
+    // Floating-point guard: never earlier than the minimum bare time.
+    if (refill < earliest) refill += 24.0;
+    return refill;
+}
+
 Inventory DailyYield(ResourceKind kind)
 {
     Inventory yield{};
