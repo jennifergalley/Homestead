@@ -83,26 +83,15 @@
     "backlog:jenny-muw5uae9-2zgp1v": "next",
     "backlog:jenny-muuec1p1-u804w0": "next",
     "backlog:jenny-mutde36c-gtsw0n": "next",
-    "backlog:jenny-mv1jukpf-balow1": "next",
     "backlog:jenny-mv48a218-e7wpr0": "next",
-    "backlog:jenny-mv448c92-isp8wm": "next",
     "backlog:jenny-mv631ikm-gv0g4r": "next",
     "backlog:jenny-mus200pa-iiju4e": "next",
     "backlog:jenny-mv63toyx-xt8kh8": "next",
     "backlog:jenny-mv63vz7q-4k35kz": "next",
     "backlog:jenny-mv6409a7-11xb05": "next",
-    "backlog:jenny-mv643gkt-eggdtc": "next",
-    "backlog:jenny-mv647jvv-kplqgk": "next",
     "backlog:jenny-mv64e3n4-tncvf1": "next",
-    "backlog:jenny-mv4701b5-4flmli": "next",
     "backlog:jenny-mv46hauz-8qmvc0": "next",
-    "backlog:jenny-mv46ate4-mi5h3r": "next",
     "backlog:jenny-mv465zej-2nnt6t": "next",
-    "backlog:jenny-mv45zu94-atf5z0": "next",
-    "backlog:jenny-mv45ehn7-4lxps3": "next",
-    "backlog:jenny-mv44v075-kibbix": "next",
-    "backlog:jenny-mv44r23l-qtqeud": "next",
-    "backlog:jenny-muw7v31r-u4p6ku": "next",
     "backlog:jenny-mv65z3g4-l7esri": "next",
     "backlog:jenny-mv664mcu-4kg2li": "next",
     "backlog:jenny-mv66pr8c-x2zhbh": "next"
@@ -223,12 +212,67 @@
     "backlog:jenny-muucngve-dfc8a4",
     "fix-fullloop-woodland-queueclearcell"
   ],
-  "updated": "2026-10-13T05:01:52.168Z",
+  "updated": "2026-10-13T05:26:18.731Z",
   "merged": {
     "backlog:jenny-mv62x9e8-k3g6qz": {
       "sha": "049a7282ff0d58dcf0593c9f15d707e2f38d93ac",
       "mergedAt": "2026-10-13T04:24:06.000Z",
       "note": "Planner backlog search box (on main; ships in the next build)"
+    },
+    "backlog:jenny-mv448c92-isp8wm": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv647jvv-kplqgk": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv643gkt-eggdtc": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv4701b5-4flmli": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv46ate4-mi5h3r": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv1jukpf-balow1": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv45zu94-atf5z0": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv45ehn7-4lxps3": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv44v075-kibbix": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-mv44r23l-qtqeud": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
+    },
+    "backlog:jenny-muw7v31r-u4p6ku": {
+      "sha": "535114f36816b6d6605257c1b1871d8e5f046c72",
+      "mergedAt": "2026-10-13T05:26:18.722Z",
+      "note": "Polish Agent: 11 small cards"
     }
   }
 }
