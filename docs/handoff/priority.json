@@ -38,21 +38,16 @@
     "backlog:jenny-muupccau-7hxtoa",
     "backlog:jenny-muulxhvp-250x9a",
     "backlog:jenny-muulwcjc-gj9t19",
-    "backlog:jenny-muulwcho-6as7ci",
     "backlog:jenny-muuls4vu-tjln72",
     "backlog:jenny-muuls4v6-qjrmsp",
-    "backlog:jenny-muuls4to-xi7gl6",
     "backlog:jenny-muujt69b-39ivgg",
     "backlog:jenny-muujmxu4-wltdrt",
     "backlog:jenny-muuec1p1-u804w0",
-    "backlog:jenny-muue8oyh-kmm2zg",
     "backlog:jenny-muudyitz-cju6ta",
     "backlog:jenny-muudyitk-ivvrch",
     "backlog:jenny-muudyirr-dn5j2m",
-    "backlog:jenny-muucngx2-veoig6",
     "backlog:jenny-muucngwi-v8ki0g",
     "backlog:jenny-muucngvz-jtxxdm",
-    "backlog:jenny-muucngve-dfc8a4",
     "backlog:jenny-muucnguw-nc2d6p",
     "backlog:jenny-muucngtd-ksulr2",
     "backlog:jenny-mutde36c-gtsw0n",
@@ -81,8 +76,7 @@
     "backlog:jenny-mv3lucwr-gobgld",
     "backlog:jenny-mv3oddmp-cvpols",
     "backlog:jenny-mv3q32oa-bchhld",
-    "fix-seed-planting-hint-and-harvest-balance",
-    "fix-fullloop-woodland-queueclearcell"
+    "fix-seed-planting-hint-and-harvest-balance"
   ],
   "slots": {
     "backlog:jenny-mv1jsi38-balcu1": "next",
@@ -108,7 +102,8 @@
     "backlog:jenny-mv45zu94-atf5z0": "next",
     "backlog:jenny-mv45ehn7-4lxps3": "next",
     "backlog:jenny-mv44v075-kibbix": "next",
-    "backlog:jenny-mv44r23l-qtqeud": "next"
+    "backlog:jenny-mv44r23l-qtqeud": "next",
+    "backlog:jenny-muw7v31r-u4p6ku": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -218,7 +213,13 @@
     "backlog:jenny-mut6zr63-iu7hm9",
     "open-estate-mine-shallow-level",
     "backlog:jenny-mv455cm5-u3ccq9",
-    "backlog:jenny-mv45tx98-dlxn1q"
+    "backlog:jenny-mv45tx98-dlxn1q",
+    "backlog:jenny-muulwcho-6as7ci",
+    "backlog:jenny-muuls4to-xi7gl6",
+    "backlog:jenny-muue8oyh-kmm2zg",
+    "backlog:jenny-muucngx2-veoig6",
+    "backlog:jenny-muucngve-dfc8a4",
+    "fix-fullloop-woodland-queueclearcell"
   ],
-  "updated": "2026-10-13T03:54:03.608Z"
+  "updated": "2026-10-13T04:09:05.034Z"
 }

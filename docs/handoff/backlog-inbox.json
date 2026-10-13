@@ -754,10 +754,11 @@
     {
       "id": "jenny-mv46fddc-37pwup",
       "title": "Blue doors on cottages are unrealistic",
-      "description": "For one thing, who has a blue door? They should be stout wooden doors, panels that are worn by the elements, and they should have handles / door knobs.",
+      "description": "For one thing, who has a blue door? They should be stout wooden doors, panels that are worn by the elements, and they should have handles / door knobs. Please use the same new asset for the door on the standing room of the manor, as the one we have does not match the style of the stone ruins, it's too pristine and looks like it was made in paint.",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-11T18:48:42.096Z"
+      "createdUtc": "2026-10-11T18:48:42.096Z",
+      "updatedUtc": "2026-10-13T04:04:55.524Z"
     },
     {
       "id": "jenny-mv46hauz-8qmvc0",
@@ -920,6 +921,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-13T03:27:15.952Z"
+    },
+    {
+      "id": "jenny-mv65l7af-ew9fwg",
+      "title": "Add a nightly transition screen like Coral Island?",
+      "description": "Something that tells us everything we did that day, all the resources we gathered, what we sold and for how much, etc.?",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T04:00:46.887Z"
+    },
+    {
+      "id": "jenny-mv65lz2g-ocegvn",
+      "title": "Add skills",
+      "description": "e.g. farming, mining, clearing, etc that we level up in over time and that makes us faster at it / takes less energy?",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T04:01:22.888Z"
     }
   ]
 }
