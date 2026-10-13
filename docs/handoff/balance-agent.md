@@ -1,137 +1,100 @@
 # Balance Agent handoff
 
 Standing role (approved by Jenny 2026-10-04, proposed by Alex): reviews planned and finished
-features for balance and cohesion. Docs-only; holds no implementer slot.
+features for balance (energy, coins, yields, timers, pacing, travel) and cohesion (design, flavor,
+UI) against the pillars: cozy fun without grinding, then beauty (flowers everywhere), then
+verisimilitude. Docs-only; never edits game code; holds no heavy-job slot.
 
-| Field | Value |
-| --- | --- |
-| Session | ceb1109b-f156-451c-b890-ca91fa92f1c1 ("Balance Agent", from 2026-10-10; replaces archived 81a547cd) |
-| Branch / worktree | `jennifergalley-balance-agent-2c8` / `E:\Repos\copilot-worktrees\SurvivalGame\jennifergalley-supreme-broccoli` |
-| Model / configuration | Claude Opus 5.5, reasoning high, default context (as launched) |
-| Owned docs | `docs/design/balance.md`, `docs/design/cohesion.md`, this file |
+**Start here (next Balance Agent):** read `docs/design/balance.md` and `docs/design/cohesion.md`,
+then the "Open" list below. Lanes consult you at planning and before `[ready]`; answer within one
+turn. Send docs `[ready]`s and backlog suggestions to the current Orchestrator (see the round page).
 
-## Done
+## Sessions
 
-- 2026-10-04: balance sheet and cohesion guide (with UI polish audit) written from `main` `b77c5c38`.
-- 2026-10-04: fishing (9 PM) review sent to Gameplay UI and Fishing Art, cc Orchestrator. Numbers
-  and pole price approved; blocking copy fixes adopted by Gameplay UI along with a 0.7 s strike
-  window.
+| Segment | Session | Branch / worktree | Model / configuration | Dates |
+| --- | --- | --- | --- | --- |
+| 1 | `81a547cd` (archived 2026-10-09) | `jennifergalley-balance-agent` / `...\jennifergalley-probable-funicular` | Claude Opus 5.5, high, default context | 2026-10-04 – 10-09 |
+| 2 | `ceb1109b-f156-451c-b890-ca91fa92f1c1` (retired 2026-10-12) | `jennifergalley-balance-agent-2c8` / `E:\Repos\copilot-worktrees\SurvivalGame\jennifergalley-supreme-broccoli` | Claude Opus 5.5, high, default context (as launched; no model changes) | 2026-10-10 – 10-12 |
 
-- 2026-10-04: fishing final balance OK (numbers, copy, visuals) on `9958a359` / Art `abead265`.
-  Non-blocking polish sent: one catch toast "Caught a lake carp.", cue panel off the heroine,
-  larger fish glyphs, shorter refusal/escape lines.
+AI credits: segment 2's usage wasn't measured in-session. Integration's accounting export for the
+round should attribute session `ceb1109b` to round 4 (map shrink stage 2, coast, beach, cave, mine,
+polish) as review-only work. All work is docs commits; the last is the commit carrying this file.
 
-- 2026-10-10: map-shrink stage 2 budget sent to the Map Agent (4ff1041f) ahead of its consult:
-  cove and mine 35–50 s (cap 60 s), manor core/pond/village unchanged, estate about 35–50 ha,
-  neighbour and communal sizing (`balance.md` §9).
-- 2026-10-10: Map Agent layout draft reviewed (cove 50 s, mine 38 s, estate 36 ha). OK on travel,
-  with 3 blocking items: keep tool-head salvage and about 1,500 coins of clearing on her land; no
-  path running into the invisible edge; rename "Wheal Woods".
-- 2026-10-10: revised layout Balance OK. All clearing stays on her land (about 4,900 coins); the
-  road ends at a gate and milestone ("Truro 14 miles"); Carn Wood; forage topped up to about 65;
-  cliff landings with rails. Still due: in-game sprint timings and a cliff-step check before the
-  Map Agent's [ready].
-- 2026-10-10: in-game evidence Balance OK (cove 58.2 s down / 58.9 s up, mine 33.4 s; landings,
-  rails, mine on her land). Asked for grass/heath and flowers on the bare cliff face and steps cut
-  before [ready] if cheap; otherwise card it as "[Balance] Dress the cove cliff and cut".
-- 2026-10-10: Names Agent (72b7d774) rename table OK with small changes (Gull Sands, "my dear",
-  en dashes, pasty/Cornish sweep). After Jenny picks the names, rewrite `cohesion.md` §1–2 to
-  neutral rural English (estate, clerk, store, neighbours, places) and update `balance.md` names.
-- 2026-10-10: Beach Agent (8c44fafc) plan approved with trimmed numbers (`balance.md` §8a; laver
-  instead of sea lettuce). Awaiting its pre-[ready] screenshot, sell lines and cooked dish.
-- 2026-10-10: cohesion.md §1–2 rewritten with Jenny's names (`281803b3a`); told Names Agent the
-  sign initial is "C." (Callum).
-- 2026-10-10: Cave Agent (d6ef3d58) sea-cave plan OK: night glow, a safe pool, flowers and ferns, 2
-  beach nodes at the mouth from the Beach Agent's 40, map label "Sea cave". Awaiting day and night
-  screenshots.
-- 2026-10-10: Gameplay Agent (5b555e6e) batch OK: meadow herbs 38 → 19 patches (keep 10 coins;
-  57 herbs a day), fingerposts replace the travel signs, ridges cleared only under tilled plots,
-  the standing-room berry bush removed, "Start a new game". Awaiting screenshots.
-- 2026-10-10: Lighting Agent (0816ef4d) persistent-moonlight night OK at 0.2 lux ground (Set A
-  unchanged); suggested village lit windows as later polish.
-- 2026-10-10: Map Agent (94e0bd8e) mixed-coast plan: I proposed a 90 s cove cap for a step-free
-  1-in-4 path; the Orchestrator reverted it to Jenny's call (options: 1-in-4 ~90 s, a lower cove
-  site, or a slope plus one short flight). Jenny picked the slope plus one or two short stone
-  flights: about 350 m, cap 75 s (§9 updated).
-- 2026-10-11 (night): Map Agent coast evidence OK to ship: cove 80 s / 378 m (5 s over; asked it
-  to trim if that's quick), cave 13 s from the path foot, mine link on the terrace, village street
-  8% average. Carded: viewpoint bench. The west cliff, bare cove-head slope, cliff striations and
-  straight waterline became the Orchestrator's blocking fixes instead; re-check shots 03 and 04 in
-  the Map Agent's next [review]. Later: Map round 2 approved by the Orchestrator; the west-cliff
-  rock face moved into this build under the Cave Agent (re-check it in the cave's review).
-- 2026-10-11 (night): Map Agent shipped the street-grade card; the village walk is now about 90 s
-  (432 m), up from about 60 s, past the 75 s cap. Carded for Jenny to choose grade vs time. Cove
-  ships at 80 s.
-- 2026-10-11 (night): Cave Agent final check: night chamber good; 3 blocking items (rock face
-  reads as rows of placed boulders and the mouth block has a seam; the day pool is an opaque glowing
-  disc; thrift, ferns and tideline nodes not visible). Goblin's gold deferred, carded. Awaiting
-  re-shot 01/03/04.
-- 2026-10-11: cave re-shots OK to ship as a first pass (outcrops read as rock, pool no longer
-  glows). Rock face, pool clarity and shaft, planting and goblin's gold carded; tideline nodes ship
-  with the Beach branch.
-- 2026-10-11: Beach Agent pre-[ready]: numbers, copy, 06:00 refresh and campfire OK. Blocking: the
-  three new meal icons are photo-like rectangles, not the ink house style. Carded: laver held
-  handful and held shell. Check after merge that the store title reads Aldridge's. Icons redrawn
-  in the house style; Balance OK for [ready].
-- 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
-  slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
-  "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
+## Owned docs
 
-## Open
+`docs/design/balance.md` (numbers sheet), `docs/design/cohesion.md` (flavor, copy, UI, beauty),
+this file. Mine numbers also live in `openspec/changes/open-estate-mine-shallow-level/design.md` §7.
 
-- 2026-10-11: filled `open-estate-mine-shallow-level` design §7 (mine numbers and manor stone
-  budget) and §8 views; summary in `balance.md` §8b. Waiting on Jenny's D1–D5 answers; re-check
-  the numbers before the mine lanes' [ready].
-- 2026-10-11: Mine Gameplay (d3cc45c6) pre-[ready]: numbers match §7. Blocking: MineFill 0.03 is
-  pitch black, so asked for 0.07–0.08 (awaiting a re-shot). Carded: the per-swing toast, the copper
-  ore icon colour, "bring the lamp closer" copy, and matching fingerpost arms. The lane adopted
-  them all (MineFill 0.075), so the cards were withdrawn; the unlit re-shot is due at its v3 pass.
-  Jenny then chose MineFill 0.05: judge the re-shot at 0.05 (outlines of walls, timbers and rails
-  faintly readable, the way out findable).
-- 2026-10-11: Mine Gameplay v3 shots: Balance OK on numbers, copy, the lamp rule and the daylight
-  pool. On v3's darker surfaces 0.05 is pitch black; recommended 0.1 (it looks like the 0.05 Jenny
-  approved on v2), with the final call Jenny's via the Orchestrator. Jenny chose 0.1.
-- 2026-10-11: Mine Art (029d7c8b) house look check: the engine-house form is OK (Jenny chose it for
-  D5). Blocking: green cast on the stone outside and on the limewash inside, mortar smears and the
-  bare apron, the 25-stone pile unreadable, flowers at the wall foot and path. Cards to send after
-  its re-shots: yard dressing, wood-brown frames, homely interior props. Re-shots: cohesion OK,
-  on condition the packaged/RT-on shots in Jenny's [review] show no green cast; iron trapdoor
-  hardware suggested. The three cards were sent to the Orchestrator.
-- 2026-10-11: Jenny dropped gem nodes (now 7 coal, 6 copper). Set gem drops at 3% per rock face
-  and 10% per vein, 85/15 quartz/amethyst, one roll per mined node (design §7, `balance.md` §8b).
-  Mine Gameplay applied it (native test: rock 8/400, coal 45/400); Balance OK.
-- 2026-10-11: Mine Art RT-on shots: the interior and trapdoor hardware are OK. Still blocking: the
-  exterior lichen reads olive-green, and the trapdoor, crate and barrel are pale, untextured wood.
-  Awaiting re-shots 02 and 23. Fix round: Balance OK for [ready] (lichen cut to a third, the
-  trapdoor in floor wood, the barrel removed); a lighter-granite card only if packaged shots still
-  look olive.
-- 2026-10-12: Polish Agent (7d7c9a21) roots rebalance approved: 5-day crop, herbed 25 and roasted
-  19, nodes 1 seed / 72 h, "Wild root seeds" copy. `balance.md` §4–§6 and §9 updated.
-- 2026-10-12: Polish Agent: beach finds refill at the first 06:00 at least 12 h after picking (all
-  finds; first said 20 h, corrected after Polish showed it skipped a day for picks after 10:00); bare tilled plots revert at 20% per morning after 24 h bare. `balance.md` §4 and §8a.
+## Decisions this round (2026-10-10 – 10-12), all recorded in the docs
 
-- My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
-  snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
-  "[Balance UI]" cards, added by the Orchestrator 2026-10-04.
+- **Map (§9 travel):** estate about 25 ha (Jenny's call). Farm 8–12 s, pond 44 s, mine 33 s. The
+  cove is 80 s / 378 m on Jenny's pick of a mostly-slope path with two short stone flights (cap
+  75 s). The village walk is about 90 s after Jenny's scheduled street-grade card. Neighbours
+  Ashgrove, Brackenburn and Thornley; Hollin Wood is for sale; Gull Sands is the communal beach
+  (about 600 m from the village, accepted); the road ends at "Marlbury 9 miles".
+- **Names (cohesion §1–2):** no Cornish or Poldark names. Larkhollow, Mr. Callum Aldridge
+  ("Aldridge's general store", sign "C. ALDRIDGE – PROVISIONS & SUNDRIES"), "Pasty", "the village".
+- **Beach (§8a):** 40 finds (about 440 coins and 20 energy a day). Laver, not sea lettuce. Meals:
+  steamed mussels 25, broth 35, fried laver 19. The campfire takes 3 driftwood and burns 4 h. Finds
+  refill at the first 06:00 at least 12 h after picking.
+- **Night:** 0.2 lux moonlight (Set A).
+- **Mine (§8b, design §7):** 20 rock faces at 3 swings, 2.5 energy and about 6 stone each, back
+  daily. 7 coal seams and 6 copper veins. No gem nodes: gems drop at 3% per face and 10% per vein,
+  85/15 quartz/amethyst. Prices: coal 10, copper ore 25, quartz 35, amethyst 150. A 25-stone pile
+  upstairs. Unlit tunnels at MineFill 0.1 (Jenny); mining needs a lit lamp within 4 m.
+- **Manor (§8b):** 5 stages, 1,500 stone, 215 timber and 7,000 coins in total, about 12 game days.
+  Jenny's D1: materials in estate chests plus a village mason; restored overnight.
+- **Polish (§4–§6):** wild roots grow in 5 days; herbed roots 25 and roasted 19 energy; wild nodes
+  give 1 seed and regrow in 72 h; "Wild root seeds". Meadow herbs halved (19 patches, still 10
+  coins). Bare tilled plots revert at 20% per morning after 24 h bare.
+
+## Open (for the next Balance Agent)
+
+- **Mine house (Mine Art `029d7c8b`):** Balance OK for `[ready]`, on the condition that Jenny's
+  review includes an RT-on or packaged exterior shot. If the walls still look olive there, card
+  "[Balance] Lighter granite on the mine house" rather than hold the build.
+- **Mine tunnels:** Mine Art sends the tunnel captures separately; they haven't been reviewed for
+  cohesion yet. Check: timber sets, never pitch black at MineFill 0.1, a daylight pool at the ladder
+  foot, no bare greybox.
+- **Post-merge checks:** the store title reads "Aldridge's" (the beach shots still showed
+  "Trethewey's"); the sea cave's 2 tideline nodes from the Beach branch sit at the cave mouth.
+- **Manor restoration (`rebuild-manor-and-decorate`):** when it's planned, hold it to the §8b stage
+  budget and Jenny's D1 (chests plus mason, overnight).
+- **Cards sent this round** (the Orchestrator files them; check their current text in
+  `docs/handoff/backlog-inbox.json` before suggesting retirement):
+  - **Village and map:** village walk grade or time; bench viewpoint on the cove path; lit village
+    windows at night; distances on fingerposts.
+  - **Sea cave:** finish the rock face; clear pool water and a light shaft; planting and goblin's
+    gold.
+  - **Beach:** held laver and shell read better.
+  - **Mine house:** yard dressing; homely props. The weathered-wood frames card was dropped
+    (done).
+  - **Older cards:** my first 12 suggestions (2026-10-04) are on the backlog as "[Balance]" /
+    "[Balance UI]".
 
 ## Backlog suggestions rule (Jenny, 2026-10-04)
 
-Every suggestion I make (balance, cohesion/UI, polish) becomes a backlog card tagged with its
-source. End each review by sending the Orchestrator a "Backlog suggestions" list: one line per
-card with a title, a one-sentence description and the doc section it came from. The Orchestrator
-adds them through the planner; I never edit the backlog files myself. Before suggesting a card be
-retired, check its current text in `docs/handoff/backlog-inbox.json` / `priority.json`: Jenny may
-have rewritten it (she turned "sleep 15/h" into "Sleep always resets the energy bar entirely").
+Every suggestion (balance, cohesion/UI, polish) becomes a backlog card tagged with its source. End
+each review by sending the Orchestrator a "Backlog suggestions" list: one line per card with a
+title, a one-sentence description and the doc section it came from. The Orchestrator adds them
+through the planner; never edit the backlog files yourself. Withdraw a suggestion when the lane
+adopts it before shipping.
 
-## How lanes reach me
+## How lanes reach the Balance Agent
 
-Orchestrator from 2026-10-11 afternoon: `fc0ce9e2-4586-4dec-8f40-6561960819c3` (replaces
-`cfe8292c`). Send [ready]s and backlog suggestions there.
+Order for new assets and animations (Jenny, 2026-10-04): the lane sends review media (screenshots
+plus MP4) and gets a cohesion OK or blocking changes first. It then sends the batch to Jenny, who
+approves it before `[ready]`. The Balance OK doesn't replace hers.
 
-Order for new assets and animations (Jenny, 2026-10-04): the lane sends me review media
-(screenshots plus MP4) and I give a cohesion OK or blocking changes. The lane then sends the batch
-to Jenny, and she approves it before [ready]. My OK comes first; it doesn't replace hers.
-
-Send the short proposal or final numbers/copy (plus a screenshot path for visible work) with
-`send_session_message`, delivery mode immediate. I answer with approve / approve-with-numbers or
+Lanes send the short proposal or final numbers/copy (plus a screenshot path for visible work) with
+`send_session_message`, delivery mode immediate. Answer with approve / approve-with-numbers or
 "balance OK" / blocking changes within one turn.
+
+Lessons from this round:
+- Check a timing rule against the whole waking day before setting it (the 20 h beach refill
+  skipped a day for picks after 10:00).
+- A playtested complaint from Jenny ("too far", "fine as is") outranks a Balance cap. When a fix
+  trades against her stated preference, put the options to her through the Orchestrator rather than
+  relaxing the cap yourself.
+- Judge darkness and colour on the final surfaces and lighting (RT-on or packaged), not on greybox
+  or RT-off captures.
