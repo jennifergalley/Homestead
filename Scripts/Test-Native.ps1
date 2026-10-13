@@ -39,4 +39,13 @@ if ($LASTEXITCODE -ne 0) { throw "Native CMake configuration failed ($LASTEXITCO
 & $cmake --build $build --config $Configuration
 if ($LASTEXITCODE -ne 0) { throw "Native compilation failed ($LASTEXITCODE)." }
 & $ctest --test-dir $build -C $Configuration --output-on-failure --timeout 1800
-if ($LASTEXITCODE -ne 0) { throw "Native tests failed ($LASTEXITCODE)." }
+if ($LASTEXITCODE -ne 0) {
+    $code = $LASTEXITCODE
+    $failed = Join-Path $build 'Testing\Temporary\LastTestsFailed.log'
+    if (Test-Path -LiteralPath $failed) {
+        Write-Host 'Failed suites:'
+        Get-Content -LiteralPath $failed | ForEach-Object { Write-Host "  $($_ -replace '^\d+:', '')" }
+        Write-Host "Full output: $(Join-Path $build 'Testing\Temporary\LastTest.log'). Rerun only these with: & '$ctest' --test-dir '$build' -C $Configuration --rerun-failed --output-on-failure"
+    }
+    throw "Native tests failed ($code)."
+}
