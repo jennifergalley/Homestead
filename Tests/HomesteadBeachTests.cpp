@@ -88,9 +88,10 @@ void DailyFinds()
     // The morning rollover: strictly after the hour, never more than a day ahead.
     CHECK(Beach::NextMorning(6.0) == 30.0 && Beach::NextMorning(5.5) == 6.0 && Beach::NextMorning(29.99) == 30.0);
     CHECK(Beach::NextMorning(30.0) == 54.0);
-    // A picked find refills at the first 06:00 at least 20 h later: a daytime pick is back tomorrow morning,
-    // a pick at 05:00 (hour 29) or late in the evening skips the very next 06:00.
-    CHECK(Beach::RefillHour(10.0) == 30.0 && Beach::RefillHour(12.0) == 30.0 && Beach::RefillHour(30.0) == 54.0);
+    // A picked find refills at the first 06:00 at least 12 h later: any pick from 06:00 to 18:00 is back tomorrow
+    // morning; an evening or night pick (or one at 05:00) skips the very next 06:00.
+    CHECK(Beach::RefillHour(10.0) == 30.0 && Beach::RefillHour(12.0) == 30.0 && Beach::RefillHour(18.0) == 30.0);
+    CHECK(Beach::RefillHour(18.5) == 54.0 && Beach::RefillHour(30.0) == 54.0);
     CHECK(Beach::RefillHour(29.0) == 54.0 && Beach::RefillHour(22.0) == 54.0 && Beach::RefillHour(9.99) == 30.0);
     for (double pick = 6.0; pick < 80.0; pick += 0.37)
     {

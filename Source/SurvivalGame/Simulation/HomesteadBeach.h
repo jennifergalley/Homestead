@@ -41,7 +41,7 @@ constexpr double EdgeAllowanceCm(ResourceKind kind)
 // The running game hour of the next 06:00 day rollover strictly after `hour`.
 double NextMorning(double hour);
 // A picked beach find is bare for at least this long, then waits for the next 06:00.
-constexpr double MinRefillHours = 20.0;
+constexpr double MinRefillHours = 12.0;
 // When a daily beach find picked at `pickHour` refills: the first 06:00 at least MinRefillHours later.
 // One rule for every beach find, so picking at 05:00 can't double-dip into the following morning.
 double RefillHour(double pickHour);

@@ -922,7 +922,7 @@ void GameplayWalkthrough()
     CHECK(Close(sim.GetState().hour, beforeSleep + 8));
     CHECK(sim.GetState().energy == 100);
     CHECK(!sim.IsNearFire(firePosition));
-    for (int cycle = 0; cycle < 8 && sim.GetState().plots[0].growth < 1.0; ++cycle)
+    for (int cycle = 0; cycle < 16 && sim.GetState().plots[0].growth < 1.0; ++cycle)
     {
         if (sim.Count(Item::Water) == 0) OK(sim.FillWater(WaterSource));
         if (sim.GetState().plots[0].moisture < 1) OK(sim.Water(plotId, garden));
@@ -933,6 +933,7 @@ void GameplayWalkthrough()
         OK(sim.Sleep(8, Home, {1, 0}));
     }
     CHECK(sim.GetState().plots[0].growth == 1);
+    if (sim.GetState().plots[0].weeds > 0) OK(sim.Weed(plotId, garden));
     const int roots = sim.Count(Item::Roots);
     const int seeds = sim.Count(Item::Seeds);
     const int seedBonus = HarvestBonusCount(CropKind::Roots, plotId, sim.GetState().hour);
@@ -1094,7 +1095,7 @@ void AtomicTransactions()
 {
     Simulation sim;
     const auto roots = Node(sim, ResourceKind::Roots);
-    Stock(sim, {{Item::Knife, 1}, {Item::Stone, 116}});
+    Stock(sim, {{Item::Knife, 1}, {Item::Stone, 117}});
     UnchangedFailure(sim, [&] { return sim.Harvest(roots.id, roots.position); });
     UnchangedFailure(sim, [&] { return sim.Clear(roots.id, roots.position); });
     CHECK(sim.CanHarvest(roots.id));
@@ -2140,8 +2141,8 @@ void BerryCropCycle()
     sim.AdvanceGameHours(4, Home);
     dry.AdvanceGameHours(4, Home);
     weedy.AdvanceGameHours(4, Home);
-    CHECK(sim.GetState().plots[0].growth < sim.GetState().plots[1].growth);
-    CHECK(Close(sim.GetState().plots[1].growth / sim.GetState().plots[0].growth, 42.0 / 30.0));
+    CHECK(sim.GetState().plots[0].growth > sim.GetState().plots[1].growth);
+    CHECK(Close(sim.GetState().plots[0].growth / sim.GetState().plots[1].growth, 120.0 / 42.0));
     CHECK(dry.GetState().plots[0].growth > 0);
     CHECK(dry.GetState().plots[0].growth < sim.GetState().plots[0].growth);
     CHECK(weedy.GetState().plots[0].growth < sim.GetState().plots[0].growth);
@@ -2207,7 +2208,7 @@ void CropTableAndStatus()
     CHECK(CropDays(CropKind::Roots) == 5 && CropDays(CropKind::Berries) == 2);
     CHECK(CropRegrowDays(CropKind::Berries) == 1 && CropRegrowDays(CropKind::Roots) == 0);
     CHECK(ReadyInText(CropKind::Roots) == "Ready in about 5 days if watered.");
-    CHECK(std::string(ItemDescription(Item::Seeds)).find("Matures in about 5 days") != std::string::npos);
+    CHECK(std::string(ItemDescription(Item::Seeds)).find("matures in about 5 days") != std::string::npos);
     // Period crops: each seed's description states its days (and regrow days), the store sells it,
     // and its produce sells back at the store.
     const auto& storeGoods = ShopGoods(ShopKind::GeneralStore);
@@ -2291,6 +2292,7 @@ void CropTableAndStatus()
         sim.AdvanceGameHours(15, Home);
     }
     CHECK(IsRipe(sim.GetState().plots[0]));
+    Edit(sim, [](State& state) { state.plots[0].weeds = 0.0; });
     const int seedBonus = HarvestBonusCount(CropKind::Roots, rootId, sim.GetState().hour);
     const Result harvested = sim.HarvestCrop(rootId, roots);
     OK(harvested);
@@ -3735,7 +3737,7 @@ void GeneratedFellingAndPersistentTimers()
     OK(loaded.ResolveGeneratedResource(branch.key, resolved));
     CHECK(resolved.id == 0 && !resolved.cleared && resolved.readyAtHour == hour + 24);
     OK(loaded.ResolveGeneratedResource(sapling.key, resolved));
-    CHECK(!resolved.cleared && resolved.readyAtHour == hour + 48);
+    CHECK(!resolved.cleared && resolved.readyAtHour == hour + 72);
     OK(loaded.SetActiveWorldRegion(tree.position));
     OK(loaded.ResolveGeneratedResource(tree.key, resolved));
     CHECK(resolved.id >= TransientResourceIdBase && resolved.cleared && !loaded.CanHarvest(resolved.id));

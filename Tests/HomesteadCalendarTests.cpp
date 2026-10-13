@@ -467,6 +467,12 @@ void CropSeasonsAndWithering()
     // Spring 26: carrots still have Summer ahead; potatoes are sown too late, with a warning.
     OK(sim.PassDaysForPlaytest(25.0, true, at(0)));
     CHECK(sim.DayNumber() == 26 && IsRipe(PlotById(sim, plots[0])));
+    // Plots left bare for days may have reverted to ground; till them again.
+    for (int i = 1; i < 4; ++i)
+    {
+        (void)sim.Till(gx + i, gy, at(i));
+        plots[i] = sim.FindNearestPlot(at(i), 1);
+    }
     OK(sim.Plant(plots[1], at(1), CropKind::Carrots));
     const Result late = sim.Plant(plots[2], at(2), CropKind::Potatoes);
     OK(late);

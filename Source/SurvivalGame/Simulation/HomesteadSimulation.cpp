@@ -3218,7 +3218,8 @@ Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimi
     state_.energy = 100.0;
     // Slept through 6 AM: the day's weeds are up when she wakes.
     Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
-    Crops::RevertBareSoil(state_, Crops::WeedDay(state_.hour) - weedDay); Your garden and fires continued through the night.");
+    Crops::RevertBareSoil(state_, Crops::WeedDay(state_.hour) - weedDay);
+    return Good("You wake rested. Your garden and fires continued through the night.");
 }
 
 std::string Simulation::Serialize() const
@@ -3567,6 +3568,7 @@ Result Simulation::Deserialize(const std::string& data)
     bool felledSeen = false;
     bool bareSinceSeen = false;
     int droppedBareSince = 0;
+    while (!input.eof())
     {
         std::string tag;
         if (!(input >> tag)) return invalid();
