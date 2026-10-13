@@ -18,6 +18,10 @@ role, model or standing session changes. Model settings are **required for futur
 
 Feature lanes (Gameplay/UI, Environment, Art and so on) are spawned fresh per build and
 archived when their work ships. Never archive a session whose worktree holds something still needed.
+**Standing roles get fresh sessions too** (Jenny, 2026-10-12): Integration, Balance, Docs and Test
+Tools are spawned fresh for each build or big new batch, starting from the role's handoff file, and
+the old session retires once its handoff and commits are on `main`. A 3-day Integration session ran
+at a full context and turned a 10-minute closure into 1h40m.
 
 ### Models
 

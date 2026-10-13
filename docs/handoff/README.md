@@ -115,6 +115,12 @@ names sessions this way when it creates them. The round page maps names to sessi
 If the round page lists no docs agent, or the one listed is archived, ask the orchestrator to spawn
 one (`send_session_message`). Until one exists, record findings yourself in the canonical doc.
 
+**Fresh standing sessions per batch** (Jenny, 2026-10-12). Integration, Balance, Docs and Test Tools
+are standing *roles*, not standing sessions. The orchestrator spawns a fresh session for each build or
+big new batch of work, starting from the role's handoff file (`integration-handoff.md`,
+`balance-agent.md`, ...), and retires the old one once its handoff and commits are on `main`. Reuse a
+live session only for a tightly related follow-up in the same batch.
+
 ## Waiting: end your turn, don't loop
 
 Jenny's standing rule for every session. A session that's waiting (for an editor slot, the UBT queue,
