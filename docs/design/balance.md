@@ -116,7 +116,9 @@ the first harvest.
 | Wild berry bush | – | 42 h | every 24 h | 6 × 6 | 36 | free | |
 
 Care: the pail holds 15 portions, and planting and watering cost 0.4 energy each. Each plot has a
-35% daily chance of gaining weeds (+0.2).
+35% daily chance of gaining weeds (+0.2). A tilled plot left bare for 24 h then has a 20% chance
+each morning at 06:00 of going back to untilled ground (about 5 mornings on average; any crop in
+it, or tilling, watering or harvesting within 24 h, protects it). Jenny's card, 2026-10-12.
 
 ✅ The shape is good: free but slow wild roots as a fallback, steady root crops and greens, and slow but lucrative
 regrowers. Margins of about 100% (turnips) are healthy.
@@ -256,7 +258,9 @@ above crops, so the daily-cap idea above is parked until a playtest.
 | Mussel bed | 8 | 3 mussels (6) | 144 |
 | Laver rocks | 8 | 2 laver (4) | 64 |
 
-0.5 energy per node, all refreshing at 06:00: about 440 coins and 20 energy a day, mostly on her own
+0.5 energy per node, all refreshing once a day: a picked node comes back at the first 06:00 at
+least 20 game hours later (Jenny, 2026-10-12; previously the next 06:00, so a 05:00 pick came back an
+hour later). That's about 440 coins and 20 energy a day, mostly on her own
 cove. ✅ That's a pleasant daily stroll, roughly fishing's per-minute rate but capped, so it doesn't
 crowd out crops. The Beach Agent proposed 56 nodes (about 830 coins); trimmed here.
 
