@@ -231,8 +231,7 @@ void SHomesteadMenu::BuildDialog()
     {
         Title = TEXT("Name this chest");
         Description = FString::Printf(TEXT("Type a name of up to %d letters and press Enter, or choose one below. ")
-            TEXT("You'll see it when you walk up to the chest.\n\nName:  %s_"),
-            Homestead::Chests::MaxNameLength, *RenameDraft);
+            TEXT("You'll see it when you walk up to the chest."), Homestead::Chests::MaxNameLength);
         Labels = {TEXT("Cancel"), TEXT("Save name"), FString::Printf(TEXT("Clear name (%s)"), UTF8_TO_TCHAR(Homestead::Chests::DefaultName))};
         for (const TCHAR* Suggestion : MenuChestNames::Suggestions) Labels.Add(FString::Printf(TEXT("Call it %s"), Suggestion));
     }
@@ -298,7 +297,22 @@ void SHomesteadMenu::BuildDialog()
         || Dialog == EDialog::SaveFailed || Dialog == EDialog::GraphicsFailed;
     DialogButtons.Reset();
     AmountControl.Reset();
-    ModalHost->SetVisibility(EVisibility::Visible);
+    // While she types, only the name line's text changes (read live from RenameDraft); the card is never
+    // rebuilt, so its height and the choices' scroll position stay put.
+    TSharedRef<SWidget> DescriptionBody = Text(Description, bCompactQuit ? 14 : 20);
+    if (Dialog == EDialog::RenameChest)
+    {
+        DescriptionBody = SNew(SVerticalBox)
+            + SVerticalBox::Slot().AutoHeight()[ Text(Description, 20) ]
+            + SVerticalBox::Slot().AutoHeight().Padding(0, 14, 0, 0)
+            [
+                SNew(SBox).MinDesiredHeight(32)
+                [
+                    SNew(STextBlock).ColorAndOpacity(Ink).Font(HomesteadUITheme::Font("Regular", 20))
+                    .Text_Lambda([this]() { return FText::FromString(FString::Printf(TEXT("Name:  %s_"), *RenameDraft)); })
+                ]
+            ];
+    }
     ModalHost->SetContent(
         // A compact card centred over a dimmed screen, not a full-width sheet.
         SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
@@ -316,7 +330,7 @@ void SHomesteadMenu::BuildDialog()
                     + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ Text(Title, bCompactQuit ? 20 : 30) ]
                     + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 18)
                     [ SNew(SBox).MaxDesiredHeight(360)
-                        [ SNew(SScrollBox) + SScrollBox::Slot()[ Text(Description, bCompactQuit ? 14 : 20) ] ] ]
+                        [ SNew(SScrollBox) + SScrollBox::Slot()[ DescriptionBody ] ] ]
                     + SVerticalBox::Slot().AutoHeight()
                     [
                         SNew(SBox).MaxDesiredHeight(230)
@@ -433,9 +447,6 @@ bool SHomesteadMenu::TypeChestNameCharacter(TCHAR Character)
         HomesteadTextEdit::CodePoints(*RenameDraft, RenameDraft.Len()), Homestead::Chests::MaxNameLength, Units);
     if (Count == 0) return true;
     for (int32 Index = 0; Index < Count; ++Index) RenameDraft.AppendChar(static_cast<TCHAR>(Units[Index]));
-    const int32 Selection = DialogSelection;
-    BuildDialog();
-    DialogSelection = Selection;
     return true;
 }
 
@@ -455,9 +466,6 @@ bool SHomesteadMenu::HandleRenameKey(FKey Key)
         {
             RenameDraft.LeftChopInline(HomesteadTextEdit::BackspaceUnits(*RenameDraft, RenameDraft.Len()));
             RenameTyper.Reset();
-            const int32 Selection = DialogSelection;
-            BuildDialog();
-            DialogSelection = Selection;
         }
         return true;
     }
