@@ -937,6 +937,38 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-13T04:01:22.888Z"
+    },
+    {
+      "id": "jenny-mv65z3g4-l7esri",
+      "title": "Starting to sleep, at any time of the day, should take us to the next morning at 6 AM",
+      "description": "Effectively it should end the day, no matter when we started to sleep, just like in Coral Island.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T04:11:35.092Z"
+    },
+    {
+      "id": "jenny-mv664mcu-4kg2li",
+      "title": "Starter lantern and oil flasks should start out in the chest when the game starts",
+      "description": "Not in my inventory",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T04:15:52.878Z"
+    },
+    {
+      "id": "jenny-mv66cv05-tawr2l",
+      "title": "Interaction hint unit tests",
+      "description": "Can we basically add a unit test(s) that says if we are standing in front of something that has some interaction possible (e.g. a berry bush or a plot of farmland), then every possible interaction (e.g. Weed + Harvest) always appears on the interaction hint card? Too often we add a new thing that is interactable and the interaction hint does not consistently appear (berry bushes, rocks with laver or mussels, weed + harvest), etc.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T04:22:17.333Z"
+    },
+    {
+      "id": "jenny-mv66pr8c-x2zhbh",
+      "title": "Still can't distinguish currant bushes from brambles",
+      "description": "I've been playing the game for days and can still barely distinguish the brambles I need to clear from the berry bushes I want to gather from. Please make the foliage of the berry bushes very distinctive from that of the brambles and make the ripe berries more obvious on the bush.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T04:32:18.972Z"
     }
   ]
 }

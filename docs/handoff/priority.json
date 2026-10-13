@@ -103,7 +103,10 @@
     "backlog:jenny-mv45ehn7-4lxps3": "next",
     "backlog:jenny-mv44v075-kibbix": "next",
     "backlog:jenny-mv44r23l-qtqeud": "next",
-    "backlog:jenny-muw7v31r-u4p6ku": "next"
+    "backlog:jenny-muw7v31r-u4p6ku": "next",
+    "backlog:jenny-mv65z3g4-l7esri": "next",
+    "backlog:jenny-mv664mcu-4kg2li": "next",
+    "backlog:jenny-mv66pr8c-x2zhbh": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -221,5 +224,5 @@
     "backlog:jenny-muucngve-dfc8a4",
     "fix-fullloop-woodland-queueclearcell"
   ],
-  "updated": "2026-10-13T04:09:05.034Z"
+  "updated": "2026-10-13T04:32:24.648Z"
 }
