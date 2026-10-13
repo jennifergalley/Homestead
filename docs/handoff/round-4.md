@@ -109,3 +109,4 @@ Jenny: "pick 2-3 small, code-only (no Unreal, no Blender) cards ... Don't make a
 | Polish Agent | `7d7c9a21-295e-4944-9093-1144b407718b` | Claude Sonnet 5.5 / high | — (no editor) | remove the controls hint bar (`jenny-mv448c92`); bigger, consistent focus-card titles (`jenny-mv647jvv`); roots rebalance (`jenny-mv643gkt`) |
 
 - 2026-10-12 21:47: Balance Agent `ceb1109b` retired (handoff `3a812c4c9` in balance-agent.md). Integration `09ae4063` is retiring after its `integration-handoff.md`. Fresh sessions for both take the next batch (rule: README, `8cfdd19f7`).
+- 2026-10-12 21:50: Integration Agent `09ae4063` retired (handoff `4f4700e6d` in integration-handoff.md; its worktree jennifergalley-miniature-memory is clean and pushed, and Jenny can archive the session to remove it). The rollback stays in the main checkout at `Build\Windows-20261010-morning`. Closure is now `Scripts\Close-Delivery.ps1` (`672a85772`).
