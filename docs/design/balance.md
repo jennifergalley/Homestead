@@ -259,8 +259,9 @@ above crops, so the daily-cap idea above is parked until a playtest.
 | Laver rocks | 8 | 2 laver (4) | 64 |
 
 0.5 energy per node, all refreshing once a day: a picked node comes back at the first 06:00 at
-least 20 game hours later (Jenny, 2026-10-12; previously the next 06:00, so a 05:00 pick came back an
-hour later). That's about 440 coins and 20 energy a day, mostly on her own
+least 12 game hours later (Jenny, 2026-10-12). Picks from 06:00 to 18:00 are back the next morning;
+evening and night picks wait one extra morning, which closes the old pick-late, back-at-dawn double
+dip. That's about 440 coins and 20 energy a day, mostly on her own
 cove. ✅ That's a pleasant daily stroll, roughly fishing's per-minute rate but capped, so it doesn't
 crowd out crops. The Beach Agent proposed 56 nodes (about 830 coins); trimmed here.
 

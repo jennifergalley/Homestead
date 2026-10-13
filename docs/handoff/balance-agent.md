@@ -107,8 +107,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   look olive.
 - 2026-10-12: Polish Agent (7d7c9a21) roots rebalance approved: 5-day crop, herbed 25 and roasted
   19, nodes 1 seed / 72 h, "Wild root seeds" copy. `balance.md` §4–§6 and §9 updated.
-- 2026-10-12: Polish Agent: beach finds refill at the first 06:00 at least 20 h after picking (all
-  finds); bare tilled plots revert at 20% per morning after 24 h bare. `balance.md` §4 and §8a.
+- 2026-10-12: Polish Agent: beach finds refill at the first 06:00 at least 12 h after picking (all
+  finds; first said 20 h, corrected after Polish showed it skipped a day for picks after 10:00); bare tilled plots revert at 20% per morning after 24 h bare. `balance.md` §4 and §8a.
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
