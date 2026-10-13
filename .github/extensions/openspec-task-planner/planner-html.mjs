@@ -278,7 +278,23 @@ export function renderPlannerHtml() {
       .stats { grid-template-columns: repeat(2, 1fr); }
       .feature-head { grid-template-columns: 1fr; gap: 7px; }
     }
-    .backlog-head { margin: 4px 0 10px; }
+    .backlog-head { margin: 4px 0 10px; flex-wrap: wrap; align-items: center; }
+    .backlog-search { display: flex; align-items: center; gap: 6px; flex: 1 1 260px; max-width: 420px; }
+    .backlog-search input {
+      flex: 1 1 auto;
+      min-width: 0;
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 8px;
+      padding: 6px 10px;
+      background: var(--background-color-default, #0d1117);
+      color: var(--text-color-default, #e6edf3);
+    }
+    mark.search-hit {
+      background: color-mix(in srgb, var(--true-color-yellow, #d29922) 45%, transparent);
+      color: inherit;
+      border-radius: 3px;
+      padding: 0 1px;
+    }
     .check-row { grid-template-columns: 26px 18px minmax(0, 1fr) auto; cursor: grab; }
     .check-row.dragging { opacity: .45; }
     .check-row.next { background: color-mix(in srgb, var(--true-color-blue, #58a6ff) 9%, transparent); }
@@ -444,6 +460,10 @@ export function renderPlannerHtml() {
       <section id="builds" class="builds" aria-label="Build changelist"></section>
       <div class="builds-head backlog-head">
         <h2>Planned improvements</h2>
+        <div class="backlog-search" role="search">
+          <input id="backlog-search" type="search" autocomplete="off" placeholder="Search titles and descriptions" aria-label="Search planned improvements">
+          <button id="backlog-search-clear" class="icon-button" type="button" title="Clear search (Esc)" aria-label="Clear search" hidden>✕ Clear</button>
+        </div>
         <span id="backlog-note" class="muted"></span>
       </div>
       <section id="board" class="board" aria-live="polite"></section>
@@ -453,7 +473,7 @@ export function renderPlannerHtml() {
     </div>
   </main>
   <script>
-    const state = { planner: null, signature: null, dragging: null };
+    const state = { planner: null, signature: null, dragging: null, search: "" };
     const buildsNode = document.getElementById("builds");
     const board = document.getElementById("board");
     const refresh = document.getElementById("refresh");
@@ -704,29 +724,78 @@ export function renderPlannerHtml() {
       return [...board.querySelectorAll(".check-row")].map((row) => row.dataset.id);
     }
 
+    // Backlog search: every word must appear in the title, description or open task text.
+    function searchTokens() {
+      return state.search.toLowerCase().split(" ").filter(Boolean);
+    }
+
+    function matchesSearch(tokens, ...parts) {
+      if (!tokens.length) return true;
+      const haystack = parts.filter(Boolean).join(" ").toLowerCase();
+      return tokens.every((token) => haystack.includes(token));
+    }
+
+    function searchRanges(text, tokens) {
+      const lower = text.toLowerCase();
+      const ranges = [];
+      for (const token of tokens) {
+        for (let at = lower.indexOf(token); at !== -1; at = lower.indexOf(token, at + token.length)) {
+          ranges.push([at, at + token.length]);
+        }
+      }
+      ranges.sort((a, b) => a[0] - b[0]);
+      const merged = [];
+      for (const range of ranges) {
+        const last = merged[merged.length - 1];
+        if (last && range[0] <= last[1]) last[1] = Math.max(last[1], range[1]);
+        else merged.push(range);
+      }
+      return merged;
+    }
+
+    function highlighted(className, text, tokens) {
+      const node = el("div", className);
+      let cursor = 0;
+      for (const [start, end] of searchRanges(text, tokens)) {
+        if (start > cursor) node.append(text.slice(cursor, start));
+        node.append(el("mark", "search-hit", text.slice(start, end)));
+        cursor = end;
+      }
+      if (cursor < text.length || !text.length) node.append(text.slice(cursor));
+      return node;
+    }
+
     function renderBoard() {
       board.replaceChildren();
       const features = state.planner.features.filter((feature) => feature.status !== "complete");
       const flagged = features.filter((feature) => feature.slot).length;
-      note.textContent = features.length + " items" + (flagged ? " · " + flagged + " scheduled" : "");
+      const tokens = searchTokens();
+      const openTasks = (feature) => feature.sections.flatMap((section) => section.tasks).filter((task) => !task.done);
+      const matching = features.filter((feature) => matchesSearch(tokens, feature.title, feature.description,
+        ...openTasks(feature).map((task) => task.text)));
+      note.textContent = (tokens.length ? matching.length + " of " + features.length + " items match" : features.length + " items")
+        + (flagged ? " · " + flagged + " scheduled" : "");
       if (!features.length) {
         board.append(el("div", "empty", "Nothing planned. Playtest feedback will land here."));
         return;
       }
       const list = el("div", "checklist");
       features.forEach((feature, index) => {
-        const open = feature.sections.flatMap((section) => section.tasks).filter((task) => !task.done);
+        const open = openTasks(feature);
         const row = el("div", "check-row" + (feature.slot ? " next" : "") + (feature.deliveryStatus === "shipped" ? " shipped" : ""));
         row.dataset.id = feature.id;
         row.draggable = true;
         row.title = feature.path ?? feature.description ?? feature.title;
+        // Filtered rows stay in the list so drag and move-to-top keep saving the whole order.
+        row.hidden = !matching.includes(feature);
         const text = el("div");
-        text.append(el("div", "check-title", feature.title));
+        text.append(highlighted("check-title", feature.title, tokens));
         if (feature.deliveryStatus === "shipped") {
           text.append(el("div", "delivery-note", "Shipped in " + feature.deliveryBuildId + " · Player acceptance pending"));
         }
         if (feature.fromBacklog) {
-          text.append(el("div", "check-text backlog-origin", "From Jenny's backlog form" + (feature.description ? " — " + feature.description : "")));
+          text.append(highlighted("check-text backlog-origin",
+            "From Jenny's backlog form" + (feature.description ? " — " + feature.description : ""), tokens));
           if (feature.imageUrl) {
             const thumb = document.createElement("img");
             thumb.className = "backlog-thumb";
@@ -735,7 +804,9 @@ export function renderPlannerHtml() {
             text.append(thumb);
           }
         }
-        for (const task of open.slice(0, 3)) text.append(el("div", "check-text", task.text));
+        const taskMatches = (task) => tokens.length && matchesSearch(tokens, task.text) ? 0 : 1;
+        const shownTasks = [...open].sort((a, b) => taskMatches(a) - taskMatches(b));
+        for (const task of shownTasks.slice(0, 3)) text.append(highlighted("check-text", task.text, tokens));
         const button = el("select", "slot-select" + (feature.slot ? " on" : ""));
         button.title = "Assign to a build";
         if (feature.deliveryStatus === "shipped") {
@@ -836,7 +907,29 @@ export function renderPlannerHtml() {
         list.append(row);
       });
       board.append(list);
+      if (tokens.length && !matching.length) board.append(el("div", "empty", "No items match “" + state.search.trim() + "”."));
     }
+
+    const searchInput = document.getElementById("backlog-search");
+    const searchClear = document.getElementById("backlog-search-clear");
+    function applySearch(value) {
+      state.search = value;
+      searchClear.hidden = !value;
+      if (state.planner) renderBoard();
+    }
+    searchInput.addEventListener("input", () => applySearch(searchInput.value));
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && searchInput.value) {
+        event.preventDefault();
+        searchInput.value = "";
+        applySearch("");
+      }
+    });
+    searchClear.addEventListener("click", () => {
+      searchInput.value = "";
+      applySearch("");
+      searchInput.focus();
+    });
 
     function render() {
       renderBuilds(state.planner.builds);
