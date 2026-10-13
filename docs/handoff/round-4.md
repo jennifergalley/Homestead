@@ -107,3 +107,5 @@ Jenny: "pick 2-3 small, code-only (no Unreal, no Blender) cards ... Don't make a
 | Name | Session | Model | MCP port | Scope |
 | --- | --- | --- | --- | --- |
 | Polish Agent | `7d7c9a21-295e-4944-9093-1144b407718b` | Claude Sonnet 5.5 / high | — (no editor) | remove the controls hint bar (`jenny-mv448c92`); bigger, consistent focus-card titles (`jenny-mv647jvv`); roots rebalance (`jenny-mv643gkt`) |
+
+- 2026-10-12 21:47: Balance Agent `ceb1109b` retired (handoff `3a812c4c9` in balance-agent.md). Integration `09ae4063` is retiring after its `integration-handoff.md`. Fresh sessions for both take the next batch (rule: README, `8cfdd19f7`).
