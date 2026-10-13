@@ -11,7 +11,7 @@ namespace HomesteadMenus
 // Her energy and purse, stacked under the calendar at the top-right of the HUD: an icon beside the
 // bar, and the coin beside her balance. The last trade's change fades beside the balance. On the
 // estate there is no hunger, so the single Energy bar stands alone, and while she is Well fed a small
-// "Well fed until 2:30 PM · work costs 15% less" chip sits under the purse (so nothing above it moves when it comes and
+// "Well fed until 2:30 PM" chip sits under the purse (so nothing above it moves when it comes and
 // goes). The seeded woodland keeps its Food bar above Energy.
 class SHomesteadVitals : public SCompoundWidget
 {
@@ -41,8 +41,8 @@ public:
     static int32 WarningBand(double Value, int32 Previous);
     static const TCHAR* WarningText(int32 Meter, int32 Band);
     // Top = the calendar's top (26) + height (100) + an 8-unit gap (HomesteadHudLayout in HomesteadHUD.h).
-    // ChipHeight fits two wrapped lines (the longest badge, "Well fed until 12:45 PM - work costs
-    // 15% less", overflows the chip's single-line width; see WellFedChip's WrapTextAt).
+    // ChipHeight leaves room for a wrapped second line (see WellFedChip's WrapTextAt); the badge is now
+    // only "Well fed until 12:45 PM".
     static constexpr float Right = 30, Top = 134, RowHeight = 54, RowGap = 6, Width = 460, ChipHeight = 60;
 
 private:

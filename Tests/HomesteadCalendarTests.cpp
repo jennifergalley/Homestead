@@ -547,11 +547,11 @@ void FoodLabelsAndWellFedBadge()
     OK(sim.SetEnergy(50.0));
     OK(sim.GrantItems(Item::Pasty, 1));
     OK(sim.Eat(Item::Pasty));
-    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM \xC2\xB7 work costs 15% less");
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
     // An hour on, the badge still shows the live expiry.
     sim.SkipToHourOfDay(12.5);
     CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed 3 h: work costs 15% less");
-    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM \xC2\xB7 work costs 15% less");
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
     // Once it runs out the badge goes.
     sim.SkipToHourOfDay(15.0);
     CHECK(!sim.IsWellFed() && Food::WellFedBadge(sim.GetState()).empty());

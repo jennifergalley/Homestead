@@ -578,7 +578,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("hud-energy-exhausted"), TEXT("Energy below 10: the bar a muted red and pulsing, and the 'Exhausted' notice."),
         ECover::Hud, 15, nullptr,
         [](AHomesteadController& PC) { PC.Sim.SetEnergy(6.0); PC.Notify(TEXT("Exhausted"), true); });
-    Add(TEXT("hud-wellfed"), TEXT("Well fed: the pasty chip 'Well fed until … · work costs 15% less' under the purse, no toast."), ECover::Hud, 4, nullptr,
+    Add(TEXT("hud-wellfed"), TEXT("Well fed: the pasty chip 'Well fed until …' under the purse, no toast."), ECover::Hud, 4, nullptr,
         [](AHomesteadController& PC)
         {
             PC.Sim.SetEnergy(55.0);
