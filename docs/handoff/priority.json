@@ -1,5 +1,40 @@
 {
   "order": [
+    "backlog:jenny-mus200pa-iiju4e",
+    "backlog:jenny-mv62x9e8-k3g6qz",
+    "backlog:jenny-mv4uzvzh-ssitiv",
+    "backlog:jenny-mv4uzvy7-ed6a8k",
+    "backlog:jenny-mv4l3fom-ncu8it",
+    "backlog:jenny-mv4l3ffm-lhxz5q",
+    "backlog:jenny-mv48a218-e7wpr0",
+    "backlog:jenny-mv4701b5-4flmli",
+    "backlog:jenny-mv46nk2v-bu04mo",
+    "backlog:jenny-mv46lud2-t0xs72",
+    "backlog:jenny-mv46hauz-8qmvc0",
+    "backlog:jenny-mv46fddc-37pwup",
+    "backlog:jenny-mv46daiu-7ex610",
+    "backlog:jenny-mv46ate4-mi5h3r",
+    "backlog:jenny-mv468owu-unydl2",
+    "backlog:jenny-mv465zej-2nnt6t",
+    "backlog:jenny-mv45zu94-atf5z0",
+    "backlog:jenny-mv45vu1f-kvsj9t",
+    "backlog:jenny-mv45tx98-dlxn1q",
+    "backlog:jenny-mv45psq4-8h9mdi",
+    "backlog:jenny-mv45ehn7-4lxps3",
+    "backlog:jenny-mv44v075-kibbix",
+    "backlog:jenny-mv44sfm8-mwx8j7",
+    "backlog:jenny-mv44r23l-qtqeud",
+    "backlog:jenny-mv448c92-isp8wm",
+    "backlog:jenny-mv445w7s-8zoya4",
+    "backlog:jenny-mv4431eo-h1ebgc",
+    "backlog:jenny-mv35snup-klx997",
+    "backlog:jenny-muxleqei-7b7tfa",
+    "backlog:jenny-muw7wqhy-gtcvaw",
+    "backlog:jenny-muw7v31r-u4p6ku",
+    "backlog:jenny-muw7pqhe-jxg7g4",
+    "backlog:jenny-muw7f1tj-1z7rf1",
+    "backlog:jenny-muw5uae9-2zgp1v",
+    "backlog:jenny-muw4ohca-ewkkx9",
     "rebuild-manor-and-decorate",
     "backlog:jenny-muupccau-7hxtoa",
     "backlog:jenny-muulxhvp-250x9a",
@@ -24,7 +59,6 @@
     "backlog:jenny-mutde36c-gtsw0n",
     "add-swimming",
     "backlog:jenny-mus200q1-469jig",
-    "backlog:jenny-mus200pa-iiju4e",
     "fit-rucksack-straps",
     "reduce-foliage-shadow-motion",
     "restore-mine-pumping-and-deep-levels",
@@ -47,7 +81,9 @@
     "backlog:jenny-mv3g4re0-cvbnch",
     "backlog:jenny-mv3lucwr-gobgld",
     "backlog:jenny-mv3oddmp-cvpols",
-    "backlog:jenny-mv3q32oa-bchhld"
+    "backlog:jenny-mv3q32oa-bchhld",
+    "fix-seed-planting-hint-and-harvest-balance",
+    "fix-fullloop-woodland-queueclearcell"
   ],
   "slots": {
     "backlog:jenny-mv1jsi38-balcu1": "next",
@@ -56,7 +92,19 @@
     "backlog:jenny-mutde36c-gtsw0n": "next",
     "backlog:jenny-mv1jukpf-balow1": "next",
     "backlog:jenny-mv48a218-e7wpr0": "next",
-    "backlog:jenny-mv448c92-isp8wm": "next"
+    "backlog:jenny-mv448c92-isp8wm": "next",
+    "backlog:jenny-mv631ikm-gv0g4r": "next",
+    "backlog:jenny-mus200pa-iiju4e": "next",
+    "backlog:jenny-mv63toyx-xt8kh8": "next",
+    "backlog:jenny-mv63vz7q-4k35kz": "next",
+    "backlog:jenny-mv6409a7-11xb05": "next",
+    "backlog:jenny-mv643gkt-eggdtc": "next",
+    "backlog:jenny-mv647jvv-kplqgk": "next",
+    "backlog:jenny-mv64e3n4-tncvf1": "next",
+    "backlog:jenny-mv62x9e8-k3g6qz": "next",
+    "backlog:jenny-mv4701b5-4flmli": "next",
+    "backlog:jenny-mv46hauz-8qmvc0": "next",
+    "backlog:jenny-mv46ate4-mi5h3r": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -167,5 +215,5 @@
     "open-estate-mine-shallow-level",
     "backlog:jenny-mv455cm5-u3ccq9"
   ],
-  "updated": "2026-10-12T06:10:00.000Z"
+  "updated": "2026-10-13T03:53:16.641Z"
 }

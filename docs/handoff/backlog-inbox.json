@@ -19,10 +19,11 @@
     {
       "id": "jenny-mus200pa-iiju4e",
       "title": "Improve work animations",
-      "description": "Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work.",
+      "description": "Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work. \n\nThe way she holds her left arm when she hacks at something with the billhook particularly bothers me. Her wrist bends at a really unnatural angle through the movement.\n\nThe scythe one is almost perfect, but her hands are not actually on the two handholds during the animation. One hand is on the handle and the other is floating in mid-air. I would suggest modifying the handles on the scythe asset rather than changing her arm or hand position, as I think her floating hand is in the right place. It just needs the handle to be there for her to hold onto.\n\nThe wood axe is pretty good, but her right hand slides way up the shaft as she raises it, and should instead stay fixed in place on the handle as she swings the axe. Same thing with the pickaxe - her right hand moves up the shaft as she raises it; it should stay fixed.",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-03T07:11:33.262Z"
+      "createdUtc": "2026-10-03T07:11:33.262Z",
+      "updatedUtc": "2026-10-13T03:10:50.270Z"
     },
     {
       "id": "jenny-mus200q1-469jig",
@@ -854,6 +855,71 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-12T06:16:30.125Z"
+    },
+    {
+      "id": "jenny-mv62x9e8-k3g6qz",
+      "title": "Give me a search box for the backlog so I can easily find and edit a piece of feedback",
+      "description": "It should search based on text in either the title or description, highlighting matches in the text and filtering the list to only those cards, and then be clearable.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T02:46:10.640Z"
+    },
+    {
+      "id": "jenny-mv631ikm-gv0g4r",
+      "title": "Increased music playlist",
+      "description": "Ideally a song should not repeat within about 2 hours of playtime. It's better than having just 1 song, but I still hear the same small set of songs all the time... it needs more variety.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T02:49:29.158Z"
+    },
+    {
+      "id": "jenny-mv63toyx-xt8kh8",
+      "title": "Grasses growing through tilled soil",
+      "description": "Grasses are growing through my tilled soil - defect, not weeds",
+      "imageFile": "jenny-mv63toyx-xt8kh8-a752dfbd-2683-4c7c-990e-1809e2751314.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-13T03:11:23.817Z"
+    },
+    {
+      "id": "jenny-mv63vz7q-4k35kz",
+      "title": "Make heroine animations non-interruptable",
+      "description": "e.g. tilling, gathering, sowing, watering, etc. - nothing should be interrupt-able. Animations should be non-skippable.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T03:13:10.406Z"
+    },
+    {
+      "id": "jenny-mv6409a7-11xb05",
+      "title": "The cliffs in the distance, visible from the manor, look ridiculous and geometric",
+      "description": "Please make them look like natural, rocky cliffs, not geometric shapes and lines, when viewed from the bluffs near the manor.",
+      "imageFile": "jenny-mv6409a7-11xb05-f90d5b00-c6eb-467e-8296-9ad7ba107c0c.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-13T03:16:30.079Z"
+    },
+    {
+      "id": "jenny-mv643gkt-eggdtc",
+      "title": "Roots are overpowered",
+      "description": "They grow in only 2 days (should be much longer, maybe 5), they provide +40 energy when cooked with simple herbs (way more than most other dishes, should be like +25 at best), and they're too easy to scavenge seeds for in the environment (should be a little more scarce).",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T03:18:59.501Z"
+    },
+    {
+      "id": "jenny-mv647jvv-kplqgk",
+      "title": "Titles on interaction cards are too small",
+      "description": "Here, \"Sapling\" is far too small. It should be the same size as the \"Hack with Billhook\" text. Same thing when pointing at growing crops - their \"<plant> - day <x> of <y>\" text should be the same size as this. Basically scale up the minimum text size on these interaction cards, and make font sizes more consistent. Same thing for \"Bed\", etc.",
+      "imageFile": "jenny-mv647jvv-kplqgk-12aedd76-4f4a-49a1-8767-2d9e9f3193e1.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-13T03:22:10.411Z",
+      "updatedUtc": "2026-10-13T03:23:10.224Z"
+    },
+    {
+      "id": "jenny-mv64e3n4-tncvf1",
+      "title": "Big grey tree's trunks move along the ground with the \"wind\"",
+      "description": "Same for some of the bushes in the forested areas - if you just stand still and watch the foliage, the tree trunks and bases of the bushes move around in the \"wind\" effect. They should remain stationary, and only the leaves / small branches should move.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-13T03:27:15.952Z"
     }
   ]
 }
