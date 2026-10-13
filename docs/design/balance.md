@@ -112,13 +112,13 @@ the first harvest.
 | Cabbage | 32 → 40 | 9 | – | 1 × 90 | 90 | 5.6 | Autumn, winter |
 | Broad bean | 36 → 45 | 7 | every 3 days | 6 × 8 | 48 | 0.4, then 16 | Spring |
 | Strawberry | 48 → 60 | 8 | every 3 days | 5 × 13 | 65 | 0.6, then 21.7 | Spring, summer |
-| Wild roots (found seed) | not sold | 30 h | – | 4 × 4, plus 1 seed back | 16 | free | Spring–autumn |
+| Wild roots (found seed) | not sold | 5 days (was 30 h; Jenny, 2026-10-12) | – | 4 × 4, plus a 25% chance of 1 seed back | 16 | free | Spring–autumn |
 | Wild berry bush | – | 42 h | every 24 h | 6 × 6 | 36 | free | |
 
 Care: the pail holds 15 portions, and planting and watering cost 0.4 energy each. Each plot has a
 35% daily chance of gaining weeds (+0.2).
 
-✅ The shape is good: fast wild roots, steady root crops and greens, and slow but lucrative
+✅ The shape is good: free but slow wild roots as a fallback, steady root crops and greens, and slow but lucrative
 regrowers. Margins of about 100% (turnips) are healthy.
 
 🔴 **Absolute pacing is too slow for one session**, because of the real-time timers in §1. Twelve
@@ -142,6 +142,8 @@ would have sold for. Cooking also costs one kindling (3 coins) and 0.3 energy.
 | Berry compote | 3 berries | 25 | 21 | 0.8 |
 | Strawberry compote | 2 strawberries | 29 | 29 | 1.0 |
 | Root vegetable hotpot | 2 roots, turnip, herb | 37 | 41 | 1.1 |
+| Roasted roots | 2 roots | 19 (was 25) | 11 | 0.6 |
+| Herbed roots | 2 roots, herb | 25 (was 40) | 21 | 0.8 |
 | Grilled trout (9 PM) | 1 trout | 38 | 43 | 1.1 |
 | Grilled perch (9 PM) | 1 perch | 31 | 31 | 1.0 |
 | Fresh mackerel slices (9 PM; no fire) | 1 mackerel | 30 | 30 | 1.0 |
@@ -179,7 +181,8 @@ buyer (timber, twine, seeds, bramble canes, weeds) count as 0. The swings are wi
 Iron and steel tools gate thickets, bramble banks, large and ancient stumps, logs and boulders. Iron
 costs × 0.85 energy per swing and steel × 0.7, with fewer swings on the big nodes.
 Spring flowers sell for 10–15: wild garlic 10, primroses 12, bluebells 15. Berries sell for 6 each
-and roots for 4.
+and roots for 4. A wild roots node gives 2 roots and 1 seed (was 2 seeds) and regrows in 72 h (was
+48 h; Jenny's roots card, 2026-10-12); broken barrels still drop seeds 12% of the time.
 
 ✅ Clearing the ruin pays well, 25–55 a node, so the first real hour funds the estate. That's the
 right early loop: tidy up, earn, plant.
@@ -288,7 +291,7 @@ These are targets for lanes to tune toward; there's no telemetry yet. They assum
 | --- | --- |
 | First 15 real minutes | Have found salvage, crafted an axe or hoe, cleared a patch and sown the first roots, and seen the shop. |
 | End of day 1 (the first real hour) | Have about 1,200–1,500 coins from scrap and firewood, a dozen plots sown, and every starter tool crafted or in sight. |
-| Day 2 (the second real hour) | Have harvested the first wild roots, cooked a first meal, and bought the pole **or** the backpack. |
+| Day 2 (the second real hour) | Have cooked a first meal from forage, and bought the pole **or** the backpack. (Wild roots now take 5 days, so the first harvest is a bought-seed crop.) |
 | Day 3 | Have harvested the first bought-seed crop, bought the other big purchase, and started a second crop. |
 | Days 4–7 | Have regrowers paying daily, a meal routine, and coins climbing steadily past 2,000 toward the next upgrade. |
 
@@ -376,6 +379,9 @@ These are proposals for the Orchestrator to offer Jenny. None is scheduled.
   branches per 4 energy, so it's no coin farm); stump 24 h → sapling → full tree at 72 h, only for
   trees 60 m or more from home; road-verge (9 m) and village-square (45 m) trees are protected;
   reach 4.5 m.
+- 2026-10-12: roots rebalance (Jenny's card `jenny-mv643gkt`, Polish Agent): wild roots grow in 5
+  days (was 30 h); herbed roots 25 energy (was 40) and roasted roots 19 (was 25), per the §5
+  formula; wild root nodes give 1 seed (was 2) and regrow in 72 h (was 48 h).
 - 2026-10-10: stage 2 travel targets for Jenny's revised map-shrink scope (cove and mine 35–50 s,
   cap 60 s; manor core, pond and village unchanged) and estate/neighbour/communal sizing (§9), sent
   to the Map Agent.

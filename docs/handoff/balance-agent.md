@@ -105,6 +105,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   Awaiting re-shots 02 and 23. Fix round: Balance OK for [ready] (lichen cut to a third, the
   trapdoor in floor wood, the barrel removed); a lighter-granite card only if packaged shots still
   look olive.
+- 2026-10-12: Polish Agent (7d7c9a21) roots rebalance approved: 5-day crop, herbed 25 and roasted
+  19, nodes 1 seed / 72 h, "Wild root seeds" copy. `balance.md` §4–§6 and §9 updated.
 
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
