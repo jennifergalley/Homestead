@@ -36,3 +36,6 @@ docs/development-status.md.tmp
 Assets/Characters/PrimitiveOutfit/_work/
 Assets/Characters/Footwear/*/_work/
 Assets/Characters/Clothing/_work/
+
+# Review renders stay out of Git LFS (copilot-instructions: Git LFS budget).
+Assets/**/Renders/

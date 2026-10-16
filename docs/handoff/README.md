@@ -270,8 +270,10 @@ A lane delivers an increment like this:
    the editor build hides show up there; see the editor skill's table 0.1). Keep running the native
    tests (step 2).
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
-   lane branch. All worktrees share one local repository, so the integration session can read
-   unpushed lane branches directly.
+   lane branch **and don't push it**. All worktrees share one local repository, so the integration
+   session can read unpushed lane branches directly. Commit big binaries (`.uasset`, `.blend`,
+   `.fbx`, textures) once, at `[ready]`, and keep review renders out of the repo. GitHub keeps every
+   pushed LFS version forever (see "Git LFS budget" in `.github\copilot-instructions.md`).
 5. **Retire secondary worktrees in the same turn:** after a per-task worktree's slice lands or is
    parked, push its branch if it must survive remotely, then run
    `git worktree remove <secondary-worktree-path>` and `git worktree prune`. Never remove a lane's

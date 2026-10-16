@@ -265,6 +265,21 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   and never remove another session's active worktree. Delete stale `Saved\Automation` sandboxes
   after their tests. When uncertain, delete unnecessary project-owned artifacts, but never Jenny's
   current save game. The Disk Cleanup Agent runs the daily broader project sweep at 10:00 AM.
+- **Git LFS budget (2026-10-15):** every `.uasset`, `.blend`, `.fbx` and image goes to Git LFS, and
+  GitHub keeps every pushed version forever. Deleting a file or rewriting history doesn't free the
+  space; only recreating the repo does. We hold about 36 GB, against 10 GB free and $0.07/GB a
+  month over that. Of the 22 GB at the tip of `main`, 14 GB is `Assets/` (sources, exports,
+  textures, review renders), not game content. So:
+  - **Review media never goes in the repo.** Beauty, proof and comparison renders and PIE captures
+    stay in `E:\CopilotScratch\<session-id>`. Commit a render only when a script consumes it (for
+    example `make_fishing_item_icons.py` reads `beauty_SM_<Fish>_hero.png`). `Assets/**/Renders/` is
+    git-ignored.
+  - **Commit big binaries once, at `[ready]`,** not on every iteration. Amend or squash
+    work-in-progress binary commits on your lane branch before Integration merges it. Every
+    `SM_MineTunnels.uasset` iteration cost another 130 MB.
+  - **Don't push lane branches** unless the orchestrator asks. All worktrees share one `.git`, so
+    Integration merges them locally, and pushing a branch uploads every binary version on it.
+  - **Don't keep `Old/` or `_v2` copies** of assets in the repo; git history already has them.
 
 ## Code practices (owned by the Architecture Agent)
 

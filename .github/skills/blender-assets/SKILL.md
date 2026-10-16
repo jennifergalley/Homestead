@@ -65,6 +65,9 @@ for at the time. If she doesn't say, work headless when she's away and ask when 
 5. **Critique the 4K renders.** Look at `beauty_SM_<Name>_hero.png` and `_detail.png` yourself.
    Name what looks fake (plastic sheen, over-saturation, uniformity, facets, floating parts,
    wrong scale), fix it, and rebuild. Expect 3-6 passes. Never report on a render you haven't viewed.
+   **Don't commit beauty or review renders** (Git LFS keeps every version forever). Only commit
+   one when a script consumes it, such as the fish icon sources. Commit the `.blend`, exports and
+   textures once, at `[ready]`, not after every pass.
 6. Record the triangle count, size and remaining weaknesses honestly in your report.
 
 ## From a reference image
