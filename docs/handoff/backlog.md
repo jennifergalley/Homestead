@@ -3,8 +3,14 @@
 Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item. `priority.json` is Jenny's scheduling order, not an autonomous pickup queue: lanes implement only the items she prioritized for their build, then go idle. The planner canvas can drag-reorder the list; **Top**, **Next build**, **Quote**, and **Remove** act on it, with **Remove** archiving the change.
 
 <!-- jenny-inbox:start -->
+- **Wild garlic in recipes** — Jenny, 2026-10-14 (added from the planner canvas): I just found some wild garlic for the first time, but I don't have any recipes I can use it in! Let's add some!
+- **I should be able to cook all fish into a meal** — Jenny, 2026-10-14 (added from the planner canvas): Not just some of them
 - **Still can't distinguish currant bushes from brambles** — Jenny, 2026-10-13 (added from the planner canvas): I've been playing the game for days and can still barely distinguish the brambles I need to clear from the berry bushes I want to gather from. Please make the foliage of the berry bushes very distinctive from that of the brambles and make the ripe berries more obvious on the bush.
 - **Interaction hint unit tests** — Jenny, 2026-10-13 (added from the planner canvas): Can we basically add a unit test(s) that says if we are standing in front of something that has some interaction possible (e.g. a berry bush or a plot of farmland), then every possible interaction (e.g. Weed + Harvest) always appears on the interaction hint card? Too often we add a new thing that is interactable and the interaction hint does not consistently appear (berry bushes, rocks with laver or mussels, weed + harvest), etc.
+
+Like right now, it's still not showing [E] Gather roots when I step close to roots.
+
+Forget what I said about auto-hiding interaction hints once you've done something a few times, plus the setting to turn it back on - I'm finding I'd rather always show the interaction hint, basically.
 - **Starter lantern and oil flasks should start out in the chest when the game starts** — Jenny, 2026-10-13 (added from the planner canvas): Not in my inventory
 - **Starting to sleep, at any time of the day, should take us to the next morning at 6 AM** — Jenny, 2026-10-13 (added from the planner canvas): Effectively it should end the day, no matter when we started to sleep, just like in Coral Island.
 - **Add skills** — Jenny, 2026-10-13 (added from the planner canvas): e.g. farming, mining, clearing, etc that we level up in over time and that makes us faster at it / takes less energy?
@@ -133,6 +139,8 @@ The way she holds her left arm when she hacks at something with the billhook par
 The scythe one is almost perfect, but her hands are not actually on the two handholds during the animation. One hand is on the handle and the other is floating in mid-air. I would suggest modifying the handles on the scythe asset rather than changing her arm or hand position, as I think her floating hand is in the right place. It just needs the handle to be there for her to hold onto.
 
 The wood axe is pretty good, but her right hand slides way up the shaft as she raises it, and should instead stay fixed in place on the handle as she swings the axe. Same thing with the pickaxe - her right hand moves up the shaft as she raises it; it should stay fixed.
+
+The hoeing animation doesn't have her left hand on the handle.
 - **Teleporting back to the manor should deposit me at the new sign location beside the farm and road** — Jenny, 2026-10-03 (added from the planner canvas): (no description)
 - **test** — Jenny, 2026-10-02 (added from the planner canvas): just testing backlog feature
 <!-- jenny-inbox:end -->

@@ -19,11 +19,11 @@
     {
       "id": "jenny-mus200pa-iiju4e",
       "title": "Improve work animations",
-      "description": "Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work. \n\nThe way she holds her left arm when she hacks at something with the billhook particularly bothers me. Her wrist bends at a really unnatural angle through the movement.\n\nThe scythe one is almost perfect, but her hands are not actually on the two handholds during the animation. One hand is on the handle and the other is floating in mid-air. I would suggest modifying the handles on the scythe asset rather than changing her arm or hand position, as I think her floating hand is in the right place. It just needs the handle to be there for her to hold onto.\n\nThe wood axe is pretty good, but her right hand slides way up the shaft as she raises it, and should instead stay fixed in place on the handle as she swings the axe. Same thing with the pickaxe - her right hand moves up the shaft as she raises it; it should stay fixed.",
+      "description": "Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work. \n\nThe way she holds her left arm when she hacks at something with the billhook particularly bothers me. Her wrist bends at a really unnatural angle through the movement.\n\nThe scythe one is almost perfect, but her hands are not actually on the two handholds during the animation. One hand is on the handle and the other is floating in mid-air. I would suggest modifying the handles on the scythe asset rather than changing her arm or hand position, as I think her floating hand is in the right place. It just needs the handle to be there for her to hold onto.\n\nThe wood axe is pretty good, but her right hand slides way up the shaft as she raises it, and should instead stay fixed in place on the handle as she swings the axe. Same thing with the pickaxe - her right hand moves up the shaft as she raises it; it should stay fixed.\n\nThe hoeing animation doesn't have her left hand on the handle.",
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-03T07:11:33.262Z",
-      "updatedUtc": "2026-10-13T03:10:50.270Z"
+      "updatedUtc": "2026-10-14T04:04:13.565Z"
     },
     {
       "id": "jenny-mus200q1-469jig",
@@ -957,10 +957,11 @@
     {
       "id": "jenny-mv66cv05-tawr2l",
       "title": "Interaction hint unit tests",
-      "description": "Can we basically add a unit test(s) that says if we are standing in front of something that has some interaction possible (e.g. a berry bush or a plot of farmland), then every possible interaction (e.g. Weed + Harvest) always appears on the interaction hint card? Too often we add a new thing that is interactable and the interaction hint does not consistently appear (berry bushes, rocks with laver or mussels, weed + harvest), etc.",
+      "description": "Can we basically add a unit test(s) that says if we are standing in front of something that has some interaction possible (e.g. a berry bush or a plot of farmland), then every possible interaction (e.g. Weed + Harvest) always appears on the interaction hint card? Too often we add a new thing that is interactable and the interaction hint does not consistently appear (berry bushes, rocks with laver or mussels, weed + harvest), etc.\n\nLike right now, it's still not showing [E] Gather roots when I step close to roots.\n\nForget what I said about auto-hiding interaction hints once you've done something a few times, plus the setting to turn it back on - I'm finding I'd rather always show the interaction hint, basically.",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-13T04:22:17.333Z"
+      "createdUtc": "2026-10-13T04:22:17.333Z",
+      "updatedUtc": "2026-10-16T01:00:58.042Z"
     },
     {
       "id": "jenny-mv66pr8c-x2zhbh",
@@ -969,6 +970,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-13T04:32:18.972Z"
+    },
+    {
+      "id": "jenny-mv7l5t51-513c2p",
+      "title": "I should be able to cook all fish into a meal",
+      "description": "Not just some of them",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-14T04:04:28.741Z"
+    },
+    {
+      "id": "jenny-mv7luqev-26i56k",
+      "title": "Wild garlic in recipes",
+      "description": "I just found some wild garlic for the first time, but I don't have any recipes I can use it in! Let's add some!",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-14T04:23:51.607Z"
     }
   ]
 }
